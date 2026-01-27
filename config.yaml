@@ -1,0 +1,163 @@
+# 네이버 블로그 자동화 설정
+# search-blogging 스킬 v2.0.0
+
+app:
+  name: search-blogging
+  version: "2.0.0"
+  description: "네이버 경제 숏텐츠 트렌딩 주제 수집부터 블로그 글 작성까지 자동화"
+
+# 글 작성 기본값
+writing:
+  char_count: 1850        # 목표 글자수
+  char_tolerance: 50      # 허용 오차 (1800~1900자)
+  min_chars: 1800         # 최소 글자수
+  max_chars: 1900         # 최대 글자수
+
+# 이미지 설정
+images:
+  default_count: 5        # 기본 이미지 수
+  min_count: 3            # 최소 이미지 수
+  max_count: 10           # 최대 이미지 수
+  download_timeout: 30    # 다운로드 타임아웃 (초)
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+
+# 태그 설정
+tags:
+  count: 8                # 기본 태그 수
+  max_count: 10           # 최대 태그 수
+
+# 출력 설정
+output:
+  base_dir: "./경제 블로그"
+  date_format: "%Y-%m-%d"
+  encoding: "utf-8"
+  subdirs:
+    - "images"
+
+# 검색 설정
+search:
+  trending_url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
+  max_topics: 10          # 수집할 최대 주제 수
+  parallel_agents: 6      # 병렬 검색 에이전트 수
+  results_per_source: 5   # 소스당 결과 수
+
+# 톤앤매너 프리셋
+tones:
+  professional:
+    name: "전문적"
+    description: "객관적이고 신뢰감 있는 어조"
+    style: "합니다/습니다"
+    suitable_for:
+      - "금융"
+      - "건강"
+      - "법률"
+      - "기술"
+  friendly:
+    name: "친근한"
+    description: "대화하듯 편안한 어조"
+    style: "비격식체"
+    suitable_for:
+      - "육아"
+      - "리뷰"
+      - "취미"
+      - "일상"
+  neutral:
+    name: "중립적"
+    description: "정보 전달 중심의 균형 잡힌 어조"
+    style: "혼합"
+    suitable_for:
+      - "비교"
+      - "가이드"
+      - "뉴스"
+
+# 글 구성 프리셋
+structures:
+  standard:
+    name: "7단계"
+    description: "도입→문제→핵심1,2,3→팁→마무리 (정보성 글에 최적)"
+    sections:
+      - name: "도입"
+        chars: [50, 100]
+      - name: "문제 제기"
+        chars: [100, 150]
+      - name: "핵심 정보 1"
+        chars: [300, 400]
+      - name: "핵심 정보 2"
+        chars: [300, 400]
+      - name: "핵심 정보 3"
+        chars: [300, 400]
+      - name: "실용 팁"
+        chars: [200, 300]
+      - name: "마무리"
+        chars: [100, 150]
+  compact:
+    name: "5단계"
+    description: "도입→핵심→상세→팁→마무리 (간결한 전달에 적합)"
+    sections:
+      - name: "도입+문제"
+        chars: [150, 200]
+      - name: "핵심 정보"
+        chars: [600, 800]
+      - name: "상세 설명"
+        chars: [400, 500]
+      - name: "실용 팁"
+        chars: [200, 300]
+      - name: "마무리"
+        chars: [100, 150]
+  flexible:
+    name: "자유"
+    description: "AI가 주제에 맞게 유연하게 구성"
+    sections: null
+
+# 이미지 가이드 모드
+image_modes:
+  reference:
+    name: "참고 이미지"
+    description: "다운로드된 참고 이미지 사용"
+    symbol: "📷"
+  ai_generate:
+    name: "AI 생성"
+    description: "Midjourney/DALL-E 프롬프트 제공"
+    symbol: "🎨"
+  svg_create:
+    name: "SVG 생성"
+    description: "svg-canvas-mcp로 직접 생성"
+    symbol: "🔷"
+
+# 색상 팔레트 (주제별)
+color_palettes:
+  finance:
+    name: "금융/경제"
+    main: ["#1a365d", "#d69e2e"]      # 네이비, 골드
+    accent: ["#38b2ac", "#ffffff"]     # 민트, 화이트
+  parenting:
+    name: "육아/교육"
+    main: ["#fbb6ce", "#90cdf4"]      # 파스텔 핑크, 스카이블루
+    accent: ["#faf089", "#9ae6b4"]     # 연노랑, 민트
+  health:
+    name: "건강/의료"
+    main: ["#48bb78", "#ffffff"]      # 그린, 화이트
+    accent: ["#4299e1", "#9ae6b4"]     # 블루, 민트
+  tech:
+    name: "기술/IT"
+    main: ["#4c51bf", "#667eea"]      # 인디고, 퍼플
+    accent: ["#38b2ac", "#f0fff4"]     # 민트, 라이트그린
+  lifestyle:
+    name: "라이프스타일"
+    main: ["#ed8936", "#faf089"]      # 오렌지, 옐로우
+    accent: ["#fc8181", "#fed7d7"]     # 코랄, 라이트핑크
+
+# 진행 상태 이모지
+progress:
+  collecting: "🔍"
+  writing: "✍️"
+  complete: "✅"
+  warning: "⚠️"
+  error: "❌"
+
+# 파일 확장자 매핑
+file_extensions:
+  html: "본문.html"
+  image_guide: "이미지 가이드.md"
+  references: "참조.md"
+  images_dir: "images"

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: 'Noto Sans KR', sans-serif; line-height: 1.8; max-width: 700px; margin: 0 auto; padding: 20px; }
+    h1 { font-size: 28px; font-weight: bold; margin-bottom: 20px; }
+    h2 { font-size: 24px; font-weight: bold; margin: 32px 0 16px; }
+    h3 { font-size: 18px; font-weight: bold; margin: 24px 0 12px; }
+    p { font-size: 16px; margin: 12px 0; }
+    blockquote { border-left: 4px solid #4A90D9; padding-left: 16px; color: #555; margin: 16px 0; }
+    .highlight-quote { background: #f0f7ff; padding: 16px; border-radius: 8px; border-left: none; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }
+    .thick-hr { border-top: 3px solid #333; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background: #f5f5f5; font-weight: bold; }
+    .cta { font-size: 24px; font-weight: bold; text-align: center; margin: 32px 0; color: #4A90D9; }
+    .small { font-size: 12px; color: #888; }
+    .image-placeholder { color: #999; text-align: center; padding: 40px; background: #f9f9f9; margin: 16px 0; }
+    .tags { color: #4A90D9; margin-top: 32px; }
+  </style>
+</head>
+<body>
+
+<h1>${title}</h1>
+
+<div class="image-placeholder">[이미지 1 삽입 - 썸네일]</div>
+
+<hr>
+
+<h2>${section1_title}</h2>
+
+<blockquote>
+"${quote1}"
+</blockquote>
+
+<p>${section1_content}</p>
+
+<div class="image-placeholder">[이미지 2 삽입]</div>
+
+<hr>
+
+<h2>${section2_title}</h2>
+
+<table>
+<tr><th>항목</th><th>내용</th><th>비고</th></tr>
+<tr><td>${table_row1_col1}</td><td>${table_row1_col2}</td><td>${table_row1_col3}</td></tr>
+<tr><td>${table_row2_col1}</td><td>${table_row2_col2}</td><td>${table_row2_col3}</td></tr>
+<tr><td>${table_row3_col1}</td><td>${table_row3_col2}</td><td>${table_row3_col3}</td></tr>
+</table>
+
+<p>${section2_content}</p>
+
+<div class="image-placeholder">[이미지 3 삽입]</div>
+
+<hr>
+
+<h2>${section3_title}</h2>
+
+<p>${section3_content}</p>
+
+<div class="image-placeholder">[이미지 4 삽입]</div>
+
+<hr>
+
+<h3>${tips_title}</h3>
+
+<p class="small">※ ${tips_note}</p>
+
+<p>${tips_content}</p>
+
+<hr class="thick-hr">
+
+<p class="cta">${cta_message}</p>
+
+<hr>
+
+<p class="tags">${tags}</p>
+
+</body>
+</html>
