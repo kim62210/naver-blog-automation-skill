@@ -124,6 +124,129 @@ image_modes:
     description: "svg-canvas-mcp로 직접 생성"
     symbol: "🔷"
 
+# 네이버 블로그 이미지 크기 표준
+image_sizes:
+  thumbnail:
+    width: 1300
+    height: 885
+    ratio: "1.47:1"
+    description: "OG 이미지, 검색결과 썸네일"
+  content_basic:
+    width: 693
+    height: 450
+    description: "본문 기본 폭"
+  content_wide:
+    width: 886
+    height: 500
+    description: "본문 확장 폭"
+  square:
+    width: 700
+    height: 700
+    ratio: "1:1"
+    description: "정사각형 (인스타 스타일)"
+  wide_title:
+    width: 1920
+    height: 400
+    description: "와이드 타이틀"
+  chart:
+    width: 800
+    height: 500
+    description: "차트/그래프용"
+  infographic:
+    width: 886
+    height: 800
+    description: "세로형 인포그래픽"
+
+# 폰트 설정
+typography:
+  font_family: "Nanum Gothic, Pretendard, sans-serif"
+  base_size: 16
+  line_height: 1.8
+  sizes:
+    title_large:
+      min: 28
+      max: 38
+      weight: "700-900"
+      use: "썸네일, 대제목"
+    title_medium:
+      min: 22
+      max: 26
+      weight: "600-700"
+      use: "소제목, 섹션 구분"
+    body:
+      min: 15
+      max: 17
+      weight: "400"
+      use: "본문 텍스트"
+    emphasis:
+      min: 18
+      max: 20
+      weight: "600-700"
+      use: "강조 텍스트"
+    caption:
+      min: 12
+      max: 14
+      weight: "300-400"
+      use: "캡션, 출처"
+  svg_defaults:
+    main_title: 48
+    sub_title: 24
+    body: 16
+    caption: 12
+
+# 2025-2026 트렌드 팔레트
+trend_palettes:
+  bold_gradient:
+    name: "볼드 그라데이션"
+    colors: ["#667eea", "#764ba2"]
+    type: "linear"
+    description: "퍼플 계열 강렬한 전환"
+    mood: "신비로운, 프리미엄"
+  sunset_gradient:
+    name: "선셋 그라데이션"
+    colors: ["#f093fb", "#f5576c"]
+    type: "linear"
+    description: "오렌지-핑크 따뜻한 전환"
+    mood: "따뜻한, 에너지"
+  ocean_gradient:
+    name: "오션 그라데이션"
+    colors: ["#4facfe", "#00f2fe"]
+    type: "linear"
+    description: "블루-민트 시원한 전환"
+    mood: "시원한, 청량"
+  sunset_warm:
+    name: "선셋 웜"
+    colors: ["#fa709a", "#fee140"]
+    type: "linear"
+    description: "핑크-옐로우 감성 전환"
+    mood: "감성적, 트렌디"
+  deep_ocean:
+    name: "딥오션"
+    colors: ["#667eea", "#00d2ff"]
+    type: "linear"
+    description: "퍼플-블루 깊은 전환"
+    mood: "깊은, 신뢰감"
+  glassmorphism:
+    name: "글라스모피즘"
+    colors: ["rgba(255,255,255,0.25)", "#f0f4f8"]
+    css:
+      background: "rgba(255, 255, 255, 0.25)"
+      backdrop_filter: "blur(10px)"
+      border: "1px solid rgba(255, 255, 255, 0.18)"
+      border_radius: "16px"
+    description: "반투명 유리 효과"
+    mood: "세련된, 모던"
+  warm_analog:
+    name: "아날로그 감성"
+    colors: ["#f7d794", "#e77f67", "#cf6a87"]
+    description: "따뜻한 레트로 감성"
+    mood: "따뜻한, 복고풍"
+  modern_minimal:
+    name: "모던 미니멀"
+    colors: ["#2d3436", "#636e72", "#b2bec3"]
+    description: "깔끔한 그레이 톤"
+    mood: "깔끔한, 전문적"
+
 # 색상 팔레트 (주제별)
 color_palettes:
   finance:

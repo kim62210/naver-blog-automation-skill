@@ -5,9 +5,10 @@
 - 작성일: ${date}
 - 총 이미지 수: ${image_count}개
 
-## 색상 팔레트
-- 메인: ${color_main} (${color_main_name})
-- 포인트: ${color_accent} (${color_accent_name})
+## 색상 팔레트 (70-25-5 법칙)
+- 메인 (70%): ${color_main} (${color_main_name}) - 배경, 주요 영역
+- 서브 (25%): ${color_accent} (${color_accent_name}) - 강조, 보조 요소
+- 포인트 (5%): ${color_point} - CTA, 하이라이트
 - 배경: ${color_background}
 - 텍스트: ${color_text}
 
@@ -33,8 +34,11 @@ ${thumbnail_prompt_en}
 
 ### 🔷 SVG 생성 가이드
 
-**캔버스:** 1200x630px (OG 이미지 최적 크기)
+**캔버스:** 1300x885px (네이버 OG 이미지 표준)
 **배경:** ${color_main} 또는 그라데이션
+**폰트:**
+- 메인: 32~48px Bold (핵심 키워드)
+- 서브: 18~24px Regular (부가 설명)
 
 **요소:**
 1. 메인 텍스트: "${title}" - 중앙 배치, 흰색, 48px bold
@@ -71,7 +75,7 @@ ${image2_prompt_en}
 
 ### 🔷 SVG 생성 가이드
 
-**캔버스:** 800x450px
+**캔버스:** 693x450px (네이버 본문 기본 폭)
 **배경:** #ffffff
 
 **요소:**
@@ -100,7 +104,7 @@ ${image3_prompt_en}
 
 ### 🔷 SVG 생성 가이드
 
-**캔버스:** 800x450px
+**캔버스:** 693x450px (네이버 본문 기본 폭)
 **배경:** ${color_background}
 
 **요소:**
@@ -124,7 +128,7 @@ ${image4_prompt_en}
 
 ### 🔷 SVG 생성 가이드
 
-**캔버스:** 800x450px
+**캔버스:** 693x450px (네이버 본문 기본 폭)
 **배경:** ${color_background}
 
 **요소:**
