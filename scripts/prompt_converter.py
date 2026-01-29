@@ -6,9 +6,27 @@ Converts image guide prompts to Gemini API optimized format.
 
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .config import get_config, get_config_value
+
+
+@dataclass
+class TextOverlayConfig:
+    """Data class for text overlay configuration"""
+
+    main_text: str = ""
+    sub_text: str = ""
+    position: str = "center"  # "center", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right"
+    font_size: int = 48
+    font_color: str = "#FFFFFF"
+    font_family: str = "Pretendard, Nanum Gothic, sans-serif"
+    shadow: bool = True
+    shadow_color: str = "rgba(0,0,0,0.5)"
+    shadow_offset: int = 2
+    background_box: bool = False
+    background_box_color: str = "rgba(0,0,0,0.3)"
+    background_box_padding: int = 20
 
 
 @dataclass
@@ -22,10 +40,13 @@ class ImageGuideItem:
     prompt: str = ""
     style_guide: Dict[str, str] = None
     filename: str = ""
+    text_overlay: TextOverlayConfig = None  # New field for text overlay config
 
     def __post_init__(self):
         if self.style_guide is None:
             self.style_guide = {}
+        if self.text_overlay is None:
+            self.text_overlay = TextOverlayConfig()
 
 
 @dataclass
@@ -38,7 +59,121 @@ class GeminiPrompt:
     style_hints: str = ""
 
 
-def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
+def strip_text_instructions(prompt: str) -> str:
+    """
+    Remove text-related instructions from prompt for background-only generation.
+
+    Args:
+        prompt: Original prompt string
+
+    Returns:
+        Prompt with text instructions removed
+
+    Example:
+        >>> strip_text_instructions('Blog thumbnail with "Hello World" text overlay')
+        'Blog thumbnail'
+    """
+    # Patterns to remove
+    text_patterns = [
+        # Text overlay patterns
+        r'[,\s]*(?:include|with|add)?[,\s]*(?:bold|large|big|small)?[,\s]*(?:Korean|English|Chinese)?[,\s]*text\s*overlay[:\s]*["\'][^"\']*["\']',
+        r'[,\s]*(?:bold|large|big)?[,\s]*["\'][^"\']*["\'][,\s]*(?:Korean|English)?\s*text\s*overlay',
+        r'[,\s]*text\s*overlay[:\s]*["\'][^"\']*["\']',
+        r'[,\s]*["\'][^"\']*["\'][,\s]*text',
+        # Text-related keywords
+        r'[,\s]*include\s+(?:bold\s+)?(?:Korean\s+)?text[^,\.]*',
+        r'[,\s]*(?:bold|large)\s+(?:Korean\s+)?text[^,\.]*',
+        r'[,\s]*Korean\s+text[^,\.]*',
+        r'[,\s]*text\s+saying[^,\.]*',
+        r'[,\s]*with\s+text[^,\.]*',
+        r'[,\s]*text\s+reading[^,\.]*',
+        # Typography patterns
+        r'[,\s]*typography[^,\.]*',
+        r'[,\s]*lettering[^,\.]*',
+        r'[,\s]*title\s+text[^,\.]*',
+        r'[,\s]*headline[^,\.]*',
+    ]
+
+    result = prompt
+    for pattern in text_patterns:
+        result = re.sub(pattern, '', result, flags=re.IGNORECASE)
+
+    # Clean up multiple commas and spaces
+    result = re.sub(r',\s*,', ',', result)
+    result = re.sub(r'\s+', ' ', result)
+    result = re.sub(r',\s*$', '', result)
+    result = re.sub(r'^\s*,', '', result)
+    result = result.strip()
+
+    return result
+
+
+def extract_text_config(prompt: str, korean_desc: str = "") -> TextOverlayConfig:
+    """
+    Extract text overlay configuration from prompt and Korean description.
+
+    Args:
+        prompt: Original English prompt
+        korean_desc: Korean description
+
+    Returns:
+        TextOverlayConfig with extracted text information
+    """
+    config = TextOverlayConfig()
+
+    # Extract quoted text from prompt
+    quoted_texts = re.findall(r'["\']([^"\']+)["\']', prompt)
+
+    # Extract Korean text from Korean description
+    korean_quoted = re.findall(r'["\']([^"\']+)["\']', korean_desc)
+
+    # Prioritize Korean quoted text for main_text
+    if korean_quoted:
+        config.main_text = korean_quoted[0]
+        if len(korean_quoted) > 1:
+            config.sub_text = korean_quoted[1]
+    elif quoted_texts:
+        # Use English quoted text as fallback
+        config.main_text = quoted_texts[0]
+        if len(quoted_texts) > 1:
+            config.sub_text = quoted_texts[1]
+
+    # Detect position hints
+    position_hints = {
+        'center': ['center', '중앙', '가운데'],
+        'top': ['top', '상단', '위'],
+        'bottom': ['bottom', '하단', '아래'],
+        'top-left': ['top-left', '좌상단'],
+        'top-right': ['top-right', '우상단'],
+        'bottom-left': ['bottom-left', '좌하단'],
+        'bottom-right': ['bottom-right', '우하단'],
+    }
+
+    combined_text = f"{prompt} {korean_desc}".lower()
+    for position, keywords in position_hints.items():
+        if any(kw in combined_text for kw in keywords):
+            config.position = position
+            break
+
+    # Detect font size hints
+    if 'bold' in combined_text or '굵은' in korean_desc:
+        config.font_size = 48
+    if 'large' in combined_text or '큰' in korean_desc:
+        config.font_size = 56
+    if 'small' in combined_text or '작은' in korean_desc:
+        config.font_size = 32
+
+    # Detect shadow preference
+    if 'no shadow' in combined_text or '그림자 없' in korean_desc:
+        config.shadow = False
+
+    return config
+
+
+def convert_to_gemini_prompt(
+    image_guide: Dict[str, Any],
+    background_only: bool = False,
+) -> str:
     """
     Convert image guide prompt to Gemini optimized format.
 
@@ -47,6 +182,7 @@ def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
             - korean_description: Korean description
             - prompt: English prompt
             - style_guide: Style guide (colors, mood, format, ratio)
+        background_only: If True, removes text-related instructions for background generation
 
     Returns:
         Optimized prompt string for Gemini API
@@ -59,6 +195,8 @@ def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
         ... }
         >>> convert_to_gemini_prompt(guide)
         "Create a high-quality blog thumbnail image. ..."
+        >>> convert_to_gemini_prompt(guide, background_only=True)
+        "Create a high-quality blog background image. ..."  # No text instructions
     """
     korean_desc = image_guide.get("korean_description", "")
     original_prompt = image_guide.get("prompt", "")
@@ -67,13 +205,21 @@ def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
     # Prompt components
     parts = []
 
-    # 1. Base instruction
-    parts.append("Create a high-quality image for a Korean blog.")
+    # 1. Base instruction (modified for background_only mode)
+    if background_only:
+        parts.append("Create a high-quality background image for a Korean blog. No text, no letters, no typography, no words.")
+    else:
+        parts.append("Create a high-quality image for a Korean blog.")
 
     # 2. English prompt (use existing prompt)
     if original_prompt:
         # Remove ratio information (handled separately)
         cleaned_prompt = re.sub(r"\d+:\d+\s*ratio", "", original_prompt)
+
+        # Remove text instructions if background_only mode
+        if background_only:
+            cleaned_prompt = strip_text_instructions(cleaned_prompt)
+
         parts.append(cleaned_prompt.strip())
 
     # 3. Convert style guide
@@ -97,8 +243,11 @@ def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
     if style_parts:
         parts.append(" ".join(style_parts))
 
-    # 4. Quality assurance phrase
-    parts.append("High resolution, professional quality, suitable for blog use.")
+    # 4. Quality assurance phrase (modified for background_only mode)
+    if background_only:
+        parts.append("High resolution, professional quality, clean background without any text or typography, suitable for text overlay later.")
+    else:
+        parts.append("High resolution, professional quality, suitable for blog use.")
 
     return " ".join(parts)
 
@@ -367,7 +516,8 @@ def get_prompt_for_thumbnail(
     title: str,
     keywords: List[str],
     color_scheme: str = "modern gradient",
-) -> str:
+    background_only: bool = False,
+) -> Tuple[str, Optional[TextOverlayConfig]]:
     """
     Generate thumbnail prompt.
 
@@ -375,20 +525,49 @@ def get_prompt_for_thumbnail(
         title: Blog title
         keywords: Keyword list
         color_scheme: Color scheme
+        background_only: If True, generates background-only prompt without text
 
     Returns:
-        Thumbnail prompt
+        Tuple of (prompt_string, TextOverlayConfig or None)
+        - If background_only=False: (full_prompt, None)
+        - If background_only=True: (background_prompt, TextOverlayConfig)
     """
     keywords_str = ", ".join(keywords[:3])
 
-    return (
-        f"Create a professional blog thumbnail image. "
-        f"Topic: {keywords_str}. "
-        f"Include bold Korean text overlay: \"{title}\". "
-        f"Use {color_scheme} color scheme. "
-        f"Eye-catching, modern design, 16:9 aspect ratio. "
-        f"High resolution, suitable for social media preview."
-    )
+    if background_only:
+        # Background-only prompt without text instructions
+        prompt = (
+            f"Create a professional blog thumbnail background image. "
+            f"Topic: {keywords_str}. "
+            f"Use {color_scheme} color scheme. "
+            f"Eye-catching, modern design, 16:9 aspect ratio. "
+            f"Clean background suitable for text overlay. "
+            f"No text, no letters, no typography, no words. "
+            f"High resolution, professional quality."
+        )
+
+        # Create text overlay config
+        text_config = TextOverlayConfig(
+            main_text=title,
+            sub_text="",
+            position="center",
+            font_size=48,
+            font_color="#FFFFFF",
+            shadow=True,
+        )
+
+        return (prompt, text_config)
+    else:
+        # Original behavior with text included
+        prompt = (
+            f"Create a professional blog thumbnail image. "
+            f"Topic: {keywords_str}. "
+            f"Include bold Korean text overlay: \"{title}\". "
+            f"Use {color_scheme} color scheme. "
+            f"Eye-catching, modern design, 16:9 aspect ratio. "
+            f"High resolution, suitable for social media preview."
+        )
+        return (prompt, None)
 
 
 def get_prompt_for_infographic(

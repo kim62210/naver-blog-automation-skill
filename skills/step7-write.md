@@ -210,7 +210,37 @@ After writing the prompt, images are saved to `./images/` folder without manual 
 
 Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
 
-### Generate Images with Python
+### New: Background + Text Overlay Pipeline (Recommended)
+
+For better Korean text quality, use the new pipeline:
+1. Generate background image via Gemini (no text)
+2. Add text overlay via SVG composition
+3. Export final PNG
+
+```python
+from scripts.image_pipeline import ImagePipeline
+from scripts.prompt_converter import TextOverlayConfig
+
+# Initialize pipeline
+pipeline = ImagePipeline()
+
+# Example: Generate thumbnail with text overlay
+result = await pipeline.generate_with_text_overlay(
+    prompt="Blog thumbnail background, finance concept, warm gradient, NO TEXT",
+    output_path="./images/01_썸네일.png",
+    text_config=TextOverlayConfig(
+        main_text="0세 적금 필수!",
+        sub_text="연 12% 고금리",
+        position="center",
+        font_size=48,
+        font_color="#FFFFFF",
+        shadow=True
+    )
+)
+# Result: Background generated → Text overlay applied → Final PNG saved
+```
+
+### Legacy: Generate Images with Python
 
 ```python
 from scripts.gemini_image import GeminiImageGenerator
@@ -234,6 +264,28 @@ print(result.summary())
 # 📊 Batch generation result: 5/5 success (100.0%), elapsed: 25.3s
 ```
 
+### Batch Generate with Text Overlay
+
+```python
+from scripts.image_pipeline import ImagePipeline
+
+# Initialize pipeline
+pipeline = ImagePipeline()
+
+# Process entire image guide with text overlay support
+with open("이미지 가이드.md", "r", encoding="utf-8") as f:
+    image_guide_content = f.read()
+
+result = await pipeline.process_image_guide(
+    image_guide_content=image_guide_content,
+    output_dir="./images/",
+    use_text_overlay=True  # Enable SVG text overlay for Mode B-2 items
+)
+
+print(result.summary())
+# 📊 Pipeline result: 5/5 success, 3 with text overlay
+```
+
 ### Environment Variable Setup (Required)
 
 ```bash
@@ -245,6 +297,17 @@ export GOOGLE_API_KEY="your-api-key"
 - **15 requests per minute** limit (auto-delay applied)
 - **500 images/day** free quota (gemini-2.0-flash-exp)
 - Auto-fallback to imagen-3.0 when quota exceeded
+
+### Text Overlay Dependencies
+
+For SVG to PNG conversion, install one of:
+```bash
+pip install cairosvg  # Recommended
+# or
+sudo apt install librsvg2-bin  # rsvg-convert
+# or
+pip install svglib reportlab  # Fallback
+```
 
 ---
 

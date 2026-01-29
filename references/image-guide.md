@@ -127,7 +127,7 @@ Infographic:
 > **Automation**: Mode B images are automatically generated via Gemini API.
 > Just write the prompt and images will be saved to `./images/` folder without manual generation.
 
-### Basic Format
+### Mode B-1: Basic Format (AI generates everything including text)
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -148,6 +148,48 @@ Infographic:
 - Ratio: {ratio}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+### Mode B-2: Background Only + Text Overlay (Recommended for thumbnails)
+
+> **New**: AI generates background only, text is added via SVG overlay for better Korean text quality.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Image N] {image role}
+
+🎨 AI Generation (Background Only)
+
+[Korean Description]
+{배경 이미지 설명 - 텍스트 제외}
+
+[AI Generation Prompt]
+{배경 전용 프롬프트 - NO TEXT, NO TYPOGRAPHY 포함}
+
+[Style Guide]
+- Color: {color}
+- Mood: {mood}
+- Format: {format}
+- Ratio: {ratio}
+
+[Text Overlay Config]
+- main_text: "{제목 텍스트}"
+- sub_text: "{부제목}" (optional)
+- position: "center" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right"
+- font_size: 48
+- font_color: "#FFFFFF"
+- font_family: "Pretendard, Nanum Gothic, sans-serif"
+- shadow: true
+- shadow_color: "rgba(0,0,0,0.5)"
+- background_box: false (optional)
+- background_box_color: "rgba(0,0,0,0.3)" (optional)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Benefits of Mode B-2:**
+1. Better Korean text rendering (AI struggles with Korean characters)
+2. Easy text editing without regenerating images
+3. Consistent font styling across all thumbnails
+4. Professional typography control (shadows, positioning, etc.)
 
 ### Gemini API Usage
 
@@ -175,6 +217,7 @@ result = await generator.generate_batch(prompts, "./images/")
 
 ### 1. Thumbnail Image
 
+#### Option A: AI generates text (legacy)
 ```
 [AI Generation Prompt]
 Blog thumbnail image, {topic keywords} concept,
@@ -190,28 +233,64 @@ eye-catching modern design, 16:9 ratio
 - Ratio: 16:9
 ```
 
-**Example:**
+#### Option B: Background + Text Overlay (Recommended)
+```
+[AI Generation Prompt]
+Blog thumbnail background image, {topic keywords} concept,
+{core object} as main element,
+{color} gradient background,
+NO TEXT, NO LETTERS, NO TYPOGRAPHY,
+clean background suitable for text overlay,
+eye-catching modern design, 16:9 ratio
+
+[Style Guide]
+- Color: {main color} + {accent color} gradient
+- Mood: Eye-catching and click-inducing
+- Format: Modern thumbnail background
+- Ratio: 16:9
+
+[Text Overlay Config]
+- main_text: "{제목 텍스트}"
+- sub_text: "{부제목}"
+- position: "center"
+- font_size: 48
+- font_color: "#FFFFFF"
+- shadow: true
+```
+
+**Example (Recommended - Background + Text Overlay):**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Thumbnail] 0세 적금 고금리 안내
 
-🎨 Generation Required
+🎨 AI Generation (Background Only)
 
 [Korean Description]
-아기 손과 돼지저금통이 있고, "0세 적금 필수! 연 12%" 텍스트가 크게 들어간 썸네일
+아기 손과 돼지저금통이 있는 따뜻한 배경 이미지 (텍스트 없음)
 
 [AI Generation Prompt]
-Blog thumbnail image, baby savings account concept,
+Blog thumbnail background image, baby savings account concept,
 cute piggy bank and baby hands as main elements,
-bold "0세 적금 필수! 연 12%" Korean text overlay,
 warm yellow to soft orange gradient background,
+NO TEXT, NO LETTERS, NO TYPOGRAPHY, NO WORDS,
+clean background suitable for text overlay,
 eye-catching modern design, 16:9 ratio
 
 [Style Guide]
 - Color: Warm yellow + Soft orange gradient
 - Mood: Warm, friendly, trustworthy
-- Format: Modern thumbnail
+- Format: Modern thumbnail background
 - Ratio: 16:9
+
+[Text Overlay Config]
+- main_text: "0세 적금 필수!"
+- sub_text: "연 12% 고금리"
+- position: "center"
+- font_size: 48
+- font_color: "#FFFFFF"
+- shadow: true
+- background_box: true
+- background_box_color: "rgba(0,0,0,0.3)"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

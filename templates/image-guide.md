@@ -16,14 +16,16 @@
 
 ## [Image 1] Thumbnail
 
-### 🎨 AI Generation Prompt
+### 🎨 AI Generation (Background Only)
+
+> **Note**: AI generates background image only. Text is added via SVG overlay.
 
 **Korean Description:**
 ${thumbnail_description_kr}
 
-**AI Generation Prompt:**
+**AI Generation Prompt (Background Only):**
 ```
-${thumbnail_prompt_en}
+${thumbnail_prompt_en_background}
 ```
 
 **Style:**
@@ -31,6 +33,15 @@ ${thumbnail_prompt_en}
 - Mood: ${thumbnail_mood}
 - Format: ${thumbnail_format}
 - Ratio: 16:9
+
+**[Text Overlay Config]**
+- main_text: "${title}"
+- sub_text: "${subtitle}"
+- position: "center"
+- font_size: 48
+- font_color: "#FFFFFF"
+- shadow: true
+- background_box: false
 
 ### 🔷 SVG Generation Guide
 

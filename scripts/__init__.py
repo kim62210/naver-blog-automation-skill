@@ -10,9 +10,11 @@
 - writer: HTML/MD 생성
 - gemini_image: Gemini API 이미지 생성
 - prompt_converter: 프롬프트 변환
+- text_overlay: SVG 텍스트 오버레이
+- image_pipeline: 통합 이미지 생성 파이프라인
 """
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 __all__ = [
     "config",
     "utils",
@@ -22,4 +24,6 @@ __all__ = [
     "writer",
     "gemini_image",
     "prompt_converter",
+    "text_overlay",
+    "image_pipeline",
 ]
