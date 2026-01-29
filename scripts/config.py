@@ -1,7 +1,7 @@
 """
-설정 파일 로더
+Configuration file loader
 
-config.yaml 파일을 로드하고 검증하며, 기본값을 병합합니다.
+Loads and validates config.yaml files, merging with default values.
 """
 
 import os
@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional
 import yaml
 
 
-# 기본 설정값
+# Default configuration values
 DEFAULT_CONFIG = {
     "app": {
         "name": "search-blogging",
@@ -43,21 +43,21 @@ DEFAULT_CONFIG = {
 
 def find_config_file(start_path: Optional[Path] = None) -> Optional[Path]:
     """
-    config.yaml 파일을 찾습니다.
+    Find config.yaml file.
 
     Args:
-        start_path: 검색 시작 경로 (없으면 현재 디렉토리)
+        start_path: Starting path for search (defaults to current directory)
 
     Returns:
-        config.yaml 파일 경로 (없으면 None)
+        Path to config.yaml file (None if not found)
     """
     if start_path is None:
         start_path = Path.cwd()
 
-    # 현재 디렉토리에서 시작하여 상위로 탐색
+    # Search upward from current directory
     current = Path(start_path).resolve()
 
-    for _ in range(5):  # 최대 5레벨까지 탐색
+    for _ in range(5):  # Search up to 5 levels
         config_path = current / "config.yaml"
         if config_path.exists():
             return config_path
@@ -72,14 +72,14 @@ def find_config_file(start_path: Optional[Path] = None) -> Optional[Path]:
 
 def deep_merge(base: Dict, override: Dict) -> Dict:
     """
-    두 딕셔너리를 깊게 병합합니다.
+    Deep merge two dictionaries.
 
     Args:
-        base: 기본 딕셔너리
-        override: 덮어쓸 딕셔너리
+        base: Base dictionary
+        override: Dictionary to override with
 
     Returns:
-        병합된 딕셔너리
+        Merged dictionary
     """
     result = base.copy()
 
@@ -94,32 +94,32 @@ def deep_merge(base: Dict, override: Dict) -> Dict:
 
 def load_config(config_path: Optional[Path] = None) -> Dict[str, Any]:
     """
-    설정 파일을 로드합니다.
+    Load configuration file.
 
     Args:
-        config_path: 설정 파일 경로 (없으면 자동 탐색)
+        config_path: Configuration file path (auto-search if not provided)
 
     Returns:
-        설정 딕셔너리
+        Configuration dictionary
 
     Raises:
-        FileNotFoundError: 설정 파일을 찾을 수 없을 때
-        yaml.YAMLError: YAML 파싱 오류 시
+        FileNotFoundError: When configuration file cannot be found
+        yaml.YAMLError: When YAML parsing fails
     """
     if config_path is None:
         config_path = find_config_file()
 
     if config_path is None or not config_path.exists():
-        print(f"⚠️ config.yaml을 찾을 수 없습니다. 기본값을 사용합니다.")
+        print(f"⚠️ config.yaml not found. Using default values.")
         return DEFAULT_CONFIG.copy()
 
     with open(config_path, "r", encoding="utf-8") as f:
         user_config = yaml.safe_load(f) or {}
 
-    # 기본값과 사용자 설정 병합
+    # Merge default and user configuration
     config = deep_merge(DEFAULT_CONFIG, user_config)
 
-    # 환경변수 오버라이드
+    # Apply environment variable overrides
     config = apply_env_overrides(config)
 
     return config
@@ -127,18 +127,18 @@ def load_config(config_path: Optional[Path] = None) -> Dict[str, Any]:
 
 def apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
     """
-    환경변수로 설정을 오버라이드합니다.
+    Override configuration with environment variables.
 
-    지원하는 환경변수:
-    - BLOG_CHAR_COUNT: 목표 글자수
-    - BLOG_IMAGE_COUNT: 기본 이미지 수
-    - BLOG_OUTPUT_DIR: 출력 디렉토리
+    Supported environment variables:
+    - BLOG_CHAR_COUNT: Target character count
+    - BLOG_IMAGE_COUNT: Default image count
+    - BLOG_OUTPUT_DIR: Output directory
 
     Args:
-        config: 설정 딕셔너리
+        config: Configuration dictionary
 
     Returns:
-        환경변수가 적용된 설정
+        Configuration with environment variables applied
     """
     env_mappings = {
         "BLOG_CHAR_COUNT": ("writing", "char_count", int),
@@ -160,15 +160,15 @@ def apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
 
 def get_config_value(config: Dict, *keys: str, default: Any = None) -> Any:
     """
-    중첩된 설정값을 안전하게 가져옵니다.
+    Safely retrieve nested configuration values.
 
     Args:
-        config: 설정 딕셔너리
-        *keys: 키 경로
-        default: 기본값
+        config: Configuration dictionary
+        *keys: Key path
+        default: Default value
 
     Returns:
-        설정값 또는 기본값
+        Configuration value or default
 
     Example:
         >>> get_config_value(config, "writing", "char_count", default=1850)
@@ -187,45 +187,45 @@ def get_config_value(config: Dict, *keys: str, default: Any = None) -> Any:
 
 def validate_config(config: Dict[str, Any]) -> list:
     """
-    설정 파일의 유효성을 검증합니다.
+    Validate configuration file.
 
     Args:
-        config: 설정 딕셔너리
+        config: Configuration dictionary
 
     Returns:
-        오류 메시지 목록 (비어있으면 유효)
+        List of error messages (empty if valid)
     """
     errors = []
 
-    # 글자수 범위 검증
+    # Validate character count range
     min_chars = get_config_value(config, "writing", "min_chars", default=1800)
     max_chars = get_config_value(config, "writing", "max_chars", default=1900)
     char_count = get_config_value(config, "writing", "char_count", default=1850)
 
     if not (min_chars <= char_count <= max_chars):
-        errors.append(f"char_count({char_count})가 범위({min_chars}~{max_chars}) 밖입니다.")
+        errors.append(f"char_count({char_count}) is outside range ({min_chars}~{max_chars}).")
 
-    # 이미지 수 범위 검증
+    # Validate image count range
     min_images = get_config_value(config, "images", "min_count", default=3)
     max_images = get_config_value(config, "images", "max_count", default=10)
     default_images = get_config_value(config, "images", "default_count", default=5)
 
     if not (min_images <= default_images <= max_images):
-        errors.append(f"default_count({default_images})가 범위({min_images}~{max_images}) 밖입니다.")
+        errors.append(f"default_count({default_images}) is outside range ({min_images}~{max_images}).")
 
     return errors
 
 
-# 편의를 위한 싱글톤 인스턴스
+# Singleton instance for convenience
 _config_instance: Optional[Dict[str, Any]] = None
 
 
 def get_config() -> Dict[str, Any]:
     """
-    설정 싱글톤 인스턴스를 반환합니다.
+    Return configuration singleton instance.
 
     Returns:
-        설정 딕셔너리
+        Configuration dictionary
     """
     global _config_instance
 
@@ -237,10 +237,10 @@ def get_config() -> Dict[str, Any]:
 
 def reload_config() -> Dict[str, Any]:
     """
-    설정을 다시 로드합니다.
+    Reload configuration.
 
     Returns:
-        새로 로드된 설정 딕셔너리
+        Newly loaded configuration dictionary
     """
     global _config_instance
     _config_instance = load_config()

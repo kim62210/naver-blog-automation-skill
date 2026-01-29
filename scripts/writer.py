@@ -1,7 +1,7 @@
 """
-HTML/MD 생성 모듈
+HTML/MD generation module
 
-Jinja2 스타일 템플릿을 렌더링하여 본문.html, 이미지 가이드.md, 참조.md를 생성합니다.
+Renders Jinja2-style templates to generate 본문.html, image guide.md, and references.md.
 """
 
 import re
@@ -18,24 +18,24 @@ from .setup import update_metadata
 
 def load_template(template_name: str, templates_dir: Optional[Path] = None) -> str:
     """
-    템플릿 파일을 로드합니다.
+    Load template file.
 
     Args:
-        template_name: 템플릿 파일명
-        templates_dir: 템플릿 디렉토리 (없으면 기본 경로)
+        template_name: Template filename
+        templates_dir: Template directory (uses default path if not provided)
 
     Returns:
-        템플릿 내용
+        Template content
     """
     if templates_dir is None:
-        # 현재 스크립트 위치 기준으로 templates 디렉토리 찾기
+        # Find templates directory relative to current script location
         script_dir = Path(__file__).parent
         templates_dir = script_dir.parent / "templates"
 
     template_path = templates_dir / template_name
 
     if not template_path.exists():
-        raise FileNotFoundError(f"템플릿을 찾을 수 없습니다: {template_path}")
+        raise FileNotFoundError(f"Template not found: {template_path}")
 
     with open(template_path, "r", encoding="utf-8") as f:
         return f.read()
@@ -43,23 +43,23 @@ def load_template(template_name: str, templates_dir: Optional[Path] = None) -> s
 
 def render_template(template_content: str, context: Dict[str, Any]) -> str:
     """
-    간단한 템플릿 렌더링 (Python string.Template 사용).
+    Simple template rendering (using Python string.Template).
 
-    지원 문법:
-    - ${variable} 또는 $variable: 변수 치환
-    - 반복문은 지원하지 않음 (별도 처리 필요)
+    Supported syntax:
+    - ${variable} or $variable: Variable substitution
+    - Loops not supported (requires separate handling)
 
     Args:
-        template_content: 템플릿 내용
-        context: 컨텍스트 변수들
+        template_content: Template content
+        context: Context variables
 
     Returns:
-        렌더링된 내용
+        Rendered content
     """
-    # 기본 치환
+    # Basic substitution
     template = Template(template_content)
 
-    # safe_substitute를 사용하여 없는 변수는 그대로 유지
+    # Use safe_substitute to keep missing variables as-is
     result = template.safe_substitute(context)
 
     return result
@@ -72,21 +72,21 @@ def generate_html_content(
     config: Optional[Dict] = None
 ) -> str:
     """
-    HTML 본문을 생성합니다.
+    Generate HTML content.
 
     Args:
-        title: 제목
-        sections: 섹션 리스트 [{"title": str, "content": str, "has_image": bool}]
-        tags: 태그 리스트
-        config: 설정 딕셔너리
+        title: Title
+        sections: Section list [{"title": str, "content": str, "has_image": bool}]
+        tags: Tag list
+        config: Configuration dictionary
 
     Returns:
-        HTML 콘텐츠
+        HTML content
     """
     if config is None:
         config = get_config()
 
-    # HTML 템플릿 시작
+    # HTML template start
     html_parts = [
         '<!DOCTYPE html>',
         '<html>',
@@ -120,7 +120,7 @@ def generate_html_content(
         '<hr>',
     ]
 
-    # 섹션별 콘텐츠 추가
+    # Add section content
     image_index = 2
     for section in sections:
         section_title = section.get("title", "")
@@ -128,31 +128,31 @@ def generate_html_content(
         has_image = section.get("has_image", False)
         section_type = section.get("type", "normal")
 
-        # 섹션 제목
+        # Section title
         if section_title:
             html_parts.append(f'\n<h2>{section_title}</h2>\n')
 
-        # 섹션 내용
+        # Section content
         if section_content:
-            # 내용을 단락으로 분리
+            # Split content into paragraphs
             paragraphs = section_content.split('\n\n')
             for para in paragraphs:
                 para = para.strip()
                 if para:
-                    # 인용구 처리
+                    # Handle quotes
                     if para.startswith('"') and para.endswith('"'):
                         html_parts.append(f'<blockquote>\n{para}\n</blockquote>\n')
                     else:
                         html_parts.append(f'<p>{para}</p>\n')
 
-        # 이미지 placeholder
+        # Image placeholder
         if has_image:
             html_parts.append(f'\n<div class="image-placeholder">[이미지 {image_index} 삽입]</div>\n')
             image_index += 1
 
         html_parts.append('\n<hr>\n')
 
-    # 태그 추가
+    # Add tags
     tags_str = ' '.join(f'#{tag}' for tag in tags)
     html_parts.extend([
         f'\n<p class="tags">{tags_str}</p>',
@@ -171,84 +171,84 @@ def generate_image_guide(
     date: Optional[str] = None
 ) -> str:
     """
-    이미지 가이드 마크다운을 생성합니다.
+    Generate image guide markdown.
 
     Args:
-        topic: 주제
-        images: 이미지 가이드 리스트
-        color_palette: 색상 팔레트
-        date: 날짜
+        topic: Topic
+        images: Image guide list
+        color_palette: Color palette
+        date: Date
 
     Returns:
-        마크다운 콘텐츠
+        Markdown content
     """
     if date is None:
         date = get_today_date()
 
     md_parts = [
-        '# 이미지 가이드',
+        '# Image Guide',
         '',
-        '## 기본 정보',
-        f'- 주제: {topic}',
-        f'- 작성일: {date}',
-        f'- 총 이미지 수: {len(images)}개',
+        '## Basic Information',
+        f'- Topic: {topic}',
+        f'- Created: {date}',
+        f'- Total images: {len(images)}',
         '',
-        '## 색상 팔레트',
-        f'- 메인: {color_palette.get("main", "#1a365d")}',
-        f'- 포인트: {color_palette.get("accent", "#d69e2e")}',
-        f'- 배경: {color_palette.get("background", "#ffffff")}',
-        f'- 텍스트: {color_palette.get("text", "#333333")}',
+        '## Color Palette',
+        f'- Main: {color_palette.get("main", "#1a365d")}',
+        f'- Accent: {color_palette.get("accent", "#d69e2e")}',
+        f'- Background: {color_palette.get("background", "#ffffff")}',
+        f'- Text: {color_palette.get("text", "#333333")}',
         '',
         '---',
         '',
     ]
 
     for idx, img in enumerate(images, 1):
-        role = img.get("role", f"이미지 {idx}")
+        role = img.get("role", f"Image {idx}")
         mode = img.get("mode", "ai_generate")
 
-        md_parts.append(f'## [이미지 {idx}] {role}')
+        md_parts.append(f'## [Image {idx}] {role}')
         md_parts.append('')
 
         if mode == "reference":
-            # 참고 이미지 모드
+            # Reference image mode
             md_parts.extend([
-                '### 📷 참고 이미지',
-                f'**파일:** {img.get("filename", "N/A")}',
-                f'**출처:** {img.get("source_url", "N/A")}',
-                f'**활용:** {img.get("usage", "직접 사용 / 레이아웃 참고")}',
+                '### 📷 Reference Image',
+                f'**File:** {img.get("filename", "N/A")}',
+                f'**Source:** {img.get("source_url", "N/A")}',
+                f'**Usage:** {img.get("usage", "Direct use / Layout reference")}',
                 '',
             ])
 
         if mode in ("ai_generate", "both"):
-            # AI 이미지 생성 프롬프트
+            # AI image generation prompt
             md_parts.extend([
-                '### 🎨 AI 생성 프롬프트',
+                '### 🎨 AI Generation Prompt',
                 '',
-                '**한글 설명:**',
-                img.get("description_kr", "이미지 설명을 입력하세요."),
+                '**Korean Description:**',
+                img.get("description_kr", "Enter image description."),
                 '',
-                '**AI 생성 프롬프트:**',
+                '**AI Generation Prompt:**',
                 '```',
                 img.get("prompt_en", "Image generation prompt here"),
                 '```',
                 '',
-                '**스타일:**',
-                f'- 색상: {img.get("colors", color_palette.get("main"))}',
-                f'- 분위기: {img.get("mood", "전문적")}',
-                f'- 형식: {img.get("format", "인포그래픽")}',
+                '**Style:**',
+                f'- Color: {img.get("colors", color_palette.get("main"))}',
+                f'- Mood: {img.get("mood", "Professional")}',
+                f'- Format: {img.get("format", "Infographic")}',
                 '',
             ])
 
         if mode in ("svg", "both"):
-            # SVG 생성 가이드
+            # SVG generation guide
             md_parts.extend([
-                '### 🔷 SVG 생성 가이드',
+                '### 🔷 SVG Generation Guide',
                 '',
-                f'**캔버스:** {img.get("canvas_width", 800)}x{img.get("canvas_height", 450)}px',
-                f'**배경:** {img.get("background", color_palette.get("background", "#ffffff"))}',
+                f'**Canvas:** {img.get("canvas_width", 800)}x{img.get("canvas_height", 450)}px',
+                f'**Background:** {img.get("background", color_palette.get("background", "#ffffff"))}',
                 '',
-                '**요소:**',
+                '**Elements:**',
             ])
 
             elements = img.get("svg_elements", [])
@@ -272,32 +272,32 @@ def generate_references(
     date: Optional[str] = None
 ) -> str:
     """
-    참조 문서 마크다운을 생성합니다.
+    Generate references markdown document.
 
     Args:
-        topic: 주제
-        text_sources: 텍스트 자료 {"네이버 뉴스": [...], "네이버 블로그": [...]}
-        images: 이미지 정보 리스트
-        date: 날짜
+        topic: Topic
+        text_sources: Text sources {"네이버 뉴스": [...], "네이버 블로그": [...]}
+        images: Image information list
+        date: Date
 
     Returns:
-        마크다운 콘텐츠
+        Markdown content
     """
     if date is None:
         date = get_today_date()
 
     md_parts = [
-        '# 참조 자료',
+        '# References',
         '',
-        '## 작성일',
+        '## Date',
         date,
         '',
-        '## 주제',
+        '## Topic',
         topic,
         '',
         '---',
         '',
-        '## 텍스트 자료',
+        '## Text Sources',
         '',
     ]
 
@@ -308,13 +308,13 @@ def generate_references(
             md_parts.append(f'### {source_name}')
 
             for idx, source in enumerate(sources, 1):
-                title = source.get("title", "제목 없음")
+                title = source.get("title", "No title")
                 url = source.get("url", "#")
                 summary = source.get("summary", "")
 
                 md_parts.append(f'{idx}. [{title}]({url})')
                 if summary:
-                    md_parts.append(f'   - 요약: {summary}')
+                    md_parts.append(f'   - Summary: {summary}')
 
                 total_sources += 1
 
@@ -323,11 +323,11 @@ def generate_references(
     md_parts.extend([
         '---',
         '',
-        '## 다운로드된 이미지',
+        '## Downloaded Images',
         '',
-        '저장 위치: `./images/`',
+        'Location: `./images/`',
         '',
-        '| # | 파일명 | 설명 | 출처 |',
+        '| # | Filename | Description | Source |',
         '|---|--------|------|------|',
     ])
 
@@ -350,16 +350,16 @@ def generate_references(
 
     if failed_images:
         md_parts.extend([
-            '### 다운로드 실패 (URL만 기록)',
+            '### Download Failed (URL only)',
             '',
-            '| # | 설명 | 이미지 URL | 실패 사유 |',
+            '| # | Description | Image URL | Failure Reason |',
             '|---|------|-----------|----------|',
         ])
 
         for idx, img in enumerate(failed_images, 1):
             description = img.get("description", "")
             url = img.get("url", "")[:50] + "..."
-            error = img.get("error", "알 수 없음")
+            error = img.get("error", "Unknown")
 
             md_parts.append(f'| {idx} | {description} | {url} | {error} |')
 
@@ -368,11 +368,11 @@ def generate_references(
     md_parts.extend([
         '---',
         '',
-        '## 참고 사항',
-        f'- 자료 수집일: {date}',
-        f'- 텍스트 자료: {total_sources}건',
-        f'- 다운로드 이미지: {downloaded_count}건',
-        f'- 다운로드 실패: {len(failed_images)}건',
+        '## Notes',
+        f'- Collection date: {date}',
+        f'- Text sources: {total_sources}',
+        f'- Downloaded images: {downloaded_count}',
+        f'- Failed downloads: {len(failed_images)}',
     ])
 
     return '\n'.join(md_parts)
@@ -386,45 +386,45 @@ def save_blog_files(
     validate: bool = True
 ) -> Dict[str, Path]:
     """
-    블로그 관련 파일들을 저장합니다.
+    Save blog-related files.
 
     Args:
-        project_path: 프로젝트 디렉토리 경로
-        html_content: HTML 본문 내용
-        image_guide: 이미지 가이드 마크다운
-        references: 참조 마크다운
-        validate: 글자수 검증 여부
+        project_path: Project directory path
+        html_content: HTML content
+        image_guide: Image guide markdown
+        references: References markdown
+        validate: Whether to validate character count
 
     Returns:
-        저장된 파일 경로들
+        Saved file paths
     """
     files = {}
 
-    # 본문.html 저장
+    # Save 본문.html
     html_path = project_path / "본문.html"
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
     files["html"] = html_path
 
-    # 글자수 검증
+    # Validate character count
     if validate:
         result = validate_char_count(html_content)
         if not result.is_valid:
             print(result.message)
 
-    # 이미지 가이드.md 저장
+    # Save 이미지 가이드.md
     guide_path = project_path / "이미지 가이드.md"
     with open(guide_path, "w", encoding="utf-8") as f:
         f.write(image_guide)
     files["image_guide"] = guide_path
 
-    # 참조.md 저장
+    # Save 참조.md
     ref_path = project_path / "참조.md"
     with open(ref_path, "w", encoding="utf-8") as f:
         f.write(references)
     files["references"] = ref_path
 
-    # 메타데이터 업데이트
+    # Update metadata
     update_metadata(project_path, {
         "files": {
             "html": str(html_path),
@@ -443,17 +443,17 @@ def print_completion_summary(
     validation_result: Optional[ValidationResult] = None
 ) -> None:
     """
-    완료 요약을 출력합니다.
+    Print completion summary.
 
     Args:
-        project_path: 프로젝트 디렉토리 경로
-        files: 저장된 파일들
-        validation_result: 글자수 검증 결과
+        project_path: Project directory path
+        files: Saved files
+        validation_result: Character count validation result
     """
     print("=" * 50)
-    print("✅ 블로그 글 작성 완료!")
+    print("✅ Blog post creation complete!")
     print("=" * 50)
-    print(f"\n📁 저장 위치: {project_path}")
+    print(f"\n📁 Location: {project_path}")
     print("")
 
     for file_type, file_path in files.items():
@@ -462,18 +462,18 @@ def print_completion_summary(
     images_dir = project_path / "images"
     if images_dir.exists():
         image_count = len(list(images_dir.iterdir()))
-        print(f"  └── images/ ({image_count}개)")
+        print(f"  └── images/ ({image_count} files)")
 
     print("")
-    print("📋 네이버 블로그에 붙여넣기 방법")
-    print("  1. 본문.html 파일을 브라우저에서 열기")
-    print("  2. Cmd+A (전체 선택) → Cmd+C (복사)")
-    print("  3. 네이버 블로그 에디터에서 Cmd+V (붙여넣기)")
-    print("  4. [이미지 N 삽입] 위치에 실제 이미지 업로드")
+    print("📋 How to paste into Naver Blog")
+    print("  1. Open 본문.html file in browser")
+    print("  2. Cmd+A (Select all) → Cmd+C (Copy)")
+    print("  3. Cmd+V (Paste) in Naver Blog editor")
+    print("  4. Upload actual images at [이미지 N 삽입] positions")
 
     if validation_result:
         print("")
-        print(f"📊 글자수: {validation_result.char_count}자")
+        print(f"📊 Character count: {validation_result.char_count}")
         print(f"   {validation_result.message}")
 
     print("=" * 50)

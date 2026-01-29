@@ -1,115 +1,115 @@
-# STEP 6: 제목 선택
+# STEP 6: Title Selection
 
-3개의 제목 후보를 제시하고 사용자가 선택합니다.
+Present 3 title candidates and let user select.
 
-## 진행 상태
-
-```
-[STEP 6/8] 제목 선택 ████████████████████████░░░░ 75%
-```
-
----
-
-## 6-1. 제목 제시 포맷
+## Progress Status
 
 ```
-제목 후보입니다:
-
-1️⃣ {제목 1}
-2️⃣ {제목 2}
-3️⃣ {제목 3}
-
-선택해주세요. 또는 "재생성"이라고 하시면 새로운 후보를 제안합니다.
+[STEP 6/8] Title selection ████████████████████████░░░░ 75%
 ```
 
 ---
 
-## 6-2. 제목 작성 원칙
+## 6-1. Title Presentation Format
 
-### 필수 요소
-1. **핵심 키워드 포함**: 검색 최적화
-2. **숫자/연도 활용**: 클릭률 향상
-3. **호기심 유발 또는 혜택 명시**: 독자 관심 유도
-4. **30자 이내 권장**: 모바일 최적화
+```
+Here are the title candidates:
 
-### 제목 패턴
+1️⃣ {title 1}
+2️⃣ {title 2}
+3️⃣ {title 3}
 
-| 패턴 | 예시 |
-|------|------|
-| 숫자형 | "2026년 육아휴직 급여, 이렇게 달라집니다 3가지" |
-| 질문형 | "0세 적금 금리 7%? 진짜 가능한 상품 정리" |
-| 혜택형 | "연말정산 환급액 늘리는 5가지 소득공제 꿀팁" |
-| 비교형 | "적금 vs 예금, 2026년에는 뭐가 더 유리할까?" |
-| 시의성 | "2026년 1월 시행! 달라지는 금융 정책 총정리" |
-
-### 제목별 스타일 (톤앤매너 연동)
-
-| 톤 | 제목 스타일 |
-|-----|-----------|
-| 전문적 | "2026년 육아휴직 급여 인상, 주요 변경사항 총정리" |
-| 친근한 | "육아휴직 급여 이렇게 올랐어요! 꼭 알아야 할 3가지" |
-| 중립적 | "2026년 육아휴직 급여 변경: 금액, 기간, 신청방법" |
+Please select. Or say "regenerate" for new candidates.
+```
 
 ---
 
-## 6-3. 제목 생성 로직
+## 6-2. Title Writing Principles
 
-### 입력 정보
-- 주제 키워드
-- 수집된 핵심 정보
-- 선택된 톤앤매너
-- 현재 연도/월
+### Required Elements
+1. **Include key keyword**: Search optimization
+2. **Use numbers/year**: Improve click-through rate
+3. **Evoke curiosity or state benefit**: Draw reader interest
+4. **Recommend under 30 characters**: Mobile optimization
 
-### 제목 구성 요소
+### Title Patterns
+
+| Pattern | Example |
+|---------|---------|
+| Number-based | "2026년 육아휴직 급여, 이렇게 달라집니다 3가지" |
+| Question-based | "0세 적금 금리 7%? 진짜 가능한 상품 정리" |
+| Benefit-based | "연말정산 환급액 늘리는 5가지 소득공제 꿀팁" |
+| Comparison-based | "적금 vs 예금, 2026년에는 뭐가 더 유리할까?" |
+| Timely | "2026년 1월 시행! 달라지는 금융 정책 총정리" |
+
+### Title Style by Tone & Manner
+
+| Tone | Title Style |
+|------|-------------|
+| Professional | "2026년 육아휴직 급여 인상, 주요 변경사항 총정리" |
+| Friendly | "육아휴직 급여 이렇게 올랐어요! 꼭 알아야 할 3가지" |
+| Neutral | "2026년 육아휴직 급여 변경: 금액, 기간, 신청방법" |
+
+---
+
+## 6-3. Title Generation Logic
+
+### Input Information
+- Topic keywords
+- Collected key information
+- Selected tone & manner
+- Current year/month
+
+### Title Composition Elements
 
 ```yaml
 title_elements:
-  keyword: "{메인 키워드}"
+  keyword: "{main keyword}"
   year: "2026년"
-  benefit: "{핵심 혜택/정보}"
-  number: "{숫자}" # 선택적
-  question: "{질문}" # 선택적
+  benefit: "{key benefit/information}"
+  number: "{number}" # optional
+  question: "{question}" # optional
 ```
 
 ---
 
-## 6-4. 재생성
+## 6-4. Regeneration
 
-사용자가 "재생성" 요청 시:
-- 새로운 3개 후보 제시
-- **무제한 반복 가능**
-- 이전 후보와 다른 패턴 사용
-
-```
-새로운 제목 후보입니다:
-
-1️⃣ {새 제목 1} - 질문형
-2️⃣ {새 제목 2} - 혜택형
-3️⃣ {새 제목 3} - 비교형
-
-선택해주세요.
-```
-
----
-
-## 6-5. 직접 입력
-
-사용자가 직접 제목을 입력하는 경우:
-- 입력된 제목 그대로 사용
-- 글자수/특수문자 제한 검토만 진행
-
----
-
-## 6-6. 제목 확정
+When user requests "regenerate":
+- Present 3 new candidates
+- **Unlimited repeats allowed**
+- Use different patterns from previous candidates
 
 ```
-✅ 확정된 제목: "{선택된 제목}"
+Here are new title candidates:
 
-이 제목으로 본문 작성을 시작합니다.
+1️⃣ {new title 1} - Question-based
+2️⃣ {new title 2} - Benefit-based
+3️⃣ {new title 3} - Comparison-based
+
+Please select.
 ```
 
 ---
 
-## 다음 단계
+## 6-5. Direct Input
 
-제목 선택 완료 → **[STEP 7: 본문 작성 및 저장](step7-write.md)**
+When user directly inputs a title:
+- Use the input title as-is
+- Only check character count/special character restrictions
+
+---
+
+## 6-6. Title Confirmation
+
+```
+✅ Confirmed title: "{selected title}"
+
+Starting body content writing.
+```
+
+---
+
+## Next Step
+
+Title selection complete → **[STEP 7: Content Writing and Saving](step7-write.md)**

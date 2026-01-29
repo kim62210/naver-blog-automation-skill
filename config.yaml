@@ -1,32 +1,32 @@
-# 네이버 블로그 자동화 설정
-# search-blogging 스킬 v2.0.0
+# Naver Blog Automation Configuration
+# search-blogging skill v2.0.0
 
 app:
   name: search-blogging
   version: "2.0.0"
   description: "네이버 경제 숏텐츠 트렌딩 주제 수집부터 블로그 글 작성까지 자동화"
 
-# 글 작성 기본값
+# Writing defaults
 writing:
-  char_count: 1850        # 목표 글자수
-  char_tolerance: 50      # 허용 오차 (1800~1900자)
-  min_chars: 1800         # 최소 글자수
-  max_chars: 1900         # 최대 글자수
+  char_count: 1850        # Target character count
+  char_tolerance: 50      # Tolerance (1800~1900 chars)
+  min_chars: 1800         # Minimum character count
+  max_chars: 1900         # Maximum character count
 
-# 이미지 설정
+# Image settings
 images:
-  default_count: 5        # 기본 이미지 수
-  min_count: 3            # 최소 이미지 수
-  max_count: 10           # 최대 이미지 수
-  download_timeout: 30    # 다운로드 타임아웃 (초)
+  default_count: 5        # Default image count
+  min_count: 3            # Minimum image count
+  max_count: 10           # Maximum image count
+  download_timeout: 30    # Download timeout (seconds)
   user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
-# 태그 설정
+# Tag settings
 tags:
-  count: 8                # 기본 태그 수
-  max_count: 10           # 최대 태그 수
+  count: 8                # Default tag count
+  max_count: 10           # Maximum tag count
 
-# 출력 설정
+# Output settings
 output:
   base_dir: "./경제 블로그"
   date_format: "%Y-%m-%d"
@@ -34,14 +34,14 @@ output:
   subdirs:
     - "images"
 
-# 검색 설정
+# Search settings
 search:
   trending_url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
-  max_topics: 10          # 수집할 최대 주제 수
-  parallel_agents: 6      # 병렬 검색 에이전트 수
-  results_per_source: 5   # 소스당 결과 수
+  max_topics: 10          # Maximum topics to collect
+  parallel_agents: 6      # Number of parallel search agents
+  results_per_source: 5   # Results per source
 
-# 톤앤매너 프리셋
+# Tone & manner presets
 tones:
   professional:
     name: "전문적"
@@ -70,7 +70,7 @@ tones:
       - "가이드"
       - "뉴스"
 
-# 글 구성 프리셋
+# Article structure presets
 structures:
   standard:
     name: "7단계"
@@ -109,24 +109,24 @@ structures:
     description: "AI가 주제에 맞게 유연하게 구성"
     sections: null
 
-# Gemini API 설정
+# Gemini API settings
 gemini:
   enabled: true
   models:
-    primary: "gemini-2.0-flash-exp"    # 이미지 생성 지원 모델
-    fallback: "imagen-3.0-generate-002" # 폴백 모델
+    primary: "gemini-2.0-flash-exp"    # Image generation supported model
+    fallback: "imagen-3.0-generate-002" # Fallback model
   default_size: "1024x1024"
   timeout: 60
   retry_count: 3
   rate_limit:
     requests_per_minute: 15
-    delay_between_requests: 4.0  # 초
+    delay_between_requests: 4.0  # seconds
   fallback_on:
     - "429"           # Rate limit exceeded
     - "QUOTA_EXCEEDED"
     - "ResourceExhausted"
 
-# 이미지 가이드 모드
+# Image guide modes
 image_modes:
   reference:
     name: "참고 이미지"
@@ -142,40 +142,40 @@ image_modes:
     description: "svg-canvas-mcp로 직접 생성"
     symbol: "🔷"
 
-# 네이버 블로그 이미지 크기 표준
+# Naver blog image size standards
 image_sizes:
   thumbnail:
     width: 1300
     height: 885
     ratio: "1.47:1"
-    description: "OG 이미지, 검색결과 썸네일"
+    description: "OG image, search result thumbnail"
   content_basic:
     width: 693
     height: 450
-    description: "본문 기본 폭"
+    description: "Content basic width"
   content_wide:
     width: 886
     height: 500
-    description: "본문 확장 폭"
+    description: "Content expanded width"
   square:
     width: 700
     height: 700
     ratio: "1:1"
-    description: "정사각형 (인스타 스타일)"
+    description: "Square (Instagram style)"
   wide_title:
     width: 1920
     height: 400
-    description: "와이드 타이틀"
+    description: "Wide title"
   chart:
     width: 800
     height: 500
-    description: "차트/그래프용"
+    description: "For charts/graphs"
   infographic:
     width: 886
     height: 800
-    description: "세로형 인포그래픽"
+    description: "Vertical infographic"
 
-# 폰트 설정
+# Typography settings
 typography:
   font_family: "Nanum Gothic, Pretendard, sans-serif"
   base_size: 16
@@ -185,65 +185,65 @@ typography:
       min: 28
       max: 38
       weight: "700-900"
-      use: "썸네일, 대제목"
+      use: "Thumbnail, main title"
     title_medium:
       min: 22
       max: 26
       weight: "600-700"
-      use: "소제목, 섹션 구분"
+      use: "Subtitle, section divider"
     body:
       min: 15
       max: 17
       weight: "400"
-      use: "본문 텍스트"
+      use: "Body text"
     emphasis:
       min: 18
       max: 20
       weight: "600-700"
-      use: "강조 텍스트"
+      use: "Emphasis text"
     caption:
       min: 12
       max: 14
       weight: "300-400"
-      use: "캡션, 출처"
+      use: "Caption, source"
   svg_defaults:
     main_title: 48
     sub_title: 24
     body: 16
     caption: 12
 
-# 2025-2026 트렌드 팔레트
+# 2025-2026 trend palettes
 trend_palettes:
   bold_gradient:
     name: "볼드 그라데이션"
     colors: ["#667eea", "#764ba2"]
     type: "linear"
-    description: "퍼플 계열 강렬한 전환"
-    mood: "신비로운, 프리미엄"
+    description: "Purple bold transition"
+    mood: "Mysterious, premium"
   sunset_gradient:
     name: "선셋 그라데이션"
     colors: ["#f093fb", "#f5576c"]
     type: "linear"
-    description: "오렌지-핑크 따뜻한 전환"
-    mood: "따뜻한, 에너지"
+    description: "Orange-pink warm transition"
+    mood: "Warm, energetic"
   ocean_gradient:
     name: "오션 그라데이션"
     colors: ["#4facfe", "#00f2fe"]
     type: "linear"
-    description: "블루-민트 시원한 전환"
-    mood: "시원한, 청량"
+    description: "Blue-mint cool transition"
+    mood: "Cool, refreshing"
   sunset_warm:
     name: "선셋 웜"
     colors: ["#fa709a", "#fee140"]
     type: "linear"
-    description: "핑크-옐로우 감성 전환"
-    mood: "감성적, 트렌디"
+    description: "Pink-yellow emotional transition"
+    mood: "Emotional, trendy"
   deep_ocean:
     name: "딥오션"
     colors: ["#667eea", "#00d2ff"]
     type: "linear"
-    description: "퍼플-블루 깊은 전환"
-    mood: "깊은, 신뢰감"
+    description: "Purple-blue deep transition"
+    mood: "Deep, trustworthy"
   glassmorphism:
     name: "글라스모피즘"
     colors: ["rgba(255,255,255,0.25)", "#f0f4f8"]
@@ -252,43 +252,43 @@ trend_palettes:
       backdrop_filter: "blur(10px)"
       border: "1px solid rgba(255, 255, 255, 0.18)"
       border_radius: "16px"
-    description: "반투명 유리 효과"
-    mood: "세련된, 모던"
+    description: "Semi-transparent glass effect"
+    mood: "Sophisticated, modern"
   warm_analog:
     name: "아날로그 감성"
     colors: ["#f7d794", "#e77f67", "#cf6a87"]
-    description: "따뜻한 레트로 감성"
-    mood: "따뜻한, 복고풍"
+    description: "Warm retro aesthetic"
+    mood: "Warm, vintage"
   modern_minimal:
     name: "모던 미니멀"
     colors: ["#2d3436", "#636e72", "#b2bec3"]
-    description: "깔끔한 그레이 톤"
-    mood: "깔끔한, 전문적"
+    description: "Clean gray tones"
+    mood: "Clean, professional"
 
-# 색상 팔레트 (주제별)
+# Color palettes (by topic)
 color_palettes:
   finance:
     name: "금융/경제"
-    main: ["#1a365d", "#d69e2e"]      # 네이비, 골드
-    accent: ["#38b2ac", "#ffffff"]     # 민트, 화이트
+    main: ["#1a365d", "#d69e2e"]      # Navy, Gold
+    accent: ["#38b2ac", "#ffffff"]     # Mint, White
   parenting:
     name: "육아/교육"
-    main: ["#fbb6ce", "#90cdf4"]      # 파스텔 핑크, 스카이블루
-    accent: ["#faf089", "#9ae6b4"]     # 연노랑, 민트
+    main: ["#fbb6ce", "#90cdf4"]      # Pastel pink, Sky blue
+    accent: ["#faf089", "#9ae6b4"]     # Light yellow, Mint
   health:
     name: "건강/의료"
-    main: ["#48bb78", "#ffffff"]      # 그린, 화이트
-    accent: ["#4299e1", "#9ae6b4"]     # 블루, 민트
+    main: ["#48bb78", "#ffffff"]      # Green, White
+    accent: ["#4299e1", "#9ae6b4"]     # Blue, Mint
   tech:
     name: "기술/IT"
-    main: ["#4c51bf", "#667eea"]      # 인디고, 퍼플
-    accent: ["#38b2ac", "#f0fff4"]     # 민트, 라이트그린
+    main: ["#4c51bf", "#667eea"]      # Indigo, Purple
+    accent: ["#38b2ac", "#f0fff4"]     # Mint, Light green
   lifestyle:
     name: "라이프스타일"
-    main: ["#ed8936", "#faf089"]      # 오렌지, 옐로우
-    accent: ["#fc8181", "#fed7d7"]     # 코랄, 라이트핑크
+    main: ["#ed8936", "#faf089"]      # Orange, Yellow
+    accent: ["#fc8181", "#fed7d7"]     # Coral, Light pink
 
-# 진행 상태 이모지
+# Progress status emoji
 progress:
   collecting: "🔍"
   writing: "✍️"
@@ -296,7 +296,7 @@ progress:
   warning: "⚠️"
   error: "❌"
 
-# 파일 확장자 매핑
+# File extension mapping
 file_extensions:
   html: "본문.html"
   image_guide: "이미지 가이드.md"

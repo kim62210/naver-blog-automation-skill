@@ -1,292 +1,292 @@
-# 이미지 가이드 작성법
+# Image Guide Creation
 
-블로그 글에 삽입할 이미지를 **3가지 방식** 중 하나로 안내합니다.
-이미지 가이드는 **이미지가이드.md** 별도 파일에 작성하며, 본문.md에는 포함하지 않습니다.
-
----
-
-## 📐 네이버 블로그 이미지 크기 표준
-
-### 필수 사이즈
-
-| 용도 | 크기 (px) | 비율 | 설명 |
-|------|----------|------|------|
-| **썸네일 (OG 이미지)** | 1300×885 | 1.47:1 | 검색결과, SNS 공유 시 표시 |
-| **본문 기본 폭** | 693×(자유) | - | 에디터 기본 너비 |
-| **본문 확장 폭** | 886×(자유) | - | 확장 레이아웃 너비 |
-| **정사각형** | 700×700 | 1:1 | 인스타 스타일 |
-| **와이드 타이틀** | 1920×(자유) | - | 전체 너비 타이틀 |
-
-### 권장 높이
-
-- **썸네일**: 885px (1300×885, 약 1.47:1 비율)
-- **본문 이미지**: 400~600px
-- **인포그래픽**: 600~1200px (세로로 긴 형태 허용)
-
-### SVG 생성 시 권장 크기
-
-| 용도 | 크기 | 설명 |
-|------|------|------|
-| 썸네일 | 1300×885 | OG 이미지 표준 |
-| 본문 (기본) | 693×450 | 기본 폭 맞춤 |
-| 본문 (확장) | 886×500 | 확장 폭 맞춤 |
-| 인포그래픽 | 886×800 | 세로로 긴 형태 |
-| 차트 | 800×500 | 차트용 권장 |
+Guide images for blog posts using one of **3 methods**.
+The image guide is written in a separate **이미지가이드.md** file, not included in 본문.md.
 
 ---
 
-## 🔤 네이버 블로그 폰트 가이드
+## 📐 Naver Blog Image Size Standards
 
-### 권장 설정
+### Required Sizes
 
-- **기본 폰트**: 나눔고딕, Pretendard, 프리텐다드, sans-serif
-- **기본 크기**: 16px (줄간격 180%)
-- **크기 범위**: 12~38px
+| Purpose | Size (px) | Ratio | Description |
+|---------|-----------|-------|-------------|
+| **Thumbnail (OG Image)** | 1300×885 | 1.47:1 | Displayed in search results, SNS shares |
+| **Content Basic Width** | 693×(free) | - | Editor default width |
+| **Content Extended Width** | 886×(free) | - | Extended layout width |
+| **Square** | 700×700 | 1:1 | Instagram style |
+| **Wide Title** | 1920×(free) | - | Full width title |
 
-### 용도별 크기
+### Recommended Heights
 
-| 용도 | 크기 | 스타일 | 용례 |
-|------|------|--------|------|
-| 메인 제목 | 28~38px | Bold/Extra Bold | 썸네일 텍스트, 대제목 |
-| 소제목 | 22~26px | Bold | 섹션 구분 |
-| 본문 | 15~17px | Regular | 일반 내용 |
-| 강조 텍스트 | 18~20px | Bold | 핵심 문구 |
-| 캡션/출처 | 12~14px | Light | 이미지 설명, 출처 |
+- **Thumbnail**: 885px (1300×885, approx. 1.47:1 ratio)
+- **Content images**: 400~600px
+- **Infographics**: 600~1200px (tall vertical format allowed)
 
-### SVG 텍스트 가이드
+### Recommended SVG Generation Sizes
+
+| Purpose | Size | Description |
+|---------|------|-------------|
+| Thumbnail | 1300×885 | OG image standard |
+| Content (basic) | 693×450 | Basic width fit |
+| Content (extended) | 886×500 | Extended width fit |
+| Infographic | 886×800 | Tall vertical format |
+| Chart | 800×500 | Recommended for charts |
+
+---
+
+## 🔤 Naver Blog Font Guide
+
+### Recommended Settings
+
+- **Default font**: Nanum Gothic, Pretendard, sans-serif
+- **Base size**: 16px (line-height 180%)
+- **Size range**: 12~38px
+
+### Size by Purpose
+
+| Purpose | Size | Style | Use Case |
+|---------|------|-------|----------|
+| Main title | 28~38px | Bold/Extra Bold | Thumbnail text, main heading |
+| Subheading | 22~26px | Bold | Section divider |
+| Body | 15~17px | Regular | General content |
+| Emphasis | 18~20px | Bold | Key phrases |
+| Caption/Source | 12~14px | Light | Image descriptions, sources |
+
+### SVG Text Guide
 
 ```
-메인 타이틀: 32~48px, font-weight: 700~900
-서브 타이틀: 18~24px, font-weight: 500~600
-본문: 14~16px, font-weight: 400
-캡션: 11~13px, font-weight: 300~400
+Main title: 32~48px, font-weight: 700~900
+Subtitle: 18~24px, font-weight: 500~600
+Body: 14~16px, font-weight: 400
+Caption: 11~13px, font-weight: 300~400
 ```
 
-### 폰트 조합 예시
+### Font Combination Examples
 
 ```
-썸네일:
-- 메인: 48px Bold (핵심 키워드)
-- 서브: 24px Regular (부가 설명)
+Thumbnail:
+- Main: 48px Bold (key keywords)
+- Sub: 24px Regular (additional description)
 
-인포그래픽:
-- 제목: 28px Bold
-- 항목: 16px Regular
-- 수치: 32px Bold (강조)
+Infographic:
+- Title: 28px Bold
+- Items: 16px Regular
+- Numbers: 32px Bold (emphasis)
 ```
 
 ---
 
-## 핵심 원칙
+## Core Principles
 
-1. **모든 이미지 위치에 반드시 3가지 중 하나 제공**
-   - 🖼️ 모드 A: 수집된 참고 이미지 직접 삽입
-   - 🎨 모드 B: AI 생성용 프롬프트 제공 (Midjourney, DALL-E 등)
-   - 🔷 모드 C: SVG 이미지 생성 가이드 (svg-canvas-mcp 활용)
+1. **Provide one of 3 methods for every image position**
+   - 🖼️ Mode A: Insert collected reference image directly
+   - 🎨 Mode B: Provide AI generation prompt (Midjourney, DALL-E, etc.)
+   - 🔷 Mode C: SVG image generation guide (using svg-canvas-mcp)
 
-2. **SVG 우선 권장 (인포그래픽/차트)**
-   - 인포그래픽, 비교표, 차트, 다이어그램 → 모드 C (SVG) 권장
-   - 사진풍, 감성 이미지 → 모드 B (AI 생성) 권장
-   - 수집된 이미지가 적합할 경우 → 모드 A
+2. **Recommend SVG for infographics/charts**
+   - Infographics, comparison tables, charts, diagrams → Mode C (SVG) recommended
+   - Photographic, emotional images → Mode B (AI generation) recommended
+   - When collected image is suitable → Mode A
 
-3. **스타일 일관성**
-   - 동일 글 내 이미지들은 통일된 색상 팔레트 유지
-   - 색상 팔레트를 이미지가이드.md 상단에 명시
+3. **Style consistency**
+   - Maintain unified color palette within same article
+   - Specify color palette at top of 이미지가이드.md
 
 ---
 
-## 🖼️ 모드 A: 참고 이미지 직접 삽입
+## 🖼️ Mode A: Direct Reference Image Insertion
 
-### 포맷
+### Format
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {이미지 역할}
+[Image N] {image role}
 
-📷 참고 이미지:
-{이미지 URL}
+📷 Reference Image:
+{image URL}
 
-📍 출처: {출처 URL}
-💡 활용: {활용 방식}
+📍 Source: {source URL}
+💡 Usage: {usage method}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### 활용 방식 옵션
+### Usage Method Options
 
-| 활용 방식 | 설명 |
-|----------|------|
-| 직접 사용 | 이미지를 그대로 블로그에 삽입 (출처 표기) |
-| 레이아웃 참고 | 구성/배치를 참고하여 유사하게 제작 |
-| 색감 참고 | 색상 팔레트를 참고하여 다른 내용으로 제작 |
-| 스타일 참고 | 전체적인 디자인 스타일만 참고 |
+| Usage Method | Description |
+|--------------|-------------|
+| Direct use | Insert image directly into blog (cite source) |
+| Layout reference | Reference composition/arrangement to create similar |
+| Color reference | Reference color palette for different content |
+| Style reference | Reference overall design style only |
 
 ---
 
-## 🎨 모드 B: AI 이미지 생성 (Gemini API 자동)
+## 🎨 Mode B: AI Image Generation (Gemini API Auto)
 
-> **자동화**: 모드 B 이미지는 Gemini API를 통해 자동으로 생성됩니다.
-> 프롬프트만 작성하면 수동 생성 없이 이미지가 `./images/` 폴더에 저장됩니다.
+> **Automation**: Mode B images are automatically generated via Gemini API.
+> Just write the prompt and images will be saved to `./images/` folder without manual generation.
 
-### 기본 포맷
+### Basic Format
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {이미지 역할}
+[Image N] {image role}
 
-🎨 AI 생성 (Gemini 자동)
+🎨 AI Generation (Gemini Auto)
 
-[한글 설명]
-{무엇을 담을지 구체적으로 설명}
+[Korean Description]
+{Describe specifically what to include}
 
-[AI 생성 프롬프트]
-{영문 프롬프트 - Gemini API에서 자동 처리}
+[AI Generation Prompt]
+{English prompt - automatically processed by Gemini API}
 
-[스타일 가이드]
-- 색상: {색상}
-- 분위기: {분위기}
-- 형식: {형식}
-- 비율: {비율}
+[Style Guide]
+- Color: {color}
+- Mood: {mood}
+- Format: {format}
+- Ratio: {ratio}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### Gemini API 사용법
+### Gemini API Usage
 
 ```python
 from scripts.gemini_image import GeminiImageGenerator
 from scripts.prompt_converter import generate_image_prompts_for_batch
 
-# 이미지 가이드에서 프롬프트 추출 및 자동 생성
+# Extract prompts from image guide and auto-generate
 prompts = generate_image_prompts_for_batch(image_guide_content)
 generator = GeminiImageGenerator()
 result = await generator.generate_batch(prompts, "./images/")
 ```
 
-### API 제한사항
+### API Limitations
 
-| 항목 | 제한 |
-|------|------|
-| 분당 요청 | 15회 (자동 딜레이 적용) |
-| 일일 한도 | 500장 (무료 티어) |
-| 폴백 | gemini-2.0-flash-exp → imagen-3.0 |
+| Item | Limit |
+|------|-------|
+| Requests per minute | 15 (auto delay applied) |
+| Daily limit | 500 images (free tier) |
+| Fallback | gemini-2.0-flash-exp → imagen-3.0 |
 
 ---
 
-## 이미지 유형별 프롬프트 템플릿
+## Image Type Prompt Templates
 
-### 1. 썸네일 이미지
+### 1. Thumbnail Image
 
 ```
-[AI 생성 프롬프트]
-Blog thumbnail image, {주제 키워드} concept,
-{핵심 오브젝트} as main element,
-bold "{썸네일 텍스트}" text overlay,
-{색상} gradient background,
+[AI Generation Prompt]
+Blog thumbnail image, {topic keywords} concept,
+{core object} as main element,
+bold "{thumbnail text}" text overlay,
+{color} gradient background,
 eye-catching modern design, 16:9 ratio
 
-[스타일 가이드]
-- 색상: {메인색} + {포인트색} 그라데이션
-- 분위기: 눈에 띄고 클릭 유도하는
-- 형식: 모던 썸네일 디자인
-- 비율: 16:9
+[Style Guide]
+- Color: {main color} + {accent color} gradient
+- Mood: Eye-catching and click-inducing
+- Format: Modern thumbnail design
+- Ratio: 16:9
 ```
 
-**예시:**
+**Example:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[썸네일] 0세 적금 고금리 안내
+[Thumbnail] 0세 적금 고금리 안내
 
-🎨 생성 필요
+🎨 Generation Required
 
-[한글 설명]
+[Korean Description]
 아기 손과 돼지저금통이 있고, "0세 적금 필수! 연 12%" 텍스트가 크게 들어간 썸네일
 
-[AI 생성 프롬프트]
+[AI Generation Prompt]
 Blog thumbnail image, baby savings account concept,
 cute piggy bank and baby hands as main elements,
 bold "0세 적금 필수! 연 12%" Korean text overlay,
 warm yellow to soft orange gradient background,
 eye-catching modern design, 16:9 ratio
 
-[스타일 가이드]
-- 색상: 따뜻한 노랑 + 소프트 오렌지 그라데이션
-- 분위기: 따뜻하고 친근한, 신뢰감 있는
-- 형식: 모던 썸네일
-- 비율: 16:9
+[Style Guide]
+- Color: Warm yellow + Soft orange gradient
+- Mood: Warm, friendly, trustworthy
+- Format: Modern thumbnail
+- Ratio: 16:9
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### 2. 인포그래픽 (비교/데이터)
+### 2. Infographic (Comparison/Data)
 
 ```
-[AI 생성 프롬프트]
-Clean infographic, {데이터 유형} comparison chart,
-{비교 항목들} side by side,
-{강조할 숫자/텍스트} highlighted,
-{색상} color scheme, minimal flat design,
-white background, {비율} ratio
+[AI Generation Prompt]
+Clean infographic, {data type} comparison chart,
+{comparison items} side by side,
+{numbers/text to emphasize} highlighted,
+{color} color scheme, minimal flat design,
+white background, {ratio} ratio
 
-[스타일 가이드]
-- 색상: {대비되는 두 색상}
-- 분위기: 깔끔하고 정보 전달력 있는
-- 형식: 플랫 디자인 인포그래픽
-- 비율: 16:9 또는 4:3
+[Style Guide]
+- Color: {two contrasting colors}
+- Mood: Clean with clear information delivery
+- Format: Flat design infographic
+- Ratio: 16:9 or 4:3
 ```
 
-**예시:**
+**Example:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 2] 일반 적금 vs 0세 적금 금리 비교
+[Image 2] 일반 적금 vs 0세 적금 금리 비교
 
-🎨 생성 필요
+🎨 Generation Required
 
-[한글 설명]
+[Korean Description]
 막대그래프로 일반 적금(3~4%)과 0세 적금(7~12%)의 금리 차이를 시각화.
 0세 적금 막대가 2~3배 더 높게 표현되어 차이가 확연히 보임.
 
-[AI 생성 프롬프트]
+[AI Generation Prompt]
 Clean infographic, interest rate comparison bar chart,
 "일반 적금 3-4%" vs "0세 적금 7-12%" side by side,
 dramatic height difference emphasized,
 gray and gold color scheme, minimal flat design,
 white background, 16:9 ratio
 
-[스타일 가이드]
-- 색상: 회색(일반) vs 골드(0세) 대비
-- 분위기: 깔끔하고 차이가 명확한
-- 형식: 플랫 디자인 막대그래프
-- 비율: 16:9
+[Style Guide]
+- Color: Gray (regular) vs Gold (0세) contrast
+- Mood: Clean with clear differences
+- Format: Flat design bar chart
+- Ratio: 16:9
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### 3. 프로세스/절차 안내도
+### 3. Process/Procedure Diagram
 
 ```
-[AI 생성 프롬프트]
-Step-by-step process infographic, {N}단계 flow chart,
-{각 단계 설명} with icons,
+[AI Generation Prompt]
+Step-by-step process infographic, {N}-step flow chart,
+{each step description} with icons,
 connected by arrows, numbered steps,
-{색상} color scheme, clean minimal style,
-white background, {비율} ratio
+{color} color scheme, clean minimal style,
+white background, {ratio} ratio
 
-[스타일 가이드]
-- 색상: {단계별 그라데이션 또는 통일 색상}
-- 분위기: 따라하기 쉬운, 직관적인
-- 형식: 플로우차트 / 스텝 다이어그램
-- 비율: 16:9 (가로) 또는 9:16 (세로)
+[Style Guide]
+- Color: {step gradient or unified color}
+- Mood: Easy to follow, intuitive
+- Format: Flow chart / Step diagram
+- Ratio: 16:9 (horizontal) or 9:16 (vertical)
 ```
 
-**예시:**
+**Example:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 4] 적금 가입 4단계 절차
+[Image 4] 적금 가입 4단계 절차
 
-🎨 생성 필요
+🎨 Generation Required
 
-[한글 설명]
+[Korean Description]
 1. 서류 준비 → 2. 은행 방문/앱 접속 → 3. 계좌 개설 → 4. 자동이체 설정
 각 단계를 아이콘과 함께 화살표로 연결한 플로우차트
 
-[AI 생성 프롬프트]
+[AI Generation Prompt]
 Step-by-step process infographic, 4-step flow chart,
 Step 1: document preparation (paper icon),
 Step 2: bank visit or app (building/phone icon),
@@ -296,43 +296,43 @@ connected by arrows, numbered circles,
 soft blue and mint color scheme, clean minimal style,
 white background, 16:9 ratio
 
-[스타일 가이드]
-- 색상: 소프트 블루 + 민트 그린
-- 분위기: 깔끔하고 따라하기 쉬운
-- 형식: 가로형 플로우차트
-- 비율: 16:9
+[Style Guide]
+- Color: Soft blue + Mint green
+- Mood: Clean and easy to follow
+- Format: Horizontal flow chart
+- Ratio: 16:9
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### 4. 체크리스트
+### 4. Checklist
 
 ```
-[AI 생성 프롬프트]
+[AI Generation Prompt]
 Checklist infographic, {N} items to prepare,
-checkbox style with {항목들},
-{색상} accent color, clean organized layout,
-subtle {배경 요소} in background,
-white background, {비율} ratio
+checkbox style with {items},
+{color} accent color, clean organized layout,
+subtle {background elements} in background,
+white background, {ratio} ratio
 
-[스타일 가이드]
-- 색상: {체크 색상} + 깔끔한 배경
-- 분위기: 정리된, 실용적인
-- 형식: 체크박스 리스트
-- 비율: 1:1 또는 4:3
+[Style Guide]
+- Color: {check color} + clean background
+- Mood: Organized, practical
+- Format: Checkbox list
+- Ratio: 1:1 or 4:3
 ```
 
-**예시:**
+**Example:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 5] 준비 서류 체크리스트
+[Image 5] 준비 서류 체크리스트
 
-🎨 생성 필요
+🎨 Generation Required
 
-[한글 설명]
+[Korean Description]
 적금 가입 시 필요한 서류 4가지를 체크박스 형태로 정리:
 □ 아기 기본증명서, □ 가족관계증명서, □ 부모 신분증, □ 아기 도장
 
-[AI 생성 프롬프트]
+[AI Generation Prompt]
 Checklist infographic, 4 required documents,
 checkbox style with document icons,
 "기본증명서, 가족관계증명서, 신분증, 도장" items,
@@ -340,116 +340,116 @@ green check accent color, clean organized layout,
 subtle paper/document elements in background,
 white background, 1:1 ratio
 
-[스타일 가이드]
-- 색상: 그린 체크 포인트 + 화이트 배경
-- 분위기: 깔끔하고 실용적인
-- 형식: 체크박스 리스트
-- 비율: 1:1 (정사각형)
+[Style Guide]
+- Color: Green check accent + White background
+- Mood: Clean and practical
+- Format: Checkbox list
+- Ratio: 1:1 (square)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### 5. 감성/분위기 이미지
+### 5. Emotional/Mood Image
 
 ```
-[AI 생성 프롬프트]
-{분위기} photography style image,
-{피사체 설명},
-{조명} lighting, {색조} tones,
-{감정 키워드} mood, soft focus background,
-{비율} ratio
+[AI Generation Prompt]
+{mood} photography style image,
+{subject description},
+{lighting} lighting, {tones} tones,
+{emotion keywords} mood, soft focus background,
+{ratio} ratio
 
-[스타일 가이드]
-- 색상: {톤 설명}
-- 분위기: {감정 키워드}
-- 형식: 사진풍 / 일러스트
-- 비율: 16:9 또는 4:3
+[Style Guide]
+- Color: {tone description}
+- Mood: {emotion keywords}
+- Format: Photography style / Illustration
+- Ratio: 16:9 or 4:3
 ```
 
-**예시:**
+**Example:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 6] 마무리 - 가족 사랑 이미지
+[Image 6] 마무리 - 가족 사랑 이미지
 
-🎨 생성 필요
+🎨 Generation Required
 
-[한글 설명]
+[Korean Description]
 부모가 신생아의 작은 손을 잡고 있는 따뜻한 이미지.
 미래를 위한 저축의 의미를 담은 희망적인 분위기.
 
-[AI 생성 프롬프트]
+[AI Generation Prompt]
 Warm family photography style image,
 parents holding newborn baby's tiny hand,
 soft natural window lighting, warm golden tones,
 love and hope mood, soft focus background,
 16:9 ratio
 
-[스타일 가이드]
-- 색상: 따뜻한 골든 톤
-- 분위기: 사랑스럽고 희망적인
-- 형식: 사진풍
-- 비율: 16:9
+[Style Guide]
+- Color: Warm golden tones
+- Mood: Loving and hopeful
+- Format: Photography style
+- Ratio: 16:9
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### 6. 표/테이블 시각화
+### 6. Table Visualization
 
 ```
-[AI 생성 프롬프트]
+[AI Generation Prompt]
 Clean data table visualization,
-{행 수} rows x {열 수} columns comparison table,
-headers: {열 제목들},
-{강조 행/열} highlighted,
-{색상} color scheme, modern minimal design,
-white background, {비율} ratio
+{rows} rows x {columns} columns comparison table,
+headers: {column titles},
+{emphasized row/column} highlighted,
+{color} color scheme, modern minimal design,
+white background, {ratio} ratio
 
-[스타일 가이드]
-- 색상: {헤더 색} + {강조 색}
-- 분위기: 정돈된, 비교하기 쉬운
-- 형식: 모던 테이블
-- 비율: 16:9
+[Style Guide]
+- Color: {header color} + {emphasis color}
+- Mood: Organized, easy to compare
+- Format: Modern table
+- Ratio: 16:9
 ```
 
 ---
 
-## 색상 팔레트 가이드
+## Color Palette Guide
 
-### 색상 배색 원칙 (70-25-5 법칙)
+### Color Balance Principle (70-25-5 Rule)
 
 ```
 ┌─────────────────────────────────────────┐
-│  메인 (70%)   │ 배경, 주요 영역         │
+│  Main (70%)   │ Background, main areas  │
 ├─────────────────────────────────────────┤
-│  서브 (25%)   │ 강조, 보조 요소         │
+│  Sub (25%)    │ Emphasis, secondary     │
 ├─────────────────────────────────────────┤
-│  포인트 (5%)  │ CTA 버튼, 하이라이트    │
+│  Accent (5%)  │ CTA buttons, highlights │
 └─────────────────────────────────────────┘
 ```
 
-⚠️ **주의**: 3~4가지 색상으로 제한 (너무 많은 색상은 산만함)
+⚠️ **Note**: Limit to 3~4 colors (too many colors looks cluttered)
 
-### 배색 적용 예시
+### Color Application Example
 
 ```
-금융 블로그 예시:
-- 메인 (70%): #1a365d (네이비) - 배경, 대영역
-- 서브 (25%): #d69e2e (골드) - 헤더, 강조박스
-- 포인트 (5%): #38b2ac (민트) - 버튼, 링크, 숫자 강조
+Finance blog example:
+- Main (70%): #1a365d (Navy) - Background, large areas
+- Sub (25%): #d69e2e (Gold) - Headers, emphasis boxes
+- Accent (5%): #38b2ac (Mint) - Buttons, links, number emphasis
 ```
 
-### 주제별 권장 색상
+### Recommended Colors by Topic
 
-| 주제 | 메인 색상 | 포인트 색상 | 분위기 |
-|------|----------|------------|--------|
-| 금융/재테크 | 네이비, 골드 | 민트, 화이트 | 신뢰, 전문성 |
-| 육아/아기 | 파스텔 핑크, 스카이블루 | 연노랑, 민트 | 따뜻함, 부드러움 |
-| 건강/의료 | 그린, 화이트 | 블루, 민트 | 청결, 안전 |
-| 부동산/정책 | 블루, 그레이 | 오렌지, 그린 | 안정, 신뢰 |
-| 라이프스타일 | 베이지, 테라코타 | 올리브, 크림 | 자연스러움 |
+| Topic | Main Color | Accent Color | Mood |
+|-------|------------|--------------|------|
+| Finance/Investment | Navy, Gold | Mint, White | Trust, Expertise |
+| Parenting/Baby | Pastel Pink, Sky Blue | Light Yellow, Mint | Warm, Soft |
+| Health/Medical | Green, White | Blue, Mint | Clean, Safe |
+| Real Estate/Policy | Blue, Gray | Orange, Green | Stable, Trustworthy |
+| Lifestyle | Beige, Terracotta | Olive, Cream | Natural |
 
-### 프롬프트용 색상 영문 표현
+### Color English Expressions for Prompts
 
-| 한글 | 영문 프롬프트 |
-|------|-------------|
+| Korean | English Prompt |
+|--------|----------------|
 | 파스텔 블루 | soft pastel blue, baby blue |
 | 민트 그린 | mint green, seafoam |
 | 따뜻한 노랑 | warm yellow, golden yellow |
@@ -459,81 +459,81 @@ white background, {비율} ratio
 
 ---
 
-## 이미지 수 권장 기준
+## Recommended Image Count
 
-| 글 길이 | 권장 이미지 수 | 배치 |
-|---------|---------------|------|
-| 1500자 미만 | 2~3개 | 썸네일 + 본문 1~2개 |
-| 1500~2000자 | 4~5개 | 썸네일 + 본문 3~4개 |
-| 2000자 이상 | 5~7개 | 썸네일 + 본문 4~6개 |
+| Article Length | Recommended Count | Layout |
+|----------------|-------------------|--------|
+| Under 1500 chars | 2~3 | Thumbnail + 1~2 body images |
+| 1500~2000 chars | 4~5 | Thumbnail + 3~4 body images |
+| Over 2000 chars | 5~7 | Thumbnail + 4~6 body images |
 
-### 배치 원칙
-1. **도입부**: 썸네일로 주제 시각화
-2. **핵심 섹션**: 인포그래픽/비교표로 정보 전달
-3. **마무리**: 감성 이미지로 여운
-
----
-
-## 사용자 질문 템플릿
-
-```
-이미지 가이드를 몇 개 포함할까요?
-
-📷 수집된 참고 이미지: N개
-  - 직접 사용 가능: N개 (🖼️ 모드 A)
-  - 생성 필요: N개 (🎨 모드 B)
-
-주제 분석 결과 **N개**를 권장합니다:
-- 썸네일 1개
-- 본문 이미지 N개
-- 인포그래픽 N개
-
-1️⃣ **권장대로** (N개)
-2️⃣ **최소** (3개 - 썸네일 + 핵심 2개)
-3️⃣ **풍부하게** (N+2개 - 모든 섹션에 이미지)
-```
+### Layout Principles
+1. **Introduction**: Visualize topic with thumbnail
+2. **Core sections**: Convey information with infographics/comparison tables
+3. **Closing**: Leave impression with emotional image
 
 ---
 
-## 프롬프트 일관성 체크리스트
+## User Prompt Template
 
-동일 글 내 여러 이미지 생성 시:
+```
+How many images should be included in the guide?
 
-- [ ] 색상 팔레트 통일 (메인색 + 포인트색)
-- [ ] 스타일 통일 (플랫/사진풍/일러스트)
-- [ ] 비율 통일 (16:9 권장)
-- [ ] 폰트 스타일 언급 통일
-- [ ] 배경 스타일 통일
+📷 Collected reference images: N
+  - Directly usable: N (🖼️ Mode A)
+  - Generation needed: N (🎨 Mode B)
+
+Based on topic analysis, **N images** recommended:
+- 1 thumbnail
+- N body images
+- N infographics
+
+1️⃣ **As recommended** (N images)
+2️⃣ **Minimum** (3 - thumbnail + 2 core)
+3️⃣ **Rich** (N+2 - images for all sections)
+```
 
 ---
 
-## 🎨 2025-2026 블로그 디자인 트렌드
+## Prompt Consistency Checklist
 
-### 1. 볼드 그라데이션
+When generating multiple images in same article:
 
-강렬한 색상 전환으로 시선 집중. 두 가지 대비되는 색상을 사용하여 깊이감 표현.
+- [ ] Unified color palette (main color + accent color)
+- [ ] Unified style (flat/photography/illustration)
+- [ ] Unified ratio (16:9 recommended)
+- [ ] Unified font style mention
+- [ ] Unified background style
 
-**추천 조합**:
-| 이름 | 색상 코드 | 특징 |
-|------|----------|------|
-| 퍼플 그라데이션 | #667eea → #764ba2 | 신비로운, 프리미엄 |
-| 오렌지-핑크 | #f093fb → #f5576c | 따뜻한, 에너지 |
-| 블루-민트 | #4facfe → #00f2fe | 시원한, 청량 |
-| 선셋 | #fa709a → #fee140 | 감성적, 트렌디 |
-| 딥오션 | #667eea → #00d2ff | 깊은, 신뢰감 |
+---
 
-**SVG 적용**:
+## 🎨 2025-2026 Blog Design Trends
+
+### 1. Bold Gradients
+
+Eye-catching with dramatic color transitions. Use two contrasting colors for depth.
+
+**Recommended Combinations**:
+| Name | Color Code | Characteristics |
+|------|------------|-----------------|
+| Purple Gradient | #667eea → #764ba2 | Mysterious, Premium |
+| Orange-Pink | #f093fb → #f5576c | Warm, Energetic |
+| Blue-Mint | #4facfe → #00f2fe | Cool, Refreshing |
+| Sunset | #fa709a → #fee140 | Emotional, Trendy |
+| Deep Ocean | #667eea → #00d2ff | Deep, Trustworthy |
+
+**SVG Application**:
 ```
-style_gradient 도구 사용:
+Use style_gradient tool:
 - type: "linear"
 - stops: [{offset: 0, color: "#667eea"}, {offset: 1, color: "#764ba2"}]
 ```
 
-### 2. 글라스모피즘
+### 2. Glassmorphism
 
-반투명 유리 효과로 세련된 느낌. 배경 블러 + 테두리 하이라이트 조합.
+Sophisticated feel with semi-transparent glass effect. Background blur + border highlight combination.
 
-**CSS 스타일**:
+**CSS Style**:
 ```css
 background: rgba(255, 255, 255, 0.25);
 backdrop-filter: blur(10px);
@@ -542,317 +542,317 @@ border-radius: 16px;
 box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
 ```
 
-**적용 요소**: 정보 카드, 가격표, 비교 박스
+**Applied elements**: Info cards, price tables, comparison boxes
 
-### 3. 레이어드 디자인
+### 3. Layered Design
 
-요소 겹침으로 깊이감 표현. 그림자와 함께 사용하면 효과적.
+Express depth through overlapping elements. Effective with shadows.
 
-**구현 방법**:
-- 다중 레이어 + 약간의 회전 (2~5도)
-- 그림자: `box-shadow: 0 8px 32px rgba(0,0,0,0.1)`
-- 요소 간 오프셋: 10~20px
+**Implementation**:
+- Multiple layers + slight rotation (2~5 degrees)
+- Shadow: `box-shadow: 0 8px 32px rgba(0,0,0,0.1)`
+- Element offset: 10~20px
 
-**적용 요소**: 썸네일, 특징 카드, 갤러리
+**Applied elements**: Thumbnails, feature cards, galleries
 
-### 4. 두꺼운 타이포
+### 4. Bold Typography
 
-타이틀에 Extra Bold (800~900) 사용하여 임팩트.
+Impact with Extra Bold (800~900) titles.
 
-**권장 사용**:
-- 썸네일 메인 텍스트: font-weight 800~900
-- 숫자 강조: font-weight 700~800, 큰 사이즈 (48px+)
-- 핵심 키워드: 배경색 + Bold 조합
+**Recommended use**:
+- Thumbnail main text: font-weight 800~900
+- Number emphasis: font-weight 700~800, large size (48px+)
+- Key keywords: Background color + Bold combination
 
-### 5. 아날로그 감성
+### 5. Analog Aesthetics
 
-콜라주, 손글씨 폰트, 질감 텍스처 활용. 디지털 이미지에 따뜻함 부여.
+Collage, handwritten fonts, texture effects. Add warmth to digital images.
 
-**적용 방법**:
-- 손글씨 스타일 폰트 사용
-- 종이 텍스처 배경
-- 스티커/테이프 효과
-- 불규칙한 테두리
+**Application methods**:
+- Handwritten style fonts
+- Paper texture backgrounds
+- Sticker/tape effects
+- Irregular borders
 
-**추천 색상**: 따뜻한 톤 (크림, 베이지, 코랄, 테라코타)
+**Recommended colors**: Warm tones (cream, beige, coral, terracotta)
 
-### 6. 비대칭 레이아웃
+### 6. Asymmetric Layout
 
-동적인 구도로 시선 유도. 정적인 그리드에서 벗어남.
+Guide eyes with dynamic composition. Break away from static grids.
 
-**적용 예시**:
-- 텍스트 좌측 + 이미지 우측 오프셋
-- 대각선 구분선
-- 크기가 다른 요소 조합
+**Application examples**:
+- Text left + Image right offset
+- Diagonal dividers
+- Mixed size elements
 
 ---
 
-## 🔷 모드 C: SVG 이미지 생성 가이드
+## 🔷 Mode C: SVG Image Generation Guide
 
-svg-canvas-mcp 도구를 사용하여 직접 SVG 이미지를 생성할 때 사용합니다.
+Use svg-canvas-mcp tools to generate SVG images directly.
 
-### 적합한 이미지 유형
+### Suitable Image Types
 
-| 유형 | 적합도 | 권장 도구 |
-|------|--------|----------|
-| 인포그래픽 | ⭐⭐⭐ | chart_bar, chart_pie, draw_text |
-| 비교표/차트 | ⭐⭐⭐ | chart_bar, chart_line |
-| 프로세스 다이어그램 | ⭐⭐⭐ | draw_rect, draw_text, draw_line |
-| 체크리스트 | ⭐⭐ | draw_rect, draw_text |
-| 썸네일 | ⭐⭐ | draw_text, style_gradient |
-| 사진풍 이미지 | ❌ | 모드 B(AI 생성) 사용 |
+| Type | Suitability | Recommended Tools |
+|------|-------------|-------------------|
+| Infographic | ⭐⭐⭐ | chart_bar, chart_pie, draw_text |
+| Comparison/Chart | ⭐⭐⭐ | chart_bar, chart_line |
+| Process diagram | ⭐⭐⭐ | draw_rect, draw_text, draw_line |
+| Checklist | ⭐⭐ | draw_rect, draw_text |
+| Thumbnail | ⭐⭐ | draw_text, style_gradient |
+| Photography style | ❌ | Use Mode B (AI generation) |
 
-### SVG 가이드 기본 템플릿
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {이미지 역할 설명}
-
-🔷 SVG 생성
-
-[이미지 설명]
-{이미지에 담길 내용을 상세 설명}
-
-[캔버스 설정]
-- 크기: {width}x{height}px
-- 배경: {hex 색상} 또는 그라데이션
-
-[색상 팔레트]
-- 메인: {hex} - {용도}
-- 포인트: {hex} - {용도}
-- 텍스트: {hex}
-- 배경: {hex}
-
-[레이어 구성]
-1. 배경 레이어
-2. 도형 레이어
-3. 텍스트 레이어
-
-[도형 요소]
-1. {도형}: 위치({x},{y}), 크기({w}x{h}), 색상({hex})
-2. {도형}: ...
-
-[텍스트 요소]
-1. "{텍스트}": 위치({x},{y}), 크기({size}px), 색상({hex}), 정렬({align})
-2. "{텍스트}": ...
-
-[저장]
-./images/{NN}_{설명}.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### SVG 유형별 상세 템플릿
-
-#### 1. 막대 차트
+### SVG Guide Basic Template
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {제목} 막대 차트
+[Image N] {image role description}
 
-🔷 SVG 생성
+🔷 SVG Generation
 
-[이미지 설명]
-{데이터 설명}
+[Image Description]
+{Detailed description of image content}
 
-[캔버스 설정]
-- 크기: 800x500px
-- 배경: #FFFFFF
+[Canvas Settings]
+- Size: {width}x{height}px
+- Background: {hex color} or gradient
 
-[차트 데이터]
-| 항목 | 값 | 색상 |
-|------|-----|------|
-| {항목1} | {값1} | {hex1} |
-| {항목2} | {값2} | {hex2} |
+[Color Palette]
+- Main: {hex} - {usage}
+- Accent: {hex} - {usage}
+- Text: {hex}
+- Background: {hex}
+
+[Layer Composition]
+1. Background layer
+2. Shape layer
+3. Text layer
+
+[Shape Elements]
+1. {shape}: position({x},{y}), size({w}x{h}), color({hex})
+2. {shape}: ...
+
+[Text Elements]
+1. "{text}": position({x},{y}), size({size}px), color({hex}), align({align})
+2. "{text}": ...
+
+[Save]
+./images/{NN}_{description}.svg
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### SVG Type-Specific Templates
+
+#### 1. Bar Chart
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Image N] {title} Bar Chart
+
+🔷 SVG Generation
+
+[Image Description]
+{data description}
+
+[Canvas Settings]
+- Size: 800x500px
+- Background: #FFFFFF
+
+[Chart Data]
+| Item | Value | Color |
+|------|-------|-------|
+| {item1} | {value1} | {hex1} |
+| {item2} | {value2} | {hex2} |
 | ... | ... | ... |
 
-[차트 스타일]
-- 막대 너비: 80px
-- 막대 간격: 40px
-- 라벨 위치: 막대 아래
-- Y축 최대값: {max_value}
+[Chart Style]
+- Bar width: 80px
+- Bar spacing: 40px
+- Label position: Below bars
+- Y-axis max: {max_value}
 
-[텍스트]
-- 제목: "{제목}" / 24px bold / 상단 중앙
-- X축 라벨: 각 막대 아래 / 14px
-- Y축 값: 막대 위 / 16px bold
+[Text]
+- Title: "{title}" / 24px bold / top center
+- X-axis labels: Below each bar / 14px
+- Y-axis values: Above bars / 16px bold
 
-[저장]
-./images/{NN}_막대차트.svg
+[Save]
+./images/{NN}_bar_chart.svg
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-#### 2. 원형 차트 (파이/도넛)
+#### 2. Pie/Donut Chart
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {제목} 원형 차트
+[Image N] {title} Pie Chart
 
-🔷 SVG 생성
+🔷 SVG Generation
 
-[이미지 설명]
-{데이터 설명}
+[Image Description]
+{data description}
 
-[캔버스 설정]
-- 크기: 600x600px
-- 배경: #FFFFFF
+[Canvas Settings]
+- Size: 600x600px
+- Background: #FFFFFF
 
-[차트 데이터]
-| 항목 | 비율 | 색상 |
-|------|------|------|
-| {항목1} | {%1} | {hex1} |
-| {항목2} | {%2} | {hex2} |
+[Chart Data]
+| Item | Percentage | Color |
+|------|------------|-------|
+| {item1} | {%1} | {hex1} |
+| {item2} | {%2} | {hex2} |
 | ... | ... | ... |
 
-[차트 스타일]
-- 유형: pie / donut
-- 반지름: 200px
-- 도넛 두께: 60px (도넛일 경우)
-- 범례 위치: 오른쪽
+[Chart Style]
+- Type: pie / donut
+- Radius: 200px
+- Donut thickness: 60px (if donut)
+- Legend position: Right
 
-[텍스트]
-- 제목: "{제목}" / 24px bold / 상단
-- 범례: 각 항목명 + 비율 / 14px
+[Text]
+- Title: "{title}" / 24px bold / top
+- Legend: Item name + percentage / 14px
 
-[저장]
-./images/{NN}_원형차트.svg
+[Save]
+./images/{NN}_pie_chart.svg
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-#### 3. 프로세스 다이어그램 (플로우차트)
+#### 3. Process Diagram (Flowchart)
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {제목} {N}단계 프로세스
+[Image N] {title} {N}-Step Process
 
-🔷 SVG 생성
+🔷 SVG Generation
 
-[이미지 설명]
-{프로세스 설명}
+[Image Description]
+{process description}
 
-[캔버스 설정]
-- 크기: 900x300px
-- 배경: #FFFFFF 또는 {hex}
+[Canvas Settings]
+- Size: 900x300px
+- Background: #FFFFFF or {hex}
 
-[단계 데이터]
-| 순서 | 제목 | 아이콘/설명 |
-|------|------|------------|
-| 1 | {제목1} | {설명1} |
-| 2 | {제목2} | {설명2} |
+[Step Data]
+| Order | Title | Icon/Description |
+|-------|-------|------------------|
+| 1 | {title1} | {desc1} |
+| 2 | {title2} | {desc2} |
 | ... | ... | ... |
 
-[레이아웃]
-- 방향: 가로 / 세로
-- 단계 간격: 200px
-- 화살표 스타일: → 또는 ▶
+[Layout]
+- Direction: Horizontal / Vertical
+- Step spacing: 200px
+- Arrow style: → or ▶
 
-[단계 박스 스타일]
-- 모양: 둥근사각형 (radius: 10px)
-- 크기: 150x100px
-- 배경색: {hex}
-- 테두리: 2px {hex}
+[Step Box Style]
+- Shape: Rounded rectangle (radius: 10px)
+- Size: 150x100px
+- Background: {hex}
+- Border: 2px {hex}
 
-[텍스트]
-- 순서 번호: 원형 배지 / 20px bold / {hex}
-- 단계 제목: 14px bold / 박스 중앙
-- 설명: 12px / 박스 하단
+[Text]
+- Step number: Circle badge / 20px bold / {hex}
+- Step title: 14px bold / box center
+- Description: 12px / box bottom
 
-[저장]
-./images/{NN}_프로세스.svg
+[Save]
+./images/{NN}_process.svg
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-#### 4. 비교표
+#### 4. Comparison Table
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {항목A} vs {항목B} 비교
+[Image N] {Item A} vs {Item B} Comparison
 
-🔷 SVG 생성
+🔷 SVG Generation
 
-[이미지 설명]
-{비교 내용 설명}
+[Image Description]
+{comparison description}
 
-[캔버스 설정]
-- 크기: 800x500px
-- 배경: #FFFFFF
+[Canvas Settings]
+- Size: 800x500px
+- Background: #FFFFFF
 
-[비교 데이터]
-| 기준 | {항목A} | {항목B} |
-|------|---------|---------|
-| {기준1} | {값A1} | {값B1} |
-| {기준2} | {값A2} | {값B2} |
+[Comparison Data]
+| Criteria | {Item A} | {Item B} |
+|----------|----------|----------|
+| {criteria1} | {valueA1} | {valueB1} |
+| {criteria2} | {valueA2} | {valueB2} |
 | ... | ... | ... |
 
-[테이블 스타일]
-- 헤더 배경: {hex}
-- 홀수행 배경: #F8F8F8
-- 짝수행 배경: #FFFFFF
-- 테두리: 1px #E0E0E0
-- 셀 패딩: 15px
+[Table Style]
+- Header background: {hex}
+- Odd row background: #F8F8F8
+- Even row background: #FFFFFF
+- Border: 1px #E0E0E0
+- Cell padding: 15px
 
-[강조 스타일]
-- 우수 항목: {hex} 배경 또는 볼드
-- 아이콘: ✓ / ✗ 또는 ⭐
+[Emphasis Style]
+- Superior item: {hex} background or bold
+- Icons: ✓ / ✗ or ⭐
 
-[저장]
-./images/{NN}_비교표.svg
+[Save]
+./images/{NN}_comparison.svg
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-#### 5. 썸네일
+#### 5. Thumbnail
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 1] 썸네일 - {주제}
+[Image 1] Thumbnail - {topic}
 
-🔷 SVG 생성
+🔷 SVG Generation
 
-[이미지 설명]
-{썸네일 컨셉 설명}
+[Image Description]
+{thumbnail concept description}
 
-[캔버스 설정]
-- 크기: 1300x885px (네이버 OG 이미지 표준)
-- 배경: 그라데이션 {hex1} → {hex2}
+[Canvas Settings]
+- Size: 1300x885px (Naver OG image standard)
+- Background: Gradient {hex1} → {hex2}
 
-[레이어 구성]
-1. 배경 그라데이션
-2. 장식 요소 (도형, 패턴)
-3. 아이콘/일러스트
-4. 메인 텍스트
-5. 서브 텍스트
+[Layer Composition]
+1. Background gradient
+2. Decorative elements (shapes, patterns)
+3. Icons/Illustrations
+4. Main text
+5. Sub text
 
-[텍스트 요소]
-- 메인: "{핵심 문구}" / 48px bold / 중앙 상단 / {hex}
-- 서브: "{부가 설명}" / 24px / 중앙 하단 / {hex}
+[Text Elements]
+- Main: "{key phrase}" / 48px bold / upper center / {hex}
+- Sub: "{additional description}" / 24px / lower center / {hex}
 
-[장식 요소]
-- {도형1}: 위치, 크기, 색상, 투명도
-- {도형2}: ...
+[Decorative Elements]
+- {shape1}: position, size, color, opacity
+- {shape2}: ...
 
-[저장]
-./images/01_썸네일.svg
+[Save]
+./images/01_thumbnail.svg
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### SVG 생성 시 주의사항
+### SVG Generation Notes
 
-1. **한글 폰트**: SVG에서 한글 표시 시 시스템 폰트 의존
-2. **복잡한 그래픽**: 너무 복잡한 경우 모드 B(AI 생성) 권장
-3. **파일 크기**: 요소가 많으면 파일 크기 증가
-4. **브라우저 호환성**: 기본 SVG 요소만 사용 권장
+1. **Korean fonts**: SVG Korean display depends on system fonts
+2. **Complex graphics**: If too complex, recommend Mode B (AI generation)
+3. **File size**: More elements = larger file size
+4. **Browser compatibility**: Recommend using only basic SVG elements
 
-### svg-canvas-mcp 주요 도구
+### svg-canvas-mcp Key Tools
 
-| 도구 | 용도 |
-|------|------|
-| `svg_create` | 새 캔버스 생성 |
-| `chart_bar` | 막대 차트 |
-| `chart_pie` / `chart_donut` | 원형 차트 |
-| `chart_line` | 선 그래프 |
-| `draw_rect` | 사각형 |
-| `draw_circle` | 원 |
-| `draw_text` | 텍스트 |
-| `draw_line` | 선 |
-| `style_gradient` | 그라데이션 |
-| `style_fill` | 채우기 색상 |
-| `export_svg` | SVG 파일 저장 |
+| Tool | Purpose |
+|------|---------|
+| `svg_create` | Create new canvas |
+| `chart_bar` | Bar chart |
+| `chart_pie` / `chart_donut` | Pie chart |
+| `chart_line` | Line graph |
+| `draw_rect` | Rectangle |
+| `draw_circle` | Circle |
+| `draw_text` | Text |
+| `draw_line` | Line |
+| `style_gradient` | Gradient |
+| `style_fill` | Fill color |
+| `export_svg` | Save SVG file |

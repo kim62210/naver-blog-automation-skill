@@ -1,7 +1,7 @@
 """
-프롬프트 변환 모듈
+Prompt conversion module
 
-이미지 가이드의 프롬프트를 Gemini API에 최적화된 형식으로 변환합니다.
+Converts image guide prompts to Gemini API optimized format.
 """
 
 import re
@@ -13,11 +13,11 @@ from .config import get_config, get_config_value
 
 @dataclass
 class ImageGuideItem:
-    """이미지 가이드 항목을 담는 데이터 클래스"""
+    """Data class for image guide items"""
 
     index: int
     role: str
-    mode: str  # "A" (참고), "B" (AI 생성), "C" (SVG)
+    mode: str  # "A" (reference), "B" (AI generation), "C" (SVG)
     korean_description: str = ""
     prompt: str = ""
     style_guide: Dict[str, str] = None
@@ -30,7 +30,7 @@ class ImageGuideItem:
 
 @dataclass
 class GeminiPrompt:
-    """Gemini용 프롬프트를 담는 데이터 클래스"""
+    """Data class for Gemini prompts"""
 
     prompt: str
     filename: str
@@ -40,16 +40,16 @@ class GeminiPrompt:
 
 def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
     """
-    이미지 가이드의 프롬프트를 Gemini 최적화 포맷으로 변환합니다
+    Convert image guide prompt to Gemini optimized format.
 
     Args:
-        image_guide: 이미지 가이드 딕셔너리
-            - korean_description: 한글 설명
-            - prompt: 영문 프롬프트
-            - style_guide: 스타일 가이드 (색상, 분위기, 형식, 비율)
+        image_guide: Image guide dictionary
+            - korean_description: Korean description
+            - prompt: English prompt
+            - style_guide: Style guide (colors, mood, format, ratio)
 
     Returns:
-        Gemini API용 최적화된 프롬프트 문자열
+        Optimized prompt string for Gemini API
 
     Example:
         >>> guide = {
@@ -64,19 +64,19 @@ def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
     original_prompt = image_guide.get("prompt", "")
     style_guide = image_guide.get("style_guide", {})
 
-    # 프롬프트 구성 요소
+    # Prompt components
     parts = []
 
-    # 1. 기본 지시문
+    # 1. Base instruction
     parts.append("Create a high-quality image for a Korean blog.")
 
-    # 2. 영문 프롬프트 (기존 프롬프트 활용)
+    # 2. English prompt (use existing prompt)
     if original_prompt:
-        # 비율 정보 제거 (별도 처리)
+        # Remove ratio information (handled separately)
         cleaned_prompt = re.sub(r"\d+:\d+\s*ratio", "", original_prompt)
         parts.append(cleaned_prompt.strip())
 
-    # 3. 스타일 가이드 변환
+    # 3. Convert style guide
     style_parts = []
 
     if "색상" in style_guide:
@@ -97,14 +97,14 @@ def convert_to_gemini_prompt(image_guide: Dict[str, Any]) -> str:
     if style_parts:
         parts.append(" ".join(style_parts))
 
-    # 4. 품질 보장 문구
+    # 4. Quality assurance phrase
     parts.append("High resolution, professional quality, suitable for blog use.")
 
     return " ".join(parts)
 
 
 def translate_color(korean_color: str) -> str:
-    """한글 색상 설명을 영문으로 변환합니다"""
+    """Convert Korean color description to English"""
     color_map = {
         "파스텔 블루": "soft pastel blue",
         "파스텔 핑크": "soft pastel pink",
@@ -132,7 +132,7 @@ def translate_color(korean_color: str) -> str:
 
 
 def translate_mood(korean_mood: str) -> str:
-    """한글 분위기 설명을 영문으로 변환합니다"""
+    """Convert Korean mood description to English"""
     mood_map = {
         "따뜻한": "warm, cozy",
         "친근한": "friendly, approachable",
@@ -161,7 +161,7 @@ def translate_mood(korean_mood: str) -> str:
 
 
 def translate_format(korean_format: str) -> str:
-    """한글 형식 설명을 영문으로 변환합니다"""
+    """Convert Korean format description to English"""
     format_map = {
         "인포그래픽": "infographic, data visualization",
         "일러스트": "illustration, illustrated",
@@ -185,17 +185,17 @@ def translate_format(korean_format: str) -> str:
 
 def parse_image_guide_markdown(content: str) -> List[ImageGuideItem]:
     """
-    이미지 가이드 마크다운을 파싱하여 이미지 항목 목록을 반환합니다
+    Parse image guide markdown and return list of image items.
 
     Args:
-        content: 이미지 가이드 마크다운 내용
+        content: Image guide markdown content
 
     Returns:
-        ImageGuideItem 목록
+        List of ImageGuideItem
     """
     items = []
 
-    # 이미지 블록 분리 (━ 구분선 기준)
+    # Split image blocks (by ━ separator)
     blocks = re.split(r"━{20,}", content)
 
     for block in blocks:
@@ -210,16 +210,16 @@ def parse_image_guide_markdown(content: str) -> List[ImageGuideItem]:
 
 
 def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
-    """단일 이미지 블록을 파싱합니다"""
+    """Parse single image block"""
     lines = block.strip().split("\n")
 
     if not lines:
         return None
 
-    # 첫 줄에서 이미지 번호와 역할 추출
+    # Extract image number and role from first line
     header_match = re.match(r"\[이미지\s*(\d+)\]\s*(.+)", lines[0])
     if not header_match:
-        # [썸네일] 형식도 처리
+        # Also handle [썸네일] format
         header_match = re.match(r"\[(\w+)\]\s*(.+)", lines[0])
         if not header_match:
             return None
@@ -229,8 +229,8 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
         index = int(header_match.group(1))
         role = header_match.group(2)
 
-    # 모드 결정
-    mode = "B"  # 기본값: AI 생성
+    # Determine mode
+    mode = "B"  # Default: AI generation
     if "📷" in block or "참고 이미지" in block or "다운로드된 이미지" in block:
         mode = "A"
     elif "🔷" in block or "SVG 생성" in block:
@@ -238,7 +238,7 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
     elif "🎨" in block or "AI 생성" in block or "생성 필요" in block:
         mode = "B"
 
-    # AI 생성 모드가 아니면 건너뛰기
+    # Skip if not AI generation mode
     if mode != "B":
         return ImageGuideItem(
             index=index,
@@ -246,19 +246,19 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
             mode=mode,
         )
 
-    # 한글 설명 추출
+    # Extract Korean description
     korean_desc = ""
     desc_match = re.search(r"\[한글 설명\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL)
     if desc_match:
         korean_desc = desc_match.group(1).strip()
 
-    # AI 생성 프롬프트 추출
+    # Extract AI generation prompt
     prompt = ""
     prompt_match = re.search(r"\[AI 생성 프롬프트\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL)
     if prompt_match:
         prompt = prompt_match.group(1).strip()
 
-    # 스타일 가이드 추출
+    # Extract style guide
     style_guide = {}
     style_match = re.search(r"\[스타일 가이드\]\s*\n(.+?)(?=━|$)", block, re.DOTALL)
     if style_match:
@@ -286,14 +286,14 @@ def extract_gemini_prompts(
     output_dir: str = "./images",
 ) -> List[GeminiPrompt]:
     """
-    이미지 가이드에서 Gemini 프롬프트를 추출합니다
+    Extract Gemini prompts from image guide.
 
     Args:
-        image_guide_content: 이미지 가이드 마크다운 내용
-        output_dir: 이미지 저장 디렉토리
+        image_guide_content: Image guide markdown content
+        output_dir: Image save directory
 
     Returns:
-        GeminiPrompt 목록 (AI 생성 모드만 포함)
+        List of GeminiPrompt (AI generation mode only)
     """
     items = parse_image_guide_markdown(image_guide_content)
     prompts = []
@@ -305,17 +305,17 @@ def extract_gemini_prompts(
         if not item.prompt:
             continue
 
-        # Gemini 최적화 프롬프트 생성
+        # Generate Gemini optimized prompt
         optimized_prompt = convert_to_gemini_prompt({
             "korean_description": item.korean_description,
             "prompt": item.prompt,
             "style_guide": item.style_guide,
         })
 
-        # 파일명 생성
+        # Generate filename
         filename = f"{item.index:02d}_{sanitize_filename(item.role)}.png"
 
-        # 비율 추출
+        # Extract ratio
         aspect_ratio = item.style_guide.get("비율", "16:9")
 
         prompts.append(GeminiPrompt(
@@ -329,12 +329,12 @@ def extract_gemini_prompts(
 
 
 def sanitize_filename(name: str) -> str:
-    """파일명에 사용할 수 없는 문자를 제거합니다"""
-    # 특수문자 제거
+    """Remove characters not allowed in filenames"""
+    # Remove special characters
     name = re.sub(r'[<>:"/\\|?*]', "", name)
-    # 공백을 언더스코어로
+    # Replace spaces with underscores
     name = re.sub(r"\s+", "_", name)
-    # 너무 긴 이름 자르기
+    # Truncate long names
     if len(name) > 50:
         name = name[:50]
     return name
@@ -344,13 +344,13 @@ def generate_image_prompts_for_batch(
     image_guide_content: str,
 ) -> List[Dict[str, str]]:
     """
-    배치 이미지 생성을 위한 프롬프트 목록을 생성합니다
+    Generate prompt list for batch image generation.
 
     Args:
-        image_guide_content: 이미지 가이드 마크다운 내용
+        image_guide_content: Image guide markdown content
 
     Returns:
-        [{"prompt": "...", "filename": "..."}, ...] 형식의 목록
+        List in format [{"prompt": "...", "filename": "..."}, ...]
     """
     gemini_prompts = extract_gemini_prompts(image_guide_content)
 
@@ -369,15 +369,15 @@ def get_prompt_for_thumbnail(
     color_scheme: str = "modern gradient",
 ) -> str:
     """
-    썸네일용 프롬프트를 생성합니다
+    Generate thumbnail prompt.
 
     Args:
-        title: 블로그 제목
-        keywords: 키워드 목록
-        color_scheme: 색상 스키마
+        title: Blog title
+        keywords: Keyword list
+        color_scheme: Color scheme
 
     Returns:
-        썸네일용 프롬프트
+        Thumbnail prompt
     """
     keywords_str = ", ".join(keywords[:3])
 
@@ -397,15 +397,15 @@ def get_prompt_for_infographic(
     chart_type: str = "bar chart",
 ) -> str:
     """
-    인포그래픽용 프롬프트를 생성합니다
+    Generate infographic prompt.
 
     Args:
-        title: 인포그래픽 제목
-        data_points: 데이터 포인트 목록
-        chart_type: 차트 유형
+        title: Infographic title
+        data_points: Data point list
+        chart_type: Chart type
 
     Returns:
-        인포그래픽용 프롬프트
+        Infographic prompt
     """
     data_str = ", ".join(data_points[:5])
 
@@ -424,14 +424,14 @@ def get_prompt_for_process(
     steps: List[str],
 ) -> str:
     """
-    프로세스 다이어그램용 프롬프트를 생성합니다
+    Generate process diagram prompt.
 
     Args:
-        title: 프로세스 제목
-        steps: 단계 목록
+        title: Process title
+        steps: Step list
 
     Returns:
-        프로세스 다이어그램용 프롬프트
+        Process diagram prompt
     """
     steps_str = " → ".join([f"Step {i+1}: {s}" for i, s in enumerate(steps[:5])])
 

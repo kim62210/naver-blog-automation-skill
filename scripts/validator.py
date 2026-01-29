@@ -1,8 +1,8 @@
 """
-글자수 검증 모듈
+Character count validation module
 
-HTML 태그를 제외한 순수 텍스트의 글자수를 검증하고,
-초과/미달 시 조정을 제안합니다.
+Validates character count of pure text excluding HTML tags,
+and suggests adjustments when over/under the limit.
 """
 
 import re
@@ -13,50 +13,50 @@ from .config import get_config, get_config_value
 
 @dataclass
 class ValidationResult:
-    """글자수 검증 결과"""
-    char_count: int          # 실제 글자수
-    target: int              # 목표 글자수
-    min_chars: int           # 최소 글자수
-    max_chars: int           # 최대 글자수
-    is_valid: bool           # 유효 여부
-    status: str              # 상태 ('ok', 'under', 'over')
-    difference: int          # 차이 (양수: 초과, 음수: 미달)
-    message: str             # 상태 메시지
+    """Character count validation result"""
+    char_count: int          # Actual character count
+    target: int              # Target character count
+    min_chars: int           # Minimum character count
+    max_chars: int           # Maximum character count
+    is_valid: bool           # Validity status
+    status: str              # Status ('ok', 'under', 'over')
+    difference: int          # Difference (positive: over, negative: under)
+    message: str             # Status message
 
 
 def strip_html_tags(html_content: str) -> str:
     """
-    HTML 태그를 모두 제거합니다.
+    Remove all HTML tags.
 
     Args:
-        html_content: HTML 콘텐츠
+        html_content: HTML content
 
     Returns:
-        태그가 제거된 텍스트
+        Text with tags removed
     """
-    # HTML 태그 제거
+    # Remove HTML tags
     text = re.sub(r'<[^>]+>', '', html_content)
     return text
 
 
 def remove_non_content(text: str) -> str:
     """
-    글자수 카운트에서 제외할 요소를 제거합니다.
+    Remove elements excluded from character count.
 
-    제외 항목:
-    - 이미지 placeholder
-    - CSS 스타일 코드
+    Excluded items:
+    - Image placeholders
+    - CSS style code
 
     Args:
-        text: 원본 텍스트
+        text: Original text
 
     Returns:
-        정리된 텍스트
+        Cleaned text
     """
-    # 이미지 placeholder 제거
+    # Remove image placeholders
     text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
 
-    # CSS 스타일 블록 제거 (만약 남아있다면)
+    # Remove CSS style blocks (if any remain)
     text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
 
     return text
@@ -64,18 +64,18 @@ def remove_non_content(text: str) -> str:
 
 def normalize_whitespace(text: str) -> str:
     """
-    공백을 정규화합니다.
+    Normalize whitespace.
 
     Args:
-        text: 원본 텍스트
+        text: Original text
 
     Returns:
-        정규화된 텍스트
+        Normalized text
     """
-    # 연속된 공백을 단일 공백으로
+    # Convert consecutive spaces to single space
     text = re.sub(r'[ \t]+', ' ', text)
 
-    # 줄바꿈은 하나의 공백으로 취급
+    # Treat line breaks as single space
     text = re.sub(r'\n+', ' ', text)
 
     return text.strip()
@@ -83,22 +83,22 @@ def normalize_whitespace(text: str) -> str:
 
 def count_content_chars(html_content: str, include_spaces: bool = True) -> int:
     """
-    HTML 콘텐츠에서 순수 글자수를 카운트합니다.
+    Count characters in HTML content.
 
     Args:
-        html_content: HTML 콘텐츠
-        include_spaces: 공백 포함 여부 (기본값: True)
+        html_content: HTML content
+        include_spaces: Include spaces (default: True)
 
     Returns:
-        글자수
+        Character count
     """
-    # HTML 태그 제거
+    # Remove HTML tags
     text = strip_html_tags(html_content)
 
-    # 비콘텐츠 요소 제거
+    # Remove non-content elements
     text = remove_non_content(text)
 
-    # 공백 정규화
+    # Normalize whitespace
     text = normalize_whitespace(text)
 
     if not include_spaces:
@@ -109,14 +109,14 @@ def count_content_chars(html_content: str, include_spaces: bool = True) -> int:
 
 def validate_char_count(html_content: str, config: Optional[dict] = None) -> ValidationResult:
     """
-    글자수를 검증합니다.
+    Validate character count.
 
     Args:
-        html_content: HTML 콘텐츠
-        config: 설정 딕셔너리 (없으면 기본 설정 사용)
+        html_content: HTML content
+        config: Configuration dictionary (uses default if not provided)
 
     Returns:
-        ValidationResult 객체
+        ValidationResult object
     """
     if config is None:
         config = get_config()
@@ -131,15 +131,15 @@ def validate_char_count(html_content: str, config: Optional[dict] = None) -> Val
     if char_count < min_chars:
         status = "under"
         is_valid = False
-        message = f"⚠️ 글자수 미달: {char_count}자 (최소 {min_chars}자 필요, {min_chars - char_count}자 부족)"
+        message = f"⚠️ Character count under limit: {char_count} chars (minimum {min_chars} required, {min_chars - char_count} short)"
     elif char_count > max_chars:
         status = "over"
         is_valid = False
-        message = f"⚠️ 글자수 초과: {char_count}자 (최대 {max_chars}자, {char_count - max_chars}자 초과)"
+        message = f"⚠️ Character count over limit: {char_count} chars (maximum {max_chars}, {char_count - max_chars} over)"
     else:
         status = "ok"
         is_valid = True
-        message = f"✅ 글자수 적합: {char_count}자 (목표: {target}자)"
+        message = f"✅ Character count valid: {char_count} chars (target: {target})"
 
     return ValidationResult(
         char_count=char_count,
@@ -155,24 +155,24 @@ def validate_char_count(html_content: str, config: Optional[dict] = None) -> Val
 
 def get_section_breakdown(html_content: str) -> List[Tuple[str, int]]:
     """
-    섹션별 글자수를 분석합니다.
+    Analyze character count by section.
 
     Args:
-        html_content: HTML 콘텐츠
+        html_content: HTML content
 
     Returns:
-        (섹션명, 글자수) 튜플 리스트
+        List of (section_name, char_count) tuples
     """
     sections = []
 
-    # h2, h3 태그를 기준으로 섹션 분리
+    # Split sections by h2, h3 tags
     pattern = r'<h[23][^>]*>(.*?)</h[23]>'
     matches = list(re.finditer(pattern, html_content, re.DOTALL))
 
     if not matches:
-        # 섹션 구분이 없으면 전체를 하나의 섹션으로
+        # If no section divisions, treat entire content as one section
         char_count = count_content_chars(html_content)
-        return [("전체", char_count)]
+        return [("Total", char_count)]
 
     for i, match in enumerate(matches):
         section_title = strip_html_tags(match.group(1)).strip()
@@ -188,58 +188,58 @@ def get_section_breakdown(html_content: str) -> List[Tuple[str, int]]:
 
 def suggest_adjustment(result: ValidationResult) -> str:
     """
-    글자수 조정 제안을 생성합니다.
+    Generate character count adjustment suggestions.
 
     Args:
-        result: ValidationResult 객체
+        result: ValidationResult object
 
     Returns:
-        조정 제안 메시지
+        Adjustment suggestion message
     """
     if result.is_valid:
-        return "글자수가 적합합니다. 조정이 필요하지 않습니다."
+        return "Character count is valid. No adjustment needed."
 
     suggestions = []
 
     if result.status == "under":
         needed = result.min_chars - result.char_count
-        suggestions.append(f"📝 {needed}자 이상 추가가 필요합니다.")
-        suggestions.append("추천 조정 방법:")
-        suggestions.append("  - 핵심 정보 섹션에 구체적인 예시 추가")
-        suggestions.append("  - 실용 팁 섹션 확장")
-        suggestions.append("  - 관련 통계나 데이터 보충")
+        suggestions.append(f"📝 Need to add {needed}+ characters.")
+        suggestions.append("Recommended adjustments:")
+        suggestions.append("  - Add specific examples to key information sections")
+        suggestions.append("  - Expand practical tips section")
+        suggestions.append("  - Add relevant statistics or data")
 
     elif result.status == "over":
         excess = result.char_count - result.max_chars
-        suggestions.append(f"✂️ {excess}자 이상 삭제가 필요합니다.")
-        suggestions.append("추천 조정 방법:")
-        suggestions.append("  - 중복되는 내용 제거")
-        suggestions.append("  - 부연 설명 간소화")
-        suggestions.append("  - 불필요한 수식어 삭제")
+        suggestions.append(f"✂️ Need to remove {excess}+ characters.")
+        suggestions.append("Recommended adjustments:")
+        suggestions.append("  - Remove redundant content")
+        suggestions.append("  - Simplify elaborations")
+        suggestions.append("  - Delete unnecessary modifiers")
 
     return "\n".join(suggestions)
 
 
 def print_validation_report(html_content: str, config: Optional[dict] = None) -> ValidationResult:
     """
-    글자수 검증 보고서를 출력합니다.
+    Print character count validation report.
 
     Args:
-        html_content: HTML 콘텐츠
-        config: 설정 딕셔너리
+        html_content: HTML content
+        config: Configuration dictionary
 
     Returns:
-        ValidationResult 객체
+        ValidationResult object
     """
     result = validate_char_count(html_content, config)
 
     print("=" * 50)
-    print("📊 글자수 검증 결과")
+    print("📊 Character Count Validation Result")
     print("=" * 50)
-    print(f"현재 글자수: {result.char_count}자")
-    print(f"목표 글자수: {result.target}자")
-    print(f"허용 범위: {result.min_chars}~{result.max_chars}자")
-    print(f"차이: {result.difference:+d}자")
+    print(f"Current count: {result.char_count} chars")
+    print(f"Target count: {result.target} chars")
+    print(f"Allowed range: {result.min_chars}~{result.max_chars} chars")
+    print(f"Difference: {result.difference:+d} chars")
     print("-" * 50)
     print(result.message)
 
@@ -247,12 +247,12 @@ def print_validation_report(html_content: str, config: Optional[dict] = None) ->
         print("-" * 50)
         print(suggest_adjustment(result))
 
-    # 섹션별 분석
+    # Section analysis
     print("-" * 50)
-    print("📑 섹션별 글자수:")
+    print("📑 Character count by section:")
     sections = get_section_breakdown(html_content)
     for section_name, char_count in sections:
-        print(f"  - {section_name}: {char_count}자")
+        print(f"  - {section_name}: {char_count} chars")
 
     print("=" * 50)
 
@@ -260,7 +260,7 @@ def print_validation_report(html_content: str, config: Optional[dict] = None) ->
 
 
 if __name__ == "__main__":
-    # 테스트용 샘플 HTML
+    # Test sample HTML
     sample_html = """
     <h2>테스트 제목</h2>
     <p>이것은 테스트 본문입니다. 글자수를 측정하기 위한 샘플 텍스트입니다.</p>
@@ -270,4 +270,4 @@ if __name__ == "__main__":
     """
 
     result = print_validation_report(sample_html)
-    print(f"\n유효 여부: {result.is_valid}")
+    print(f"\nValidity: {result.is_valid}")

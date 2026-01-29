@@ -1,160 +1,160 @@
-# STEP 3: 병렬 자료 수집
+# STEP 3: Parallel Research
 
-6개 에이전트를 동시에 실행하여 자료와 이미지를 수집합니다.
+Run 6 agents simultaneously to collect materials and images.
 
-## 진행 상태
-
-```
-[STEP 3/8] 자료 수집 ████████████░░░░░░░░░░░░░░░░ 37%
-```
-
----
-
-## 3-1. 실행 방법
-
-Task 도구로 librarian 에이전트 6개를 **병렬 실행**합니다:
+## Progress Status
 
 ```
-Agent 1: 네이버 뉴스 검색 (WebSearch - site:news.naver.com) + 뉴스 이미지 수집
-Agent 2: 네이버 블로그 검색 (mcp__naver-search__search_blog) + 블로그 이미지 수집
-Agent 3: 웹 검색 일반 (WebSearch)
-Agent 4: 확장 키워드 검색 1 (AI가 관련 키워드 생성 후 검색)
-Agent 5: 확장 키워드 검색 2 (AI가 관련 키워드 생성 후 검색)
-Agent 6: 이미지 전용 검색 (WebSearch - 네이버/구글 이미지 검색)
+[STEP 3/8] Research ████████████░░░░░░░░░░░░░░░░ 37%
 ```
 
 ---
 
-## 3-2. 수집 목표
+## 3-1. Execution Method
 
-| 항목 | 목표 |
-|------|------|
-| 텍스트 자료 | 소스별 5건, 총 15~25건 |
-| 참고 이미지 | 10~15건 (뉴스/블로그/이미지 검색 통합) |
-
----
-
-## 3-3. 에이전트 프롬프트 템플릿
-
-### Agent 1 - 네이버 뉴스 + 이미지
+Launch 6 librarian agents **in parallel** using the Task tool:
 
 ```
-"{주제}"에 대한 최신 네이버 뉴스 5건을 검색해주세요.
-각 결과에서 제목, URL, 핵심 내용 요약을 추출해주세요.
-
-**이미지 수집**: 뉴스 기사에 포함된 대표 이미지 URL을 함께 수집해주세요.
-- WebFetch로 기사 페이지 접근 후 og:image 또는 본문 내 주요 이미지 URL 추출
-- 이미지 설명(alt 텍스트 또는 캡션)도 함께 기록
-```
-
-### Agent 2 - 네이버 블로그 + 이미지
-
-```
-mcp__naver-search__search_blog 도구로 "{주제}" 검색하여 5건 수집.
-각 결과의 제목, URL, 요약을 정리해주세요.
-
-**이미지 수집**: 블로그 글 내 삽입된 이미지 URL을 수집해주세요.
-- 인포그래픽, 표, 차트 이미지 우선 수집
-- 이미지당 간단한 설명 기록 (예: "금리 비교표", "신청 절차 안내")
-```
-
-### Agent 3 - 웹 검색
-
-```
-"{주제}"에 대한 신뢰할 수 있는 웹 정보 5건을 검색해주세요.
-공식 기관, 금융사, 정부 사이트 우선.
-```
-
-### Agent 4, 5 - 확장 키워드
-
-```
-"{주제}"의 관련 키워드 "{확장 키워드}"로 추가 정보 검색.
-```
-
-### Agent 6 - 이미지 전용 검색
-
-```
-"{주제}"에 대한 참고용 이미지를 검색해주세요.
-
-**검색 쿼리 예시:**
-- "{주제} 인포그래픽"
-- "{주제} 비교표"
-- "{주제} 설명 이미지"
-
-**수집 항목:**
-- 이미지 URL
-- 이미지 출처 페이지 URL
-- 이미지 설명 (검색 결과 또는 alt 텍스트)
-- 이미지 유형 (사진/인포그래픽/표/일러스트)
-
-**우선 수집 대상:**
-1. 인포그래픽 (데이터 시각화)
-2. 비교표/차트
-3. 절차/프로세스 안내도
-4. 관련 제품/서비스 이미지
+Agent 1: Naver News search (WebSearch - site:news.naver.com) + News image collection
+Agent 2: Naver Blog search (mcp__naver-search__search_blog) + Blog image collection
+Agent 3: General web search (WebSearch)
+Agent 4: Extended keyword search 1 (AI generates related keywords then searches)
+Agent 5: Extended keyword search 2 (AI generates related keywords then searches)
+Agent 6: Image-only search (WebSearch - Naver/Google image search)
 ```
 
 ---
 
-## 3-4. 이미지 수집 기준
+## 3-2. Collection Goals
 
-| 우선순위 | 이미지 유형 | 활용 |
-|---------|-----------|------|
-| 1 | 인포그래픽 | 핵심 정보 섹션에 참고 |
-| 2 | 비교표/차트 | 데이터 비교 섹션에 활용 |
-| 3 | 절차 안내도 | 가이드/팁 섹션에 참고 |
-| 4 | 제품/서비스 이미지 | 본문 시각 자료로 활용 |
-| 5 | 감성 이미지 | 도입/마무리 분위기 연출 |
+| Item | Target |
+|------|--------|
+| Text materials | 5 per source, 15~25 total |
+| Reference images | 10~15 (combined from news/blog/image search) |
 
 ---
 
-## 3-5. 이미지 다운로드 및 저장
+## 3-3. Agent Prompt Templates
 
-### Python 스크립트 사용
+### Agent 1 - Naver News + Images
+
+```
+Search for the latest 5 Naver news articles about "{topic}".
+Extract title, URL, and key content summary from each result.
+
+**Image collection**: Also collect representative image URLs from news articles.
+- Access article pages via WebFetch and extract og:image or main images from the body
+- Also record image descriptions (alt text or captions)
+```
+
+### Agent 2 - Naver Blog + Images
+
+```
+Use mcp__naver-search__search_blog tool to search "{topic}" and collect 5 results.
+Organize title, URL, and summary for each result.
+
+**Image collection**: Collect image URLs embedded in blog posts.
+- Prioritize infographics, tables, chart images
+- Record brief description per image (e.g., "interest rate comparison table", "application process guide")
+```
+
+### Agent 3 - Web Search
+
+```
+Search for 5 reliable web sources about "{topic}".
+Prioritize official agencies, financial companies, government sites.
+```
+
+### Agent 4, 5 - Extended Keywords
+
+```
+Search for additional information using related keyword "{expanded keyword}" for "{topic}".
+```
+
+### Agent 6 - Image-Only Search
+
+```
+Search for reference images about "{topic}".
+
+**Search query examples:**
+- "{topic} 인포그래픽"
+- "{topic} 비교표"
+- "{topic} 설명 이미지"
+
+**Collection items:**
+- Image URL
+- Source page URL
+- Image description (search result or alt text)
+- Image type (photo/infographic/table/illustration)
+
+**Priority collection targets:**
+1. Infographics (data visualization)
+2. Comparison tables/charts
+3. Procedure/process guides
+4. Related product/service images
+```
+
+---
+
+## 3-4. Image Collection Criteria
+
+| Priority | Image Type | Usage |
+|----------|-----------|-------|
+| 1 | Infographic | Reference for key information sections |
+| 2 | Comparison table/chart | Use for data comparison sections |
+| 3 | Procedure guide | Reference for guide/tips sections |
+| 4 | Product/service image | Visual material for body |
+| 5 | Emotional image | Mood for intro/closing |
+
+---
+
+## 3-5. Image Download and Save
+
+### Using Python Script
 
 ```python
 from scripts.collector import collect_images, print_collection_report
 
 images = [
     {
-        "url": "{이미지URL}",
-        "source_url": "{출처URL}",
-        "source_name": "뉴스",
-        "description": "금리비교표",
-        "type": "인포그래픽"
+        "url": "{image URL}",
+        "source_url": "{source URL}",
+        "source_name": "News",
+        "description": "Interest rate comparison table",
+        "type": "Infographic"
     },
-    # ... 더 많은 이미지
+    # ... more images
 ]
 
 result = collect_images(images, project_path)
 print_collection_report(result)
 ```
 
-### 수동 다운로드 (curl)
+### Manual Download (curl)
 
 ```bash
-# 디렉토리 생성
-mkdir -p "./경제 블로그/YYYY-MM-DD/주제명/images"
+# Create directory
+mkdir -p "./경제 블로그/YYYY-MM-DD/topic-name/images"
 
-# 이미지 다운로드
-# 파일명 형식: {순번}_{출처}_{설명요약}.{확장자}
-curl -L -o "./images/01_뉴스_금리비교표.jpg" "{이미지URL}"
-curl -L -o "./images/02_블로그_신청절차.png" "{이미지URL}"
+# Download images
+# Filename format: {number}_{source}_{description}.{extension}
+curl -L -o "./images/01_뉴스_금리비교표.jpg" "{image URL}"
+curl -L -o "./images/02_블로그_신청절차.png" "{image URL}"
 ```
 
-### 파일명 규칙
-- 순번: 01, 02, 03... (수집 순서)
-- 출처: 뉴스/블로그/검색
-- 설명요약: 이미지 내용 한글 요약 (공백 없이)
-- 확장자: 원본 URL에서 추출 (jpg, png, gif, webp)
+### Filename Rules
+- Number: 01, 02, 03... (collection order)
+- Source: 뉴스/블로그/검색 (News/Blog/Search)
+- Description summary: Korean summary of image content (no spaces)
+- Extension: Extract from original URL (jpg, png, gif, webp)
 
-### 다운로드 시 주의사항
-- `-L` 옵션으로 리다이렉트 따라가기
-- User-Agent 헤더 필요 시 추가: `-H "User-Agent: Mozilla/5.0"`
-- 다운로드 실패 시 URL만 참조.md에 기록
+### Download Notes
+- Use `-L` option to follow redirects
+- Add User-Agent header if needed: `-H "User-Agent: Mozilla/5.0"`
+- Record URL only in 참조.md if download fails
 
 ---
 
-## 다음 단계
+## Next Step
 
-자료 수집 완료 → **[STEP 4: 수집 결과 요약 및 확인](step4-review.md)**
+Research complete → **[STEP 4: Review Collection Results](step4-review.md)**

@@ -1,7 +1,7 @@
 """
-공통 유틸리티 함수
+Common utility functions
 
-파일명 정규화, 날짜 처리, 텍스트 정리 등의 공통 기능을 제공합니다.
+Provides common functionality for filename normalization, date handling, text cleanup, etc.
 """
 
 import re
@@ -13,36 +13,36 @@ from typing import Optional
 
 def normalize_filename(text: str, max_length: int = 50) -> str:
     """
-    텍스트를 파일명으로 사용 가능한 형태로 정규화합니다.
+    Normalize text for use as a filename.
 
     Args:
-        text: 정규화할 텍스트
-        max_length: 최대 길이 (기본값: 50)
+        text: Text to normalize
+        max_length: Maximum length (default: 50)
 
     Returns:
-        정규화된 파일명
+        Normalized filename
 
     Example:
         >>> normalize_filename("2026년 육아휴직 변경 사항!")
         '2026년-육아휴직-변경-사항'
     """
-    # 유니코드 정규화 (NFC)
+    # Unicode normalization (NFC)
     text = unicodedata.normalize("NFC", text)
 
-    # 파일명에 사용할 수 없는 특수문자 제거
-    # 허용: 한글, 영문, 숫자, 하이픈, 언더스코어
+    # Remove special characters not allowed in filenames
+    # Allowed: Korean, English, numbers, hyphens, underscores
     text = re.sub(r'[^\w가-힣\s-]', '', text)
 
-    # 연속된 공백을 하이픈으로 변환
+    # Convert consecutive spaces to hyphens
     text = re.sub(r'\s+', '-', text.strip())
 
-    # 연속된 하이픈 제거
+    # Remove consecutive hyphens
     text = re.sub(r'-+', '-', text)
 
-    # 앞뒤 하이픈 제거
+    # Remove leading/trailing hyphens
     text = text.strip('-')
 
-    # 최대 길이 제한
+    # Apply maximum length limit
     if len(text) > max_length:
         text = text[:max_length].rstrip('-')
 
@@ -51,13 +51,13 @@ def normalize_filename(text: str, max_length: int = 50) -> str:
 
 def get_today_date(format_str: str = "%Y-%m-%d") -> str:
     """
-    오늘 날짜를 지정된 형식으로 반환합니다.
+    Return today's date in the specified format.
 
     Args:
-        format_str: 날짜 형식 (기본값: "%Y-%m-%d")
+        format_str: Date format (default: "%Y-%m-%d")
 
     Returns:
-        형식화된 날짜 문자열
+        Formatted date string
     """
     return datetime.now().strftime(format_str)
 
@@ -68,15 +68,15 @@ def create_output_path(
     date: Optional[str] = None
 ) -> Path:
     """
-    출력 경로를 생성합니다.
+    Create output path.
 
     Args:
-        base_dir: 기본 디렉토리 (예: "./경제 블로그")
-        topic: 주제명
-        date: 날짜 (없으면 오늘 날짜 사용)
+        base_dir: Base directory (e.g., "./경제 블로그")
+        topic: Topic name
+        date: Date (uses today's date if not provided)
 
     Returns:
-        출력 경로 (Path 객체)
+        Output path (Path object)
 
     Example:
         >>> create_output_path("./경제 블로그", "육아휴직 가이드")
@@ -91,18 +91,18 @@ def create_output_path(
 
 def clean_text(text: str) -> str:
     """
-    텍스트를 정리합니다 (불필요한 공백, 줄바꿈 정리).
+    Clean text (remove unnecessary whitespace, normalize line breaks).
 
     Args:
-        text: 정리할 텍스트
+        text: Text to clean
 
     Returns:
-        정리된 텍스트
+        Cleaned text
     """
-    # 여러 줄바꿈을 두 줄바꿈으로 통일
+    # Normalize multiple line breaks to two
     text = re.sub(r'\n{3,}', '\n\n', text)
 
-    # 줄 끝 공백 제거
+    # Remove trailing whitespace from lines
     lines = [line.rstrip() for line in text.split('\n')]
     text = '\n'.join(lines)
 
@@ -111,26 +111,26 @@ def clean_text(text: str) -> str:
 
 def extract_extension_from_url(url: str) -> str:
     """
-    URL에서 파일 확장자를 추출합니다.
+    Extract file extension from URL.
 
     Args:
-        url: 이미지 URL
+        url: Image URL
 
     Returns:
-        확장자 (기본값: 'jpg')
+        Extension (default: 'jpg')
     """
-    # URL에서 쿼리 파라미터 제거
+    # Remove query parameters from URL
     clean_url = url.split('?')[0]
 
-    # 확장자 추출
+    # Extract extension
     extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
     lower_url = clean_url.lower()
 
     for ext in extensions:
         if lower_url.endswith(ext):
-            return ext[1:]  # 점 제거
+            return ext[1:]  # Remove dot
 
-    return 'jpg'  # 기본값
+    return 'jpg'  # Default
 
 
 def format_image_filename(
@@ -140,22 +140,22 @@ def format_image_filename(
     extension: str
 ) -> str:
     """
-    이미지 파일명을 형식화합니다.
+    Format image filename.
 
     Args:
-        index: 순번 (1부터 시작)
-        source: 출처 (뉴스/블로그/검색)
-        description: 설명 (한글)
-        extension: 확장자
+        index: Sequence number (starting from 1)
+        source: Source (뉴스/블로그/검색)
+        description: Description (Korean)
+        extension: Extension
 
     Returns:
-        형식화된 파일명
+        Formatted filename
 
     Example:
         >>> format_image_filename(1, "뉴스", "금리 비교표", "jpg")
         '01_뉴스_금리비교표.jpg'
     """
-    # 설명에서 공백 제거
+    # Remove spaces from description
     clean_desc = description.replace(' ', '')
     clean_desc = normalize_filename(clean_desc, max_length=20)
 
@@ -164,21 +164,21 @@ def format_image_filename(
 
 def count_chars_excluding_html(html_content: str) -> int:
     """
-    HTML 태그를 제외한 순수 텍스트의 글자수를 카운트합니다.
+    Count characters excluding HTML tags.
 
     Args:
-        html_content: HTML 콘텐츠
+        html_content: HTML content
 
     Returns:
-        글자수 (공백 포함)
+        Character count (including spaces)
     """
-    # HTML 태그 제거
+    # Remove HTML tags
     text = re.sub(r'<[^>]+>', '', html_content)
 
-    # 이미지 placeholder 제거
+    # Remove image placeholders
     text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
 
-    # 연속된 공백을 단일 공백으로
+    # Normalize consecutive spaces to single space
     text = re.sub(r'\s+', ' ', text)
 
     return len(text.strip())
@@ -186,15 +186,15 @@ def count_chars_excluding_html(html_content: str) -> int:
 
 def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
     """
-    텍스트를 지정된 길이로 자릅니다.
+    Truncate text to specified length.
 
     Args:
-        text: 원본 텍스트
-        max_length: 최대 길이
-        suffix: 말줄임 표시 (기본값: "...")
+        text: Original text
+        max_length: Maximum length
+        suffix: Ellipsis indicator (default: "...")
 
     Returns:
-        잘린 텍스트
+        Truncated text
     """
     if len(text) <= max_length:
         return text
@@ -204,13 +204,13 @@ def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
 
 def parse_time_ago(time_str: str) -> Optional[int]:
     """
-    '~시간 전', '~일 전' 형식의 문자열을 분 단위로 변환합니다.
+    Convert '~시간 전', '~일 전' format strings to minutes.
 
     Args:
-        time_str: 시간 문자열 (예: "3시간 전", "1일 전")
+        time_str: Time string (e.g., "3시간 전", "1일 전")
 
     Returns:
-        분 단위 시간 (파싱 실패 시 None)
+        Time in minutes (None if parsing fails)
     """
     patterns = [
         (r'(\d+)\s*분\s*전', 1),
@@ -228,13 +228,13 @@ def parse_time_ago(time_str: str) -> Optional[int]:
 
 def sanitize_for_markdown(text: str) -> str:
     """
-    마크다운 특수문자를 이스케이프합니다.
+    Escape markdown special characters.
 
     Args:
-        text: 원본 텍스트
+        text: Original text
 
     Returns:
-        이스케이프된 텍스트
+        Escaped text
     """
     special_chars = ['\\', '`', '*', '_', '{', '}', '[', ']', '(', ')', '#', '+', '-', '.', '!', '|']
 

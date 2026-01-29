@@ -1,40 +1,40 @@
-# STEP 2: 주제 확정 및 키워드 확장
+# STEP 2: Topic Confirmation and Keyword Expansion
 
-선택된 주제를 확정하고 관련 키워드를 확장합니다.
+Confirm the selected topic and expand related keywords.
 
-## 진행 상태
-
-```
-[STEP 2/8] 주제 확정 ████████░░░░░░░░░░░░░░░░░░░░ 25%
-```
-
----
-
-## 2-1. 주제 확정 메시지
+## Progress Status
 
 ```
-✅ 선택된 주제: "{주제}"
-
-이 주제로 블로그 글을 작성합니다.
-자료 수집을 시작합니다...
+[STEP 2/8] Topic confirmation ████████░░░░░░░░░░░░░░░░░░░░ 25%
 ```
 
 ---
 
-## 2-2. 키워드 확장
+## 2-1. Topic Confirmation Message
 
-선택된 주제에서 관련 검색 키워드를 확장합니다:
+```
+✅ Selected topic: "{topic}"
 
-### 확장 방법
-1. **동의어/유사어**: 주제의 다른 표현
-2. **세부 주제**: 하위 카테고리
-3. **연관 질문**: 독자들이 궁금해할 내용
-4. **시의성 키워드**: 연도, 최신, 변경 등
+A blog post will be written on this topic.
+Starting material collection...
+```
 
-### 키워드 확장 예시
+---
 
-| 입력 키워드 | 확장 키워드 |
-|------------|------------|
+## 2-2. Keyword Expansion
+
+Expand related search keywords from the selected topic:
+
+### Expansion Methods
+1. **Synonyms/Similar terms**: Alternative expressions for the topic
+2. **Subtopics**: Sub-categories
+3. **Related questions**: What readers would be curious about
+4. **Timeliness keywords**: Year, latest, changes, etc.
+
+### Keyword Expansion Examples
+
+| Input Keyword | Expanded Keywords |
+|---------------|-------------------|
 | 0세 적금 | 신생아 적금 금리, 아기 적금 추천 2026, 영유아 적금 비교 |
 | 육아휴직 | 육아휴직 급여 계산, 육아휴직 연장 방법, 2026 육아휴직 변경 |
 | 주담대 금리 | 주택담보대출 금리비교, 변동금리 고정금리, 은행별 주담대 |
@@ -42,49 +42,49 @@
 
 ---
 
-## 2-3. 검색 키워드 세트 생성
+## 2-3. Generate Search Keyword Set
 
-병렬 검색을 위한 키워드 세트를 준비합니다:
+Prepare keyword sets for parallel searching:
 
 ```yaml
-primary_keyword: "{메인 주제}"
+primary_keyword: "{main topic}"
 secondary_keywords:
-  - "{확장 키워드 1}"
-  - "{확장 키워드 2}"
-  - "{확장 키워드 3}"
+  - "{expanded keyword 1}"
+  - "{expanded keyword 2}"
+  - "{expanded keyword 3}"
 image_keywords:
-  - "{주제} 인포그래픽"
-  - "{주제} 비교표"
-  - "{주제} 설명 이미지"
+  - "{topic} 인포그래픽"
+  - "{topic} 비교표"
+  - "{topic} 설명 이미지"
 ```
 
 ---
 
-## 2-4. 프로젝트 디렉토리 생성
+## 2-4. Create Project Directory
 
-Python 스크립트를 사용하여 출력 디렉토리를 자동 생성합니다:
+Use Python script to auto-generate output directory:
 
 ```python
 from scripts.setup import create_project_structure
 
 project_path = create_project_structure(
-    topic="{주제}",
+    topic="{topic}",
     base_dir="./경제 블로그"
 )
-# 결과: ./경제 블로그/2026-01-27/주제명/
-#       ├── images/
-#       └── .metadata.json
+# Result: ./경제 블로그/2026-01-27/topic-name/
+#         ├── images/
+#         └── .metadata.json
 ```
 
-### 생성되는 구조
+### Generated Structure
 ```
-./경제 블로그/YYYY-MM-DD/주제명/
-├── images/           # 이미지 저장 디렉토리
-└── .metadata.json    # 메타데이터 파일
+./경제 블로그/YYYY-MM-DD/topic-name/
+├── images/           # Image storage directory
+└── .metadata.json    # Metadata file
 ```
 
 ---
 
-## 다음 단계
+## Next Step
 
-키워드 확장 완료 → **[STEP 3: 병렬 자료 수집](step3-research.md)**
+Keyword expansion complete → **[STEP 3: Parallel Research](step3-research.md)**

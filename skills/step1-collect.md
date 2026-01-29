@@ -1,92 +1,92 @@
-# STEP 1: 트렌딩 주제 수집 및 선택
+# STEP 1: Trending Topic Collection and Selection
 
-Chrome DevTools MCP를 사용하여 네이버 경제 숏텐츠에서 오늘의 인기 주제를 수집하고, 사용자가 선택합니다.
+Use Chrome DevTools MCP to collect today's popular topics from Naver Economy Shortents, and let the user select one.
 
-## 진행 상태
+## Progress Status
 
 ```
-[STEP 1/8] 주제 수집 ████░░░░░░░░░░░░░░░░░░░░░░░░ 12%
+[STEP 1/8] Topic collection ████░░░░░░░░░░░░░░░░░░░░░░░░ 12%
 ```
 
 ---
 
-## 1-1. 네이버 경제 숏텐츠 페이지 접근
+## 1-1. Access Naver Economy Shortents Page
 
-Chrome DevTools MCP 도구를 사용하여 페이지에 접근합니다:
+Use Chrome DevTools MCP tools to access the page:
 
 ```
-1. mcp__chrome-devtools__navigate_page 호출:
+1. Call mcp__chrome-devtools__navigate_page:
    - type: "url"
    - url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
    - timeout: 30000
 
-2. mcp__chrome-devtools__take_snapshot 호출:
-   - 페이지 콘텐츠 스냅샷 획득
+2. Call mcp__chrome-devtools__take_snapshot:
+   - Capture page content snapshot
 ```
 
 ---
 
-## 1-2. 주제 추출
+## 1-2. Topic Extraction
 
-스냅샷에서 경제 관련 숏텐츠 링크를 파싱합니다:
+Parse economy-related shortents links from the snapshot:
 
-**추출 대상:**
-- `link` 요소 중 숏텐츠 콘텐츠 (uid 패턴으로 식별)
-- 각 링크에서 제목(StaticText)과 시간 정보 추출
+**Extraction targets:**
+- `link` elements for shortents content (identify by uid pattern)
+- Extract title (StaticText) and time information from each link
 
-**추출 데이터:**
-- 제목 (메인 타이틀)
-- 부제목/설명
-- 게시 시간 (N시간 전, N일 전)
+**Extracted data:**
+- Title (main title)
+- Subtitle/description
+- Post time (N hours ago, N days ago)
 
 ---
 
-## 1-3. 10개 주제 선별 및 제시
+## 1-3. Select and Present 10 Topics
 
-수집된 주제 중 시사성과 블로그 적합성을 기준으로 10개를 선별하여 표로 제시합니다:
+Select 10 topics from collected items based on timeliness and blog suitability, then present in a table:
 
 ```
-📊 오늘의 경제 블로그 추천 주제 TOP 10
+📊 Today's Top 10 Recommended Economy Blog Topics
 
-| # | 주제 | 핵심 내용 | 시점 | 추천 이유 |
-|---|------|----------|------|----------|
-| 1 | {제목} | {부제목/설명} | {시간} | {시사성/관심도 분석} |
-| 2 | {제목} | {부제목/설명} | {시간} | {시사성/관심도 분석} |
+| # | Topic | Key Content | Time | Recommendation Reason |
+|---|-------|-------------|------|----------------------|
+| 1 | {title} | {subtitle/description} | {time} | {timeliness/interest analysis} |
+| 2 | {title} | {subtitle/description} | {time} | {timeliness/interest analysis} |
 | ... | ... | ... | ... | ... |
-| 10 | {제목} | {부제목/설명} | {시간} | {시사성/관심도 분석} |
+| 10 | {title} | {subtitle/description} | {time} | {timeliness/interest analysis} |
 ```
 
-### 주제 선별 기준
-1. **시사성**: 최근 24시간 이내 뉴스 우선
-2. **검색량**: 트렌딩 순위 상위 우선
-3. **블로그 적합성**: 정보 전달형 콘텐츠 적합 여부
-4. **독자 관심도**: 일상생활 연관성
+### Topic Selection Criteria
+1. **Timeliness**: Prioritize news within 24 hours
+2. **Search volume**: Prioritize higher trending rankings
+3. **Blog suitability**: Suitable for informational content
+4. **Reader interest**: Relevance to daily life
 
 ---
 
-## 1-4. 사용자 선택
+## 1-4. User Selection
 
-AskUserQuestion 도구를 사용하여 사용자가 주제를 선택하도록 합니다:
+Use AskUserQuestion tool to let user select a topic:
 
-**질문 구성:**
-- 첫 번째 질문: 1~4번 주제 선택지
-- 두 번째 질문: 5~8번 주제 선택지 (위에 없는 경우)
-- "기타" 옵션으로 직접 입력 가능
+**Question structure:**
+- First question: Topic choices 1-4
+- Second question: Topic choices 5-8 (if not in above)
+- "Other" option for custom input
 
-**선택 후:**
-- 선택된 주제를 기반으로 STEP 2 진행
-- 사용자가 직접 입력한 경우 해당 키워드 사용
-
----
-
-## 1-5. 주제 직접 입력 (선택적)
-
-사용자가 `/search-blogging 주제` 형태로 직접 주제를 입력한 경우:
-- STEP 1을 건너뛰고 바로 STEP 2로 진행
-- 입력된 주제 키워드 사용
+**After selection:**
+- Proceed to STEP 2 based on selected topic
+- Use the keyword if user directly inputs
 
 ---
 
-## 다음 단계
+## 1-5. Direct Topic Input (Optional)
 
-주제가 선택되면 → **[STEP 2: 주제 확정 및 키워드 확장](step2-confirm.md)**
+If user directly inputs a topic in `/search-blogging topic` format:
+- Skip STEP 1 and proceed directly to STEP 2
+- Use the input topic keyword
+
+---
+
+## Next Step
+
+When topic is selected → **[STEP 2: Topic Confirmation and Keyword Expansion](step2-confirm.md)**

@@ -1,100 +1,100 @@
-# STEP 8: 수정 루프
+# STEP 8: Revision Loop
 
-완성본을 제시하고 사용자 피드백을 받습니다.
+Present the completed work and receive user feedback.
 
-## 진행 상태
-
-```
-[STEP 8/8] 검토/수정 ████████████████████████████ 100%
-```
-
----
-
-## 8-1. 완성 안내
+## Progress Status
 
 ```
-✅ 블로그 글 작성 완료!
-
-📁 저장 위치
-./경제 블로그/YYYY-MM-DD/주제명/
-├── 본문.html (HTML 파일)
-├── 이미지 가이드.md (이미지 생성 가이드)
-├── 참조.md (출처 목록)
-└── images/  (참고 이미지 + 생성된 SVG)
-
-📋 네이버 블로그에 붙여넣기 방법
-1. 본문.html 파일을 브라우저에서 열기 (더블클릭)
-2. Cmd+A (전체 선택) → Cmd+C (복사)
-3. 네이버 블로그 에디터에서 Cmd+V (붙여넣기)
-4. [이미지 N 삽입] 위치에 실제 이미지 업로드
-
-📊 작성 정보
-- 본문 글자수: XXXX자 (순수 본문 기준)
-- 이미지 가이드: N개
-  - 🔷 SVG 생성: N개
-  - 🎨 AI 생성: N개
-  - 📷 참고 이미지: N개
-- 태그: N개
-
-수정이 필요하시면 말씀해주세요.
-- "제목 변경해줘"
-- "톤을 더 친근하게"
-- "2번째 섹션 내용 보강해줘"
-- "이미지 가이드 추가해줘"
-- "SVG로 바로 생성해줘"
-
-완료되셨으면 "완료"라고 해주세요.
+[STEP 8/8] Review/Edit ████████████████████████████ 100%
 ```
 
 ---
 
-## 8-2. 수정 요청 처리
-
-### 지원하는 수정 유형
-
-| 수정 요청 | 처리 |
-|----------|------|
-| "제목 변경해줘" | 새로운 제목 3개 제안 |
-| "톤을 더 친근하게/전문적으로" | 톤앤매너 변경하여 전체 재작성 |
-| "N번째 섹션 내용 보강해줘" | 해당 섹션만 수정 |
-| "글자수 늘려줘/줄여줘" | 지정 글자수에 맞게 조정 |
-| "태그 변경해줘" | 새로운 태그 제안 |
-| "이미지 가이드 추가해줘" | 추가 이미지 가이드 생성 |
-| "SVG로 바로 생성해줘" | svg-canvas-mcp로 SVG 파일 생성 |
-| "표 추가해줘" | 관련 데이터 표 삽입 |
-
-### 수정 프로세스
+## 8-1. Completion Notice
 
 ```
-1. 사용자 수정 요청 접수
-2. 해당 부분만 수정 (전체 재작성 최소화)
-3. 수정된 내용 미리보기 제시
-4. 파일 업데이트
-5. 완성본 다시 제시
+✅ Blog post writing complete!
+
+📁 Save Location
+./경제 블로그/YYYY-MM-DD/topic-name/
+├── 본문.html (HTML file)
+├── 이미지 가이드.md (Image generation guide)
+├── 참조.md (Source list)
+└── images/  (Reference images + Generated SVGs)
+
+📋 How to Paste into Naver Blog
+1. Open 본문.html file in browser (double-click)
+2. Cmd+A (select all) → Cmd+C (copy)
+3. Cmd+V (paste) in Naver Blog editor
+4. Upload actual images at [이미지 N 삽입] positions
+
+📊 Writing Info
+- Body character count: XXXX chars (pure body text)
+- Image guides: N
+  - 🔷 SVG generation: N
+  - 🎨 AI generation: N
+  - 📷 Reference images: N
+- Tags: N
+
+Let me know if you need any revisions.
+- "Change the title"
+- "Make the tone more friendly"
+- "Expand the 2nd section"
+- "Add more image guides"
+- "Generate SVG directly"
+
+Say "done" when you're finished.
 ```
 
 ---
 
-## 8-3. SVG 이미지 즉시 생성
+## 8-2. Handling Revision Requests
 
-사용자가 "SVG로 바로 생성해줘" 요청 시:
+### Supported Revision Types
+
+| Revision Request | Action |
+|-----------------|--------|
+| "Change the title" | Suggest 3 new titles |
+| "Make tone more friendly/professional" | Rewrite entire content with new tone |
+| "Expand section N" | Modify only that section |
+| "Increase/decrease character count" | Adjust to specified count |
+| "Change tags" | Suggest new tags |
+| "Add image guide" | Generate additional image guide |
+| "Generate SVG directly" | Create SVG file via svg-canvas-mcp |
+| "Add a table" | Insert related data table |
+
+### Revision Process
 
 ```
-어떤 이미지를 SVG로 생성할까요?
-
-이미지 가이드.md의 이미지 목록:
-1. 썸네일 (1200x630px)
-2. 금리 비교 차트 (800x450px)
-3. 신청 절차 인포그래픽 (800x600px)
-
-번호를 선택하거나 "전체"라고 해주세요.
+1. Receive user revision request
+2. Modify only relevant parts (minimize full rewrites)
+3. Present modified content preview
+4. Update files
+5. Present completed work again
 ```
 
-### SVG 생성 실행
+---
+
+## 8-3. Immediate SVG Image Generation
+
+When user requests "Generate SVG directly":
+
+```
+Which image should be generated as SVG?
+
+Image list from 이미지 가이드.md:
+1. Thumbnail (1200x630px)
+2. Interest rate comparison chart (800x450px)
+3. Application process infographic (800x600px)
+
+Select a number or say "all".
+```
+
+### SVG Generation Execution
 
 ```python
-# svg-canvas-mcp 도구 사용
-# 예: 막대 차트 생성
+# Using svg-canvas-mcp tools
+# Example: Creating bar chart
 
 mcp__svg-canvas__svg_create(width=800, height=450, background="#ffffff")
 mcp__svg-canvas__draw_rect(x=200, y=260, width=120, height=90, fill="#B0B0B0")
@@ -106,12 +106,12 @@ mcp__svg-canvas__svg_save(filePath="./images/02_금리비교차트.svg")
 
 ---
 
-## 8-4. 수정 후 파일 업데이트
+## 8-4. File Update After Revision
 
 ```python
 from scripts.writer import save_blog_files
 
-# 수정된 내용으로 파일 다시 저장
+# Save files again with modified content
 files = save_blog_files(
     project_path=project_path,
     html_content=updated_html_content,
@@ -123,62 +123,62 @@ files = save_blog_files(
 
 ---
 
-## 8-5. 무제한 수정 루프
+## 8-5. Unlimited Revision Loop
 
-- 사용자 요청에 따라 해당 부분만 수정
-- 수정 후 다시 완성본 제시
-- **무제한 반복 가능**
-
-```
-수정 완료!
-
-📝 변경 사항
-- {변경된 내용 요약}
-
-📊 현재 정보
-- 본문 글자수: XXXX자
-- 이미지 가이드: N개
-
-추가 수정이 필요하시면 말씀해주세요.
-완료되셨으면 "완료"라고 해주세요.
-```
-
----
-
-## 8-6. 종료 조건
-
-다음 중 하나에 해당하면 워크플로우 종료:
-- 사용자가 "완료", "끝", "OK", "확인" 등 종료 의사 표시
-- 또는 추가 수정 요청 없이 대화 종료
-
-### 종료 메시지
+- Modify only relevant parts per user request
+- Present completed work again after modification
+- **Unlimited repeats allowed**
 
 ```
-✨ 블로그 글 작성이 완료되었습니다!
+Revision complete!
 
-📁 최종 저장 위치: ./경제 블로그/YYYY-MM-DD/주제명/
+📝 Changes Made
+- {summary of changes}
 
-사용법 요약:
-1. 본문.html → 브라우저에서 열어 복사 → 블로그에 붙여넣기
-2. 이미지 가이드.md → AI 또는 SVG로 이미지 생성
-3. [이미지 N 삽입] 위치에 이미지 업로드
+📊 Current Info
+- Body character count: XXXX chars
+- Image guides: N
 
-다음 글을 작성하시려면 /search-blogging 을 다시 실행해주세요.
+Let me know if you need more revisions.
+Say "done" when you're finished.
 ```
 
 ---
 
-## 에러 처리
+## 8-6. Exit Conditions
 
-### 검색 실패 시
+Workflow ends when one of these occurs:
+- User indicates completion with "done", "finished", "OK", "confirm", etc.
+- Or conversation ends without additional revision requests
+
+### Exit Message
+
 ```
-⚠️ {소스명} 검색 중 오류가 발생했습니다.
-다른 소스의 자료로 진행할까요?
+✨ Blog post writing is complete!
 
-1️⃣ 현재 수집된 자료로 진행
-2️⃣ 검색 재시도
-3️⃣ 작업 중단
+📁 Final save location: ./경제 블로그/YYYY-MM-DD/topic-name/
+
+Usage summary:
+1. 본문.html → Open in browser, copy → paste into blog
+2. 이미지 가이드.md → Generate images with AI or SVG
+3. Upload images at [이미지 N 삽입] positions
+
+Run /search-blogging again to write your next post.
 ```
 
-### 글자수 자동 조정
-작성 완료 전 자체 검증하여 1800~1900자 범위에 맞게 조정 (목표: 1850자)
+---
+
+## Error Handling
+
+### When Search Fails
+```
+⚠️ An error occurred while searching {source name}.
+Would you like to proceed with materials from other sources?
+
+1️⃣ Proceed with currently collected materials
+2️⃣ Retry search
+3️⃣ Cancel operation
+```
+
+### Auto Character Count Adjustment
+Before completion, self-validate and adjust to 1800~1900 character range (target: 1850 chars)

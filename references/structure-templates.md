@@ -1,136 +1,136 @@
-# 글 구성 템플릿
+# Article Structure Templates
 
-블로그 글의 구조를 선택할 때 사용자에게 제시할 옵션입니다.
+Options to present to users when selecting blog article structure.
 
 ---
 
-## 1. 7단계 구성 (Standard)
+## 1. 7-Step Structure (Standard)
 
-가장 표준적이고 완성도 높은 구성입니다.
+The most standard and comprehensive structure.
 
 ```
 ┌─────────────────────────────────────┐
-│ 1. 도입 (Hook)                      │
-│    - 공감 유도 또는 질문으로 시작    │
-│    - 50~100자                       │
+│ 1. Introduction (Hook)              │
+│    - Start with empathy or question │
+│    - 50~100 characters              │
 ├─────────────────────────────────────┤
-│ 2. 문제 제기                         │
-│    - 왜 이 주제가 중요한지           │
-│    - 100~150자                      │
+│ 2. Problem Statement                │
+│    - Why this topic matters         │
+│    - 100~150 characters             │
 ├─────────────────────────────────────┤
-│ 3. 핵심 정보 1                       │
-│    - 첫 번째 주요 포인트             │
-│    - 300~400자                      │
+│ 3. Core Information 1               │
+│    - First main point               │
+│    - 300~400 characters             │
 ├─────────────────────────────────────┤
-│ 4. 핵심 정보 2                       │
-│    - 두 번째 주요 포인트             │
-│    - 300~400자                      │
+│ 4. Core Information 2               │
+│    - Second main point              │
+│    - 300~400 characters             │
 ├─────────────────────────────────────┤
-│ 5. 핵심 정보 3                       │
-│    - 세 번째 주요 포인트             │
-│    - 300~400자                      │
+│ 5. Core Information 3               │
+│    - Third main point               │
+│    - 300~400 characters             │
 ├─────────────────────────────────────┤
-│ 6. 실용 팁/적용법                    │
-│    - 독자가 바로 적용할 수 있는 팁   │
-│    - 200~300자                      │
+│ 6. Practical Tips/Application       │
+│    - Tips readers can apply now     │
+│    - 200~300 characters             │
 ├─────────────────────────────────────┤
-│ 7. 마무리 (CTA)                     │
-│    - 요약 + 행동 유도                │
-│    - 100~150자                      │
+│ 7. Closing (CTA)                    │
+│    - Summary + call to action       │
+│    - 100~150 characters             │
 └─────────────────────────────────────┘
 ```
 
-### 적합한 글 유형
-- 정보성 글 (가이드, 설명)
-- 비교/분석 글
-- 리스트형 콘텐츠
+### Suitable Article Types
+- Informational articles (guides, explanations)
+- Comparison/Analysis articles
+- List-style content
 
 ---
 
-## 2. 5단계 구성 (Compact)
+## 2. 5-Step Structure (Compact)
 
-핵심만 전달하는 간결한 구성입니다.
+A concise structure that delivers only the essentials.
 
 ```
 ┌─────────────────────────────────────┐
-│ 1. 도입 + 문제 제기                  │
-│    - 공감과 문제를 함께 제시         │
-│    - 150~200자                      │
+│ 1. Introduction + Problem           │
+│    - Present empathy and problem    │
+│    - 150~200 characters             │
 ├─────────────────────────────────────┤
-│ 2. 핵심 정보 (통합)                  │
-│    - 주요 포인트들을 통합 제시       │
-│    - 600~800자                      │
+│ 2. Core Information (Integrated)    │
+│    - Present main points together   │
+│    - 600~800 characters             │
 ├─────────────────────────────────────┤
-│ 3. 상세 설명/예시                    │
-│    - 구체적 사례나 데이터            │
-│    - 400~500자                      │
+│ 3. Detailed Explanation/Examples    │
+│    - Specific cases or data         │
+│    - 400~500 characters             │
 ├─────────────────────────────────────┤
-│ 4. 실용 팁                          │
-│    - 바로 적용 가능한 조언           │
-│    - 200~300자                      │
+│ 4. Practical Tips                   │
+│    - Immediately applicable advice  │
+│    - 200~300 characters             │
 ├─────────────────────────────────────┤
-│ 5. 마무리                           │
-│    - 요약 + 행동 유도                │
-│    - 100~150자                      │
+│ 5. Closing                          │
+│    - Summary + call to action       │
+│    - 100~150 characters             │
 └─────────────────────────────────────┘
 ```
 
-### 적합한 글 유형
-- 빠른 정보 전달
-- 뉴스/트렌드 요약
-- 간단한 팁 공유
+### Suitable Article Types
+- Quick information delivery
+- News/Trend summaries
+- Simple tip sharing
 
 ---
 
-## 3. 자유 구성 (Flexible)
+## 3. Flexible Structure
 
-주제와 내용에 따라 유연하게 구성합니다.
+Adapt flexibly based on topic and content.
 
-### 구성 원칙
-1. **도입은 필수** - 첫 문장에서 관심 끌기
-2. **핵심은 3개 이하** - 집중도 유지
-3. **마무리는 행동 유도** - 독자 참여 유도
+### Composition Principles
+1. **Introduction is mandatory** - Grab attention in first sentence
+2. **Maximum 3 core points** - Maintain focus
+3. **Closing should prompt action** - Encourage reader engagement
 
-### 자유 구성 시 고려사항
-- 스토리텔링: 시간순 흐름
-- 문제-해결: 원인→결과→해결책
-- Q&A: 질문-답변 형식
-- Before-After: 변화 전후 비교
+### Considerations for Flexible Structure
+- Storytelling: Chronological flow
+- Problem-Solution: Cause→Effect→Solution
+- Q&A: Question-Answer format
+- Before-After: Before and after comparison
 
-### 글자수 배분 예시 (1800~2000자 기준)
+### Character Distribution Example (1800~2000 total)
 ```
-도입: 10% (180~200자)
-본문: 75% (1350~1500자)
-마무리: 15% (270~300자)
-```
-
----
-
-## 사용자 질문 템플릿
-
-```
-글의 구성을 선택해주세요:
-
-1️⃣ **7단계 구성** - 도입→문제→핵심1,2,3→팁→마무리 (정보성 글에 최적)
-2️⃣ **5단계 구성** - 도입→핵심→상세→팁→마무리 (간결한 전달에 적합)
-3️⃣ **자유 구성** - AI가 주제에 맞게 유연하게 구성 (스토리텔링/Q&A 등)
+Introduction: 10% (180~200 characters)
+Body: 75% (1350~1500 characters)
+Closing: 15% (270~300 characters)
 ```
 
 ---
 
-## 공통 작성 규칙
+## User Prompt Template
 
-### 소제목 작성법
-- 호기심 유발하는 질문형: "왜 0세 적금이 필수일까?"
-- 숫자 활용: "3가지 이유", "TOP 5"
-- 핵심 키워드 포함
+```
+Please select the article structure:
 
-### 문단 작성법
-- 한 문단 3~5문장
-- 첫 문장에 핵심 정보
-- 마지막 문장에 다음 내용 연결
+1️⃣ **7-Step Structure** - Intro→Problem→Core1,2,3→Tips→Closing (optimal for informational articles)
+2️⃣ **5-Step Structure** - Intro→Core→Details→Tips→Closing (suitable for concise delivery)
+3️⃣ **Flexible Structure** - AI adapts structure to topic (storytelling/Q&A etc.)
+```
 
-### 가독성 향상
-- 문장 길이 30자 이내 권장
-- 전문 용어 사용 시 괄호 설명
-- 숫자/데이터는 표로 정리
+---
+
+## Common Writing Rules
+
+### Subheading Writing Tips
+- Curiosity-inducing questions: "왜 0세 적금이 필수일까?"
+- Use numbers: "3가지 이유", "TOP 5"
+- Include key keywords
+
+### Paragraph Writing Tips
+- 3~5 sentences per paragraph
+- Key information in first sentence
+- Connect to next content in last sentence
+
+### Readability Improvement
+- Recommended sentence length under 30 characters
+- Explain technical terms in parentheses
+- Organize numbers/data in tables

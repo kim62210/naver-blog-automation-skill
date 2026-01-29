@@ -1,7 +1,7 @@
 """
-이미지 수집 모듈
+Image collection module
 
-URL에서 이미지를 다운로드하고, 파일명을 생성하며, 메타데이터를 추출합니다.
+Downloads images from URLs, generates filenames, and extracts metadata.
 """
 
 import hashlib
@@ -21,25 +21,25 @@ from .setup import update_metadata
 
 @dataclass
 class ImageInfo:
-    """이미지 정보"""
-    url: str                         # 원본 URL
-    source_url: str                  # 출처 페이지 URL
-    source_name: str                 # 출처명 (뉴스/블로그/검색)
-    description: str                 # 설명
-    image_type: str                  # 유형 (인포그래픽/표/일러스트/사진)
-    filename: Optional[str] = None   # 저장된 파일명
-    local_path: Optional[Path] = None  # 로컬 저장 경로
-    downloaded: bool = False         # 다운로드 성공 여부
-    error: Optional[str] = None      # 오류 메시지
+    """Image information"""
+    url: str                         # Original URL
+    source_url: str                  # Source page URL
+    source_name: str                 # Source name (뉴스/블로그/검색)
+    description: str                 # Description
+    image_type: str                  # Type (인포그래픽/표/일러스트/사진)
+    filename: Optional[str] = None   # Saved filename
+    local_path: Optional[Path] = None  # Local storage path
+    downloaded: bool = False         # Download success status
+    error: Optional[str] = None      # Error message
 
 
 @dataclass
 class CollectionResult:
-    """수집 결과"""
-    total: int                       # 총 수집 시도 수
-    success: int                     # 성공 수
-    failed: int                      # 실패 수
-    images: List[ImageInfo] = field(default_factory=list)  # 이미지 목록
+    """Collection result"""
+    total: int                       # Total collection attempts
+    success: int                     # Success count
+    failed: int                      # Failure count
+    images: List[ImageInfo] = field(default_factory=list)  # Image list
 
 
 def download_image(
@@ -49,16 +49,16 @@ def download_image(
     user_agent: Optional[str] = None
 ) -> bool:
     """
-    이미지를 다운로드합니다.
+    Download an image.
 
     Args:
-        url: 이미지 URL
-        save_path: 저장 경로
-        timeout: 타임아웃 (초)
-        user_agent: User-Agent 헤더
+        url: Image URL
+        save_path: Save path
+        timeout: Timeout (seconds)
+        user_agent: User-Agent header
 
     Returns:
-        성공 여부
+        Success status
     """
     config = get_config()
 
@@ -76,7 +76,7 @@ def download_image(
         with urllib.request.urlopen(request, timeout=timeout) as response:
             content = response.read()
 
-            # 최소 크기 확인 (100 bytes 이상)
+            # Check minimum size (100 bytes or more)
             if len(content) < 100:
                 return False
 
@@ -99,15 +99,15 @@ def collect_images(
     config: Optional[Dict] = None
 ) -> CollectionResult:
     """
-    여러 이미지를 수집합니다.
+    Collect multiple images.
 
     Args:
-        images: 이미지 정보 리스트 [{"url", "source_url", "source_name", "description", "type"}]
-        output_dir: 출력 디렉토리
-        config: 설정 딕셔너리
+        images: Image info list [{"url", "source_url", "source_name", "description", "type"}]
+        output_dir: Output directory
+        config: Configuration dictionary
 
     Returns:
-        CollectionResult 객체
+        CollectionResult object
     """
     if config is None:
         config = get_config()
@@ -125,10 +125,10 @@ def collect_images(
         description = img_data.get("description", f"이미지{idx}")
         image_type = img_data.get("type", "기타")
 
-        # 파일 확장자 추출
+        # Extract file extension
         extension = extract_extension_from_url(url)
 
-        # 파일명 생성
+        # Generate filename
         filename = format_image_filename(idx, source_name, description, extension)
         save_path = images_dir / filename
 
@@ -141,7 +141,7 @@ def collect_images(
             filename=filename,
         )
 
-        # 다운로드 시도
+        # Attempt download
         success = download_image(url, save_path, timeout=timeout)
 
         if success:
@@ -150,7 +150,7 @@ def collect_images(
             result.success += 1
         else:
             image_info.downloaded = False
-            image_info.error = "다운로드 실패"
+            image_info.error = "Download failed"
             result.failed += 1
 
         result.images.append(image_info)
@@ -160,13 +160,13 @@ def collect_images(
 
 def validate_image_url(url: str) -> bool:
     """
-    이미지 URL의 유효성을 검사합니다.
+    Validate image URL.
 
     Args:
-        url: 이미지 URL
+        url: Image URL
 
     Returns:
-        유효 여부
+        Validity status
     """
     if not url:
         return False
@@ -174,23 +174,23 @@ def validate_image_url(url: str) -> bool:
     try:
         parsed = urlparse(url)
 
-        # 스킴 확인
+        # Check scheme
         if parsed.scheme not in ("http", "https"):
             return False
 
-        # 호스트 확인
+        # Check host
         if not parsed.netloc:
             return False
 
-        # 이미지 확장자 확인 (선택적)
+        # Check image extension (optional)
         image_extensions = ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp')
         path_lower = parsed.path.lower()
 
-        # 확장자가 있으면 이미지 확장자인지 확인
+        # If extension exists, verify it's an image extension
         if '.' in parsed.path:
             return any(path_lower.endswith(ext) for ext in image_extensions)
 
-        # 확장자가 없으면 일단 허용 (CDN 등)
+        # Allow if no extension (CDN, etc.)
         return True
 
     except Exception:
@@ -199,13 +199,13 @@ def validate_image_url(url: str) -> bool:
 
 def generate_image_metadata(images: List[ImageInfo]) -> List[Dict[str, Any]]:
     """
-    이미지 목록에서 메타데이터를 생성합니다.
+    Generate metadata from image list.
 
     Args:
-        images: ImageInfo 리스트
+        images: ImageInfo list
 
     Returns:
-        메타데이터 딕셔너리 리스트
+        Metadata dictionary list
     """
     metadata = []
 
@@ -237,11 +237,11 @@ def save_collection_result(
     project_path: Path
 ) -> None:
     """
-    수집 결과를 메타데이터 파일에 저장합니다.
+    Save collection result to metadata file.
 
     Args:
-        result: CollectionResult 객체
-        project_path: 프로젝트 디렉토리 경로
+        result: CollectionResult object
+        project_path: Project directory path
     """
     metadata = generate_image_metadata(result.images)
 
@@ -257,28 +257,28 @@ def save_collection_result(
 
 def print_collection_report(result: CollectionResult) -> None:
     """
-    수집 결과 보고서를 출력합니다.
+    Print collection result report.
 
     Args:
-        result: CollectionResult 객체
+        result: CollectionResult object
     """
     print("=" * 50)
-    print("📷 이미지 수집 결과")
+    print("📷 Image Collection Result")
     print("=" * 50)
-    print(f"총 시도: {result.total}건")
-    print(f"성공: {result.success}건")
-    print(f"실패: {result.failed}건")
+    print(f"Total attempts: {result.total}")
+    print(f"Success: {result.success}")
+    print(f"Failed: {result.failed}")
     print("-" * 50)
 
     if result.success > 0:
-        print("\n✅ 다운로드 완료:")
+        print("\n✅ Downloads completed:")
         for img in result.images:
             if img.downloaded:
                 print(f"  - {img.filename}")
                 print(f"    └ {img.description} ({img.image_type})")
 
     if result.failed > 0:
-        print("\n❌ 다운로드 실패 (URL만 기록):")
+        print("\n❌ Downloads failed (URL recorded):")
         for img in result.images:
             if not img.downloaded:
                 print(f"  - {img.description}: {img.error}")
@@ -292,19 +292,19 @@ def create_image_list_from_search_results(
     source_name: str
 ) -> List[Dict[str, str]]:
     """
-    검색 결과에서 이미지 리스트를 생성합니다.
+    Create image list from search results.
 
     Args:
-        search_results: 검색 결과 리스트
-        source_name: 출처명
+        search_results: Search result list
+        source_name: Source name
 
     Returns:
-        이미지 정보 리스트
+        Image info list
     """
     images = []
 
     for result in search_results:
-        # 이미지 URL 추출 (다양한 필드명 지원)
+        # Extract image URL (support various field names)
         image_url = (
             result.get("image_url") or
             result.get("thumbnail") or
@@ -327,7 +327,7 @@ def create_image_list_from_search_results(
 
 
 if __name__ == "__main__":
-    # 테스트
+    # Test
     test_images = [
         {
             "url": "https://example.com/test.jpg",

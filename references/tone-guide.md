@@ -1,96 +1,96 @@
-# 톤앤매너 가이드
+# Tone & Manner Guide
 
-블로그 글 작성 시 사용자에게 아래 3가지 옵션을 제시합니다.
+Present the following 3 options to users when writing blog posts.
 
 ---
 
-## 1. 전문적 (Professional)
+## 1. Professional
 
-### 특징
-- 객관적이고 신뢰감 있는 어조
-- 데이터와 근거 중심 서술
-- 정확한 용어 사용
-- 격식체 사용 (합니다/습니다)
+### Characteristics
+- Objective and trustworthy tone
+- Data and evidence-based writing
+- Accurate terminology
+- Formal speech style (합니다/습니다)
 
-### 적합한 주제
-- 금융/투자 정보
-- 의료/건강 정보
-- 법률/세무 정보
-- 기술/IT 정보
+### Suitable Topics
+- Finance/Investment information
+- Medical/Health information
+- Legal/Tax information
+- Technology/IT information
 
-### 예시 문장
+### Example Sentences
 ```
 "2026년 1월 기준, 0세 전용 적금 상품의 평균 금리는 연 8.5%로
 일반 적금 대비 약 2배 높은 수준입니다."
 ```
 
-### 피해야 할 표현
-- 과도한 감정 표현 (대박, 미쳤어요)
-- 비격식체 (했거든요, 됐어요)
-- 개인적 의견 과다
+### Expressions to Avoid
+- Excessive emotional expressions (대박, 미쳤어요)
+- Informal speech (했거든요, 됐어요)
+- Too many personal opinions
 
 ---
 
-## 2. 친근한 (Friendly)
+## 2. Friendly
 
-### 특징
-- 대화하듯 편안한 어조
-- 개인 경험 공유
-- 독자에게 말 거는 표현
-- 비격식체 자연스럽게 사용
+### Characteristics
+- Casual conversational tone
+- Sharing personal experiences
+- Expressions that engage the reader
+- Natural use of informal speech
 
-### 적합한 주제
-- 육아/생활 정보
-- 리뷰/후기
-- 취미/여행
-- 일상 팁
+### Suitable Topics
+- Parenting/Living information
+- Reviews/Experiences
+- Hobbies/Travel
+- Daily tips
 
-### 예시 문장
+### Example Sentences
 ```
 "아이 낳고 적금? '이자 몇 푼 받자고?' 했거든요.
 근데 0세는 진짜 달랐습니다. 직접 가입해보니까 '이건 안 하면 손해다' 싶더라고요."
 ```
 
-### 권장 표현
-- 공감 표현 (저도 그랬어요, 맞죠?)
-- 솔직한 경험담
-- 이모티콘 적절히 사용 가능
+### Recommended Expressions
+- Empathy expressions (저도 그랬어요, 맞죠?)
+- Honest experiences
+- Appropriate emoji usage
 
 ---
 
-## 3. 중립적 (Neutral)
+## 3. Neutral
 
-### 특징
-- 정보 전달 중심
-- 감정 표현 최소화
-- 균형 잡힌 시각
-- 반말/존댓말 혼합 가능
+### Characteristics
+- Information-focused delivery
+- Minimal emotional expression
+- Balanced perspective
+- Mixed formal/informal speech
 
-### 적합한 주제
-- 비교 분석 글
-- 가이드/매뉴얼
-- 뉴스 요약
-- 범용 정보
+### Suitable Topics
+- Comparison analysis articles
+- Guides/Manuals
+- News summaries
+- General information
 
-### 예시 문장
+### Example Sentences
 ```
 "0세 적금은 출생 후 1년 이내 가입 가능한 영유아 전용 상품이다.
 일반 적금 대비 금리가 높고, 은행별 축하금 혜택이 있다."
 ```
 
-### 특징적 요소
-- 팩트 중심 나열
-- 주관적 평가 자제
-- 다양한 선택지 제시
+### Key Elements
+- Fact-based enumeration
+- Avoid subjective evaluations
+- Present various options
 
 ---
 
-## 사용자 질문 템플릿
+## User Prompt Template
 
 ```
-글의 톤앤매너를 선택해주세요:
+Please select the tone & manner for your article:
 
-1️⃣ **전문적** - 객관적이고 신뢰감 있는 어조 (금융/건강/법률 정보에 적합)
-2️⃣ **친근한** - 대화하듯 편안한 어조 (육아/리뷰/일상 팁에 적합)
-3️⃣ **중립적** - 정보 전달 중심의 균형 잡힌 어조 (비교 분석/가이드에 적합)
+1️⃣ **Professional** - Objective and trustworthy tone (suitable for finance/health/legal information)
+2️⃣ **Friendly** - Casual conversational tone (suitable for parenting/reviews/daily tips)
+3️⃣ **Neutral** - Balanced information-focused tone (suitable for comparisons/guides)
 ```

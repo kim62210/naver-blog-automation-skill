@@ -1,90 +1,90 @@
-# STEP 7: 본문 작성 및 저장
+# STEP 7: Content Writing and Saving
 
-선택된 옵션에 따라 본문을 작성하고 파일로 저장합니다.
+Write the body content according to selected options and save to files.
 
-## 진행 상태
+## Progress Status
 
 ```
-[STEP 7/8] 본문 작성 ████████████████████████████░ 87%
+[STEP 7/8] Content writing ████████████████████████████░ 87%
 ```
 
 ---
 
-## 7-1. 글자수 규칙 (중요!)
+## 7-1. Character Count Rules (Important!)
 
-### 목표
-- **본문.html 엄격 준수: 1850자 내외**
-- **허용 범위: 1800~1900자 (±50자)**
-- 공백 포함
+### Target
+- **Strictly follow 본문.html: Around 1850 characters**
+- **Allowed range: 1800~1900 characters (±50)**
+- Including spaces
 
-### 카운트 제외 항목
-- 모든 HTML 태그 (`<h2>`, `<p>`, `<table>`, `<blockquote>` 등)
-- 이미지 placeholder (`[이미지 N 삽입]`)
-- CSS 스타일 코드
-- 해시태그 목록
+### Excluded from Count
+- All HTML tags (`<h2>`, `<p>`, `<table>`, `<blockquote>`, etc.)
+- Image placeholders (`[이미지 N 삽입]`)
+- CSS style code
+- Hashtag list
 
-### 카운트 포함 항목
-- 본문 텍스트 (도입, 핵심 내용, 마무리)
-- 표 안의 텍스트 내용
-- CTA 문구
-- 모든 실제 콘텐츠 텍스트
+### Included in Count
+- Body text (intro, core content, closing)
+- Text content inside tables
+- CTA text
+- All actual content text
 
-### Python 글자수 검증
+### Python Character Validation
 
 ```python
 from scripts.validator import validate_char_count, print_validation_report
 
 result = validate_char_count(html_content)
 # result.is_valid: True/False
-# result.char_count: 실제 글자수
-# result.message: 상태 메시지
+# result.char_count: Actual character count
+# result.message: Status message
 ```
 
 ---
 
-## 7-2. HTML 형식 가이드
+## 7-2. HTML Format Guide
 
-본문.html은 **완전한 HTML 파일**로 작성됩니다.
-브라우저에서 열고 전체 선택(Cmd+A) → 복사(Cmd+C) → 네이버 블로그에 붙여넣기(Cmd+V)하면 서식이 그대로 유지됩니다.
+본문.html is written as a **complete HTML file**.
+Open in browser, select all (Cmd+A) → copy (Cmd+C) → paste into Naver Blog (Cmd+V) to preserve formatting.
 
-### HTML 태그 매핑
+### HTML Tag Mapping
 
-| 요소 | HTML 태그 |
-|------|-----------|
-| 대제목 | `<h2 style="font-size:24px;font-weight:bold;">` |
-| 중제목 | `<h3 style="font-size:18px;font-weight:bold;">` |
-| 소제목 | `<h4 style="font-size:15px;font-weight:bold;">` |
-| 인용구 | `<blockquote style="border-left:4px solid #ccc;padding-left:16px;color:#666;">` |
-| 강조인용 | `<blockquote style="background:#f0f7ff;padding:16px;border-radius:8px;">` |
-| 글자-특대 | `<p style="font-size:24px;font-weight:bold;text-align:center;">` |
-| 글자-소 | `<p style="font-size:12px;color:#888;">` |
-| 구분선 | `<hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">` |
-| 이미지 위치 | `<p style="color:#999;text-align:center;">[이미지 N 삽입]</p>` |
+| Element | HTML Tag |
+|---------|----------|
+| Main heading | `<h2 style="font-size:24px;font-weight:bold;">` |
+| Subheading | `<h3 style="font-size:18px;font-weight:bold;">` |
+| Minor heading | `<h4 style="font-size:15px;font-weight:bold;">` |
+| Blockquote | `<blockquote style="border-left:4px solid #ccc;padding-left:16px;color:#666;">` |
+| Highlighted quote | `<blockquote style="background:#f0f7ff;padding:16px;border-radius:8px;">` |
+| Extra large text | `<p style="font-size:24px;font-weight:bold;text-align:center;">` |
+| Small text | `<p style="font-size:12px;color:#888;">` |
+| Divider | `<hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">` |
+| Image position | `<p style="color:#999;text-align:center;">[이미지 N 삽입]</p>` |
 
 ---
 
-## 7-3. 본문 작성
+## 7-3. Body Writing
 
-### 템플릿 사용
+### Using Templates
 
 ```python
 from scripts.writer import generate_html_content
 
 sections = [
-    {"title": "도입", "content": "...", "has_image": False},
-    {"title": "핵심 정보 1", "content": "...", "has_image": True},
-    {"title": "핵심 정보 2", "content": "...", "has_image": True},
+    {"title": "Introduction", "content": "...", "has_image": False},
+    {"title": "Core Information 1", "content": "...", "has_image": True},
+    {"title": "Core Information 2", "content": "...", "has_image": True},
     # ...
 ]
 
 html_content = generate_html_content(
-    title="{제목}",
+    title="{title}",
     sections=sections,
-    tags=["태그1", "태그2", ...]
+    tags=["tag1", "tag2", ...]
 )
 ```
 
-### 직접 작성 시 참고
+### Manual Writing Reference
 
 ```html
 <!DOCTYPE html>
@@ -93,26 +93,26 @@ html_content = generate_html_content(
   <meta charset="UTF-8">
   <style>
     body { font-family: 'Noto Sans KR', sans-serif; line-height: 1.8; max-width: 700px; margin: 0 auto; padding: 20px; }
-    /* ... 스타일 생략 ... */
+    /* ... styles omitted ... */
   </style>
 </head>
 <body>
 
-<h1>{제목}</h1>
+<h1>{title}</h1>
 
 <div class="image-placeholder">[이미지 1 삽입 - 썸네일]</div>
 
 <hr>
 
-<h2>{소제목}</h2>
+<h2>{subheading}</h2>
 
 <blockquote>
-"{인용 문구}"
+"{quote text}"
 </blockquote>
 
-<p>{본문 내용}</p>
+<p>{body content}</p>
 
-<!-- 이미지, 표, 추가 섹션... -->
+<!-- images, tables, additional sections... -->
 
 <p class="tags">#태그1 #태그2 #태그3 ...</p>
 
@@ -122,83 +122,83 @@ html_content = generate_html_content(
 
 ---
 
-## 7-4. 이미지 가이드 작성 (별도 파일)
+## 7-4. Image Guide Writing (Separate File)
 
-**중요**: 본문.html에는 이미지 가이드를 포함하지 않습니다.
-모든 이미지 가이드는 **이미지 가이드.md** 파일에 별도로 작성합니다.
+**Important**: Do not include image guides in 본문.html.
+All image guides are written separately in the **이미지 가이드.md** file.
 
-### 이미지 가이드 모드
+### Image Guide Modes
 
-#### 📷 모드 A: 참고 이미지 사용
+#### 📷 Mode A: Use Reference Image
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {이미지 역할 설명}
+[Image N] {image role description}
 
-📷 다운로드된 이미지: ./images/{파일명}
-📍 원본 출처: {URL}
-💡 활용: {직접 사용 / 레이아웃 참고 / 색감 참고}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### 🎨 모드 B: AI 이미지 생성 (Gemini API 자동 생성)
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {이미지 역할 설명}
-
-🎨 AI 생성
-
-[한글 설명]
-{이미지에 담길 내용을 한글로 상세 설명}
-
-[AI 생성 프롬프트]
-{영문 프롬프트 - Gemini API에서 자동 생성됨}
-
-[스타일 가이드]
-- 색상: {주요 색상}
-- 분위기: {분위기 키워드}
-- 형식: {인포그래픽/일러스트/사진풍/플랫디자인}
-- 비율: {16:9 / 1:1 / 4:3}
+📷 Downloaded image: ./images/{filename}
+📍 Original source: {URL}
+💡 Usage: {direct use / reference layout / reference colors}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**Gemini API 자동 생성**:
-모드 B 이미지는 Gemini API를 통해 자동으로 생성됩니다.
-프롬프트 작성 후 별도의 수동 작업 없이 이미지가 `./images/` 폴더에 저장됩니다.
-
-#### 🔷 모드 C: SVG 이미지 생성 가이드
+#### 🎨 Mode B: AI Image Generation (Auto-generated via Gemini API)
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[이미지 N] {이미지 역할 설명}
+[Image N] {image role description}
 
-🔷 SVG 생성
+🎨 AI Generation
 
-[이미지 설명]
-{이미지에 담길 내용을 상세 설명}
+[Korean Description]
+{detailed description of image content in Korean}
 
-[SVG 가이딩]
-- 캔버스 크기: {width}x{height}
-- 배경색: {hex 색상코드}
-- 주요 요소:
-  1. {요소1}: {위치}, {크기}, {색상}
-  2. {요소2}: {위치}, {크기}, {색상}
+[AI Generation Prompt]
+{English prompt - auto-generated via Gemini API}
 
-[색상 팔레트]
-- 메인: {hex}
-- 포인트: {hex}
-- 배경: {hex}
+[Style Guide]
+- Colors: {main colors}
+- Mood: {mood keywords}
+- Format: {infographic/illustration/photo style/flat design}
+- Ratio: {16:9 / 1:1 / 4:3}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
-[저장 경로]
-./images/{파일명}.svg
+**Gemini API Auto-Generation**:
+Mode B images are automatically generated via Gemini API.
+After writing the prompt, images are saved to `./images/` folder without manual work.
+
+#### 🔷 Mode C: SVG Image Generation Guide
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Image N] {image role description}
+
+🔷 SVG Generation
+
+[Image Description]
+{detailed description of image content}
+
+[SVG Guidance]
+- Canvas size: {width}x{height}
+- Background color: {hex color code}
+- Key elements:
+  1. {element1}: {position}, {size}, {color}
+  2. {element2}: {position}, {size}, {color}
+
+[Color Palette]
+- Main: {hex}
+- Point: {hex}
+- Background: {hex}
+
+[Save Path]
+./images/{filename}.svg
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-## 7-5. 태그 생성
+## 7-5. Tag Generation
 
-- 8~10개 자동 생성
-- 핵심 키워드 + 관련 키워드
-- # 기호로 시작
+- Auto-generate 8~10 tags
+- Core keywords + related keywords
+- Start with # symbol
 
 ```
 #육아휴직 #육아휴직급여 #2026육아휴직 #육아휴직신청 #출산휴가 #부모급여 #워킹맘 #워킹대디
@@ -206,24 +206,24 @@ html_content = generate_html_content(
 
 ---
 
-## 7-6. Gemini API로 이미지 자동 생성
+## 7-6. Auto-Generate Images via Gemini API
 
-모드 B(🎨 AI 생성) 이미지는 Gemini API를 통해 자동으로 생성됩니다.
+Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
 
-### Python으로 이미지 생성
+### Generate Images with Python
 
 ```python
 from scripts.gemini_image import GeminiImageGenerator
 from scripts.prompt_converter import generate_image_prompts_for_batch
 
-# 이미지 가이드에서 프롬프트 추출
+# Extract prompts from image guide
 with open("이미지 가이드.md", "r", encoding="utf-8") as f:
     image_guide_content = f.read()
 
 prompts = generate_image_prompts_for_batch(image_guide_content)
 # [{"prompt": "...", "filename": "01_썸네일.png"}, ...]
 
-# Gemini API로 일괄 생성
+# Batch generate via Gemini API
 generator = GeminiImageGenerator()
 result = await generator.generate_batch(
     prompts=prompts,
@@ -231,38 +231,38 @@ result = await generator.generate_batch(
 )
 
 print(result.summary())
-# 📊 배치 생성 결과: 5/5 성공 (100.0%), 소요시간: 25.3초
+# 📊 Batch generation result: 5/5 success (100.0%), elapsed: 25.3s
 ```
 
-### 환경변수 설정 (필수)
+### Environment Variable Setup (Required)
 
 ```bash
 export GOOGLE_API_KEY="your-api-key"
 ```
 
-### 생성 제한사항
+### Generation Limits
 
-- **분당 15회** 요청 제한 (자동 딜레이 적용)
-- **일일 500장** 무료 한도 (gemini-2.0-flash-exp)
-- 한도 초과 시 imagen-3.0으로 자동 폴백
+- **15 requests per minute** limit (auto-delay applied)
+- **500 images/day** free quota (gemini-2.0-flash-exp)
+- Auto-fallback to imagen-3.0 when quota exceeded
 
 ---
 
-## 7-7. 파일 저장
+## 7-7. File Saving
 
-### 저장 경로
+### Save Path
 ```
-./경제 블로그/YYYY-MM-DD/주제명/
+./경제 블로그/YYYY-MM-DD/topic-name/
 ├── 본문.html
 ├── 이미지 가이드.md
 ├── 참조.md
 └── images/
-    ├── 01_썸네일.png      ← Gemini 자동 생성
-    ├── 02_비교표.png       ← Gemini 자동 생성
+    ├── 01_썸네일.png      ← Gemini auto-generated
+    ├── 02_비교표.png       ← Gemini auto-generated
     └── ...
 ```
 
-### Python으로 저장
+### Save with Python
 
 ```python
 from scripts.writer import save_blog_files
@@ -272,15 +272,15 @@ files = save_blog_files(
     html_content=html_content,
     image_guide=image_guide_md,
     references=references_md,
-    validate=True  # 글자수 자동 검증
+    validate=True  # Auto character count validation
 )
 ```
 
 ---
 
-## 7-8. 글자수 검증 및 조정
+## 7-8. Character Count Validation and Adjustment
 
-작성 완료 후 글자수를 검증합니다:
+Validate character count after writing:
 
 ```python
 from scripts.validator import print_validation_report
@@ -288,22 +288,22 @@ from scripts.validator import print_validation_report
 result = print_validation_report(html_content)
 
 if not result.is_valid:
-    # 초과/미달 시 조정 필요
+    # Adjustment needed when over/under
     print(suggest_adjustment(result))
 ```
 
-### 글자수 초과 시
-- 중복되는 내용 제거
-- 부연 설명 간소화
-- 불필요한 수식어 삭제
+### When Over Character Limit
+- Remove redundant content
+- Simplify supplementary explanations
+- Delete unnecessary modifiers
 
-### 글자수 미달 시
-- 핵심 정보 섹션에 구체적인 예시 추가
-- 실용 팁 섹션 확장
-- 관련 통계나 데이터 보충
+### When Under Character Limit
+- Add specific examples to core information sections
+- Expand practical tips section
+- Add related statistics or data
 
 ---
 
-## 다음 단계
+## Next Step
 
-파일 저장 완료 → **[STEP 8: 수정 루프](step8-revise.md)**
+File saving complete → **[STEP 8: Revision Loop](step8-revise.md)**

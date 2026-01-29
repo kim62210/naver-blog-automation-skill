@@ -1,124 +1,124 @@
-# STEP 5: 글 작성 옵션 선택
+# STEP 5: Select Writing Options
 
-사용자에게 3가지를 순서대로 질문합니다.
+Ask the user 3 questions in sequence.
 
-## 진행 상태
-
-```
-[STEP 5/8] 옵션 선택 ████████████████████░░░░░░░░ 62%
-```
-
----
-
-## 5-1. 톤앤매너
+## Progress Status
 
 ```
-글의 톤앤매너를 선택해주세요:
-
-1️⃣ **전문적** - 객관적이고 신뢰감 있는 어조 (금융/건강/법률 정보에 적합)
-2️⃣ **친근한** - 대화하듯 편안한 어조 (육아/리뷰/일상 팁에 적합)
-3️⃣ **중립적** - 정보 전달 중심의 균형 잡힌 어조 (비교 분석/가이드에 적합)
-```
-
-### 톤앤매너 상세
-
-| 톤 | 문체 | 적합 주제 | 예시 문장 |
-|-----|------|----------|----------|
-| 전문적 | 합니다/습니다 | 금융, 건강, 법률 | "이 상품의 금리는 연 7%로, 시중 평균 대비 높은 편입니다." |
-| 친근한 | 비격식체 | 육아, 리뷰, 일상 | "이거 진짜 대박이에요! 저도 써보고 깜짝 놀랐어요~" |
-| 중립적 | 혼합 | 비교, 가이드, 뉴스 | "A 상품과 B 상품을 비교해 보면 다음과 같은 차이가 있습니다." |
-
-> 상세 가이드: `references/tone-guide.md` 참조
-
----
-
-## 5-2. 글 구성
-
-```
-글의 구성을 선택해주세요:
-
-1️⃣ **7단계 구성** - 도입→문제→핵심1,2,3→팁→마무리 (정보성 글에 최적)
-2️⃣ **5단계 구성** - 도입→핵심→상세→팁→마무리 (간결한 전달에 적합)
-3️⃣ **자유 구성** - AI가 주제에 맞게 유연하게 구성 (스토리텔링/Q&A 등)
-```
-
-### 구성별 글자수 배분 (목표: 1850자)
-
-#### 7단계 구성
-| 섹션 | 글자수 |
-|------|--------|
-| 도입 | 50~100자 |
-| 문제 제기 | 100~150자 |
-| 핵심 정보 1 | 300~400자 |
-| 핵심 정보 2 | 300~400자 |
-| 핵심 정보 3 | 300~400자 |
-| 실용 팁 | 200~300자 |
-| 마무리 | 100~150자 |
-
-#### 5단계 구성
-| 섹션 | 글자수 |
-|------|--------|
-| 도입+문제 | 150~200자 |
-| 핵심 정보 | 600~800자 |
-| 상세 설명 | 400~500자 |
-| 실용 팁 | 200~300자 |
-| 마무리 | 100~150자 |
-
-> 상세 가이드: `references/structure-templates.md` 참조
-
----
-
-## 5-3. 이미지 수
-
-AI가 주제를 분석하여 권장 이미지 수를 먼저 제안합니다:
-
-```
-이미지 가이드를 몇 개 포함할까요?
-
-주제 분석 결과 **N개**를 권장합니다:
-- 썸네일 1개
-- 본문 이미지 N개
-- 인포그래픽 N개
-
-1️⃣ **권장대로** (N개)
-2️⃣ **최소** (3개 - 썸네일 + 핵심 2개)
-3️⃣ **풍부하게** (N+2개 - 모든 섹션에 이미지)
-```
-
-### 이미지 수 기준
-
-| 글 길이 | 권장 이미지 수 | 구성 |
-|---------|--------------|------|
-| 1500자 미만 | 3개 | 썸네일 + 핵심 2개 |
-| 1500~2000자 | 5개 | 썸네일 + 섹션별 1개 + 인포그래픽 |
-| 2000자 이상 | 7개 이상 | 모든 섹션에 이미지 |
-
-> 상세 가이드: `references/image-guide.md` 참조
-
----
-
-## 5-4. 옵션 요약
-
-선택된 옵션을 요약하여 확인합니다:
-
-```
-📝 글 작성 옵션 확인
-
-• 톤앤매너: {선택된 톤}
-• 글 구성: {선택된 구성}
-• 이미지 수: {선택된 수}개
-
-이 설정으로 제목 후보를 생성할까요?
+[STEP 5/8] Options ████████████████████░░░░░░░░ 62%
 ```
 
 ---
 
-## config.yaml 연동
+## 5-1. Tone & Manner
 
-선택된 옵션은 config.yaml의 프리셋과 연동됩니다:
+```
+Please select the tone & manner for your article:
+
+1️⃣ **Professional** - Objective and trustworthy tone (suitable for finance/health/legal information)
+2️⃣ **Friendly** - Casual conversational tone (suitable for parenting/reviews/daily tips)
+3️⃣ **Neutral** - Balanced information-focused tone (suitable for comparisons/guides)
+```
+
+### Tone & Manner Details
+
+| Tone | Style | Suitable Topics | Example Sentence |
+|------|-------|-----------------|------------------|
+| Professional | 합니다/습니다 (formal) | Finance, Health, Legal | "이 상품의 금리는 연 7%로, 시중 평균 대비 높은 편입니다." |
+| Friendly | Informal speech | Parenting, Reviews, Daily life | "이거 진짜 대박이에요! 저도 써보고 깜짝 놀랐어요~" |
+| Neutral | Mixed | Comparison, Guide, News | "A 상품과 B 상품을 비교해 보면 다음과 같은 차이가 있습니다." |
+
+> Detailed guide: See `references/tone-guide.md`
+
+---
+
+## 5-2. Article Structure
+
+```
+Please select the article structure:
+
+1️⃣ **7-Step Structure** - Intro→Problem→Core1,2,3→Tips→Closing (optimal for informational articles)
+2️⃣ **5-Step Structure** - Intro→Core→Details→Tips→Closing (suitable for concise delivery)
+3️⃣ **Flexible Structure** - AI adapts structure to topic (storytelling/Q&A etc.)
+```
+
+### Character Distribution by Structure (Target: 1850 chars)
+
+#### 7-Step Structure
+| Section | Characters |
+|---------|------------|
+| Introduction | 50~100 chars |
+| Problem statement | 100~150 chars |
+| Core information 1 | 300~400 chars |
+| Core information 2 | 300~400 chars |
+| Core information 3 | 300~400 chars |
+| Practical tips | 200~300 chars |
+| Closing | 100~150 chars |
+
+#### 5-Step Structure
+| Section | Characters |
+|---------|------------|
+| Intro + Problem | 150~200 chars |
+| Core information | 600~800 chars |
+| Detailed explanation | 400~500 chars |
+| Practical tips | 200~300 chars |
+| Closing | 100~150 chars |
+
+> Detailed guide: See `references/structure-templates.md`
+
+---
+
+## 5-3. Number of Images
+
+AI analyzes the topic and suggests recommended number of images first:
+
+```
+How many image guides should be included?
+
+Based on topic analysis, **N images** are recommended:
+- 1 thumbnail
+- N body images
+- N infographics
+
+1️⃣ **As recommended** (N images)
+2️⃣ **Minimum** (3 images - thumbnail + 2 core images)
+3️⃣ **Rich** (N+2 images - images for all sections)
+```
+
+### Image Count Guidelines
+
+| Article Length | Recommended Images | Composition |
+|----------------|-------------------|-------------|
+| Under 1500 chars | 3 | Thumbnail + 2 core images |
+| 1500~2000 chars | 5 | Thumbnail + 1 per section + infographic |
+| Over 2000 chars | 7+ | Images for all sections |
+
+> Detailed guide: See `references/image-guide.md`
+
+---
+
+## 5-4. Options Summary
+
+Summarize and confirm selected options:
+
+```
+📝 Writing Options Confirmed
+
+• Tone & Manner: {selected tone}
+• Article Structure: {selected structure}
+• Number of Images: {selected count}
+
+Proceed with generating title candidates?
+```
+
+---
+
+## config.yaml Integration
+
+Selected options integrate with config.yaml presets:
 
 ```yaml
-# config.yaml에서 로드
+# Load from config.yaml
 tones:
   professional:
     name: "전문적"
@@ -132,6 +132,6 @@ structures:
 
 ---
 
-## 다음 단계
+## Next Step
 
-옵션 선택 완료 → **[STEP 6: 제목 선택](step6-title.md)**
+Options selection complete → **[STEP 6: Title Selection](step6-title.md)**

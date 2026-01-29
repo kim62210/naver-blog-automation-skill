@@ -1,57 +1,57 @@
-# 참조 자료
+# References
 
-## 작성일
+## Date
 ${date}
 
-## 주제
+## Topic
 ${topic}
 
 ---
 
-## 텍스트 자료
+## Text Sources
 
-### 네이버 뉴스
+### Naver News
 ${news_sources}
 
-### 네이버 블로그
+### Naver Blog
 ${blog_sources}
 
-### 웹 검색
+### Web Search
 ${web_sources}
 
 ---
 
-## 다운로드된 이미지
+## Downloaded Images
 
-저장 위치: `./images/`
+Save location: `./images/`
 
-| # | 파일명 | 설명 | 원본 URL | 출처 |
-|---|--------|------|----------|------|
+| # | Filename | Description | Original URL | Source |
+|---|----------|-------------|--------------|--------|
 ${downloaded_images_table}
 
-### 다운로드 실패 (URL만 기록)
-| # | 설명 | 이미지 URL | 출처 | 실패 사유 |
-|---|------|-----------|------|----------|
+### Download Failed (URL only)
+| # | Description | Image URL | Source | Failure Reason |
+|---|-------------|-----------|--------|----------------|
 ${failed_images_table}
 
 ---
 
-## 이미지 활용 가이드
+## Image Usage Guide
 
-본문 작성 시 ./images/ 폴더의 이미지를 활용:
+Use images from ./images/ folder when writing content:
 
-1. **직접 사용**: 블로그에 업로드하여 사용 (출처 표기 필수)
-2. **참고용**: 유사한 스타일/구성으로 직접 제작
-3. **저작권 주의**:
-   - 뉴스 이미지: 언론사 저작권 확인
-   - 블로그 이미지: 원작자 허락 또는 출처 표기
-   - AI 생성 권장: 저작권 문제 없음
+1. **Direct use**: Upload to blog (source attribution required)
+2. **Reference**: Create similar style/composition yourself
+3. **Copyright notice**:
+   - News images: Check media company copyright
+   - Blog images: Get original author's permission or attribute source
+   - AI generation recommended: No copyright issues
 
 ---
 
-## 참고 사항
-- 자료 수집일: ${date}
-- 텍스트 자료: ${total_text_sources}건
-- 다운로드 이미지: ${downloaded_count}건
-- 다운로드 실패: ${failed_count}건
-- 총 이미지: ${total_images}건
+## Notes
+- Data collection date: ${date}
+- Text sources: ${total_text_sources} items
+- Downloaded images: ${downloaded_count} items
+- Download failed: ${failed_count} items
+- Total images: ${total_images} items

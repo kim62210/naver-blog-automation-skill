@@ -1,142 +1,142 @@
-# STEP 4: 수집 결과 요약 및 확인
+# STEP 4: Review Collection Results
 
-수집된 자료를 요약하여 사용자에게 확인받습니다.
+Summarize collected materials and get user confirmation.
 
-## 진행 상태
+## Progress Status
 
 ```
-[STEP 4/8] 결과 확인 ████████████████░░░░░░░░░░░░ 50%
+[STEP 4/8] Review ████████████████░░░░░░░░░░░░ 50%
 ```
 
 ---
 
-## 4-1. 요약 포맷
+## 4-1. Summary Format
 
 ```
-📊 자료 수집 완료
+📊 Material Collection Complete
 
-[텍스트 자료]
-• 네이버 뉴스: N건
-• 네이버 블로그: N건
-• 웹 검색: N건
-• 총 수집: N건
+[Text Materials]
+• Naver News: N items
+• Naver Blog: N items
+• Web search: N items
+• Total collected: N items
 
-[참고 이미지 - 다운로드 완료]
-• 뉴스 이미지: N건
-• 블로그 이미지: N건
-• 이미지 검색: N건
-• 총 다운로드: N건
-• 저장 위치: ./images/
+[Reference Images - Download Complete]
+• News images: N items
+• Blog images: N items
+• Image search: N items
+• Total downloaded: N items
+• Save location: ./images/
 
-[핵심 정보 요약]
-1. {핵심 정보 1}
-2. {핵심 정보 2}
-3. {핵심 정보 3}
+[Key Information Summary]
+1. {key information 1}
+2. {key information 2}
+3. {key information 3}
 ...
 
-[다운로드된 이미지 목록]
-1. 📷 01_뉴스_{설명}.jpg - {유형}
-   └ 출처: {출처 URL}
-2. 📷 02_블로그_{설명}.png - {유형}
-   └ 출처: {출처 URL}
+[Downloaded Image List]
+1. 📷 01_뉴스_{description}.jpg - {type}
+   └ Source: {source URL}
+2. 📷 02_블로그_{description}.png - {type}
+   └ Source: {source URL}
 ...
 
-[자료 충분성 판단]
-✅ 충분 / ⚠️ 보통 / ❌ 부족
+[Material Sufficiency Assessment]
+✅ Sufficient / ⚠️ Moderate / ❌ Insufficient
 
-이대로 글 작성을 진행할까요?
-1️⃣ 진행
-2️⃣ 추가 검색 (키워드 지정)
-3️⃣ 다른 주제로 변경
+Proceed with writing?
+1️⃣ Proceed
+2️⃣ Additional search (specify keyword)
+3️⃣ Change topic
 ```
 
 ---
 
-## 4-2. 자료 충분성 판단 기준
+## 4-2. Material Sufficiency Criteria
 
-### ✅ 충분
-- 텍스트 자료 15건 이상
-- 핵심 정보 요약 5개 이상 도출
-- 다양한 소스 (뉴스/블로그/공식사이트)
-- 참고 이미지 8건 이상
+### ✅ Sufficient
+- 15+ text materials
+- 5+ key information points extracted
+- Diverse sources (news/blog/official sites)
+- 8+ reference images
 
-### ⚠️ 보통
-- 텍스트 자료 10~15건
-- 핵심 정보 요약 3~5개 도출
-- 일부 소스 편중
-- 참고 이미지 5~8건
+### ⚠️ Moderate
+- 10~15 text materials
+- 3~5 key information points extracted
+- Some source bias
+- 5~8 reference images
 
-### ❌ 부족
-- 텍스트 자료 10건 미만
-- 핵심 정보 요약 3개 미만
-- 소스 단일화
-- 참고 이미지 5건 미만
-
----
-
-## 4-3. 자료 부족 시
-
-자료가 부족하다고 판단되면 사용자에게 알립니다:
-
-```
-⚠️ 수집된 자료가 충분하지 않습니다.
-
-[부족한 부분]
-- {구체적 내용}
-
-어떻게 진행할까요?
-1️⃣ 현재 자료로 진행 (내용이 얇을 수 있음)
-2️⃣ 추가 키워드로 검색: "{제안 키워드}"
-3️⃣ 다른 주제로 변경
-```
+### ❌ Insufficient
+- Less than 10 text materials
+- Less than 3 key information points extracted
+- Single source
+- Less than 5 reference images
 
 ---
 
-## 4-4. 핵심 정보 추출
+## 4-3. When Materials are Insufficient
 
-수집된 자료에서 글 작성에 필요한 핵심 정보를 추출합니다:
+Notify user when materials are deemed insufficient:
 
-### 추출 항목
-1. **핵심 개념**: 주제의 정의/개요
-2. **중요 수치/데이터**: 통계, 금액, 비율 등
-3. **비교 정보**: 장단점, 전후 비교
-4. **실용 정보**: 신청 방법, 주의사항
-5. **최신 동향**: 변경 사항, 트렌드
+```
+⚠️ Collected materials are insufficient.
 
-### 정보 구조화
+[Missing parts]
+- {specific content}
+
+How would you like to proceed?
+1️⃣ Proceed with current materials (content may be thin)
+2️⃣ Search with additional keyword: "{suggested keyword}"
+3️⃣ Change topic
+```
+
+---
+
+## 4-4. Key Information Extraction
+
+Extract key information needed for writing from collected materials:
+
+### Extraction Items
+1. **Key concepts**: Definition/overview of the topic
+2. **Important figures/data**: Statistics, amounts, percentages, etc.
+3. **Comparison information**: Pros and cons, before-after comparison
+4. **Practical information**: Application methods, precautions
+5. **Recent trends**: Changes, trends
+
+### Information Structure
 
 ```yaml
-topic: "{주제}"
+topic: "{topic}"
 key_concepts:
-  - "{핵심 개념 1}"
-  - "{핵심 개념 2}"
+  - "{key concept 1}"
+  - "{key concept 2}"
 data_points:
-  - "{수치/데이터 1}"
-  - "{수치/데이터 2}"
+  - "{figure/data 1}"
+  - "{figure/data 2}"
 comparisons:
-  - "{비교 정보}"
+  - "{comparison info}"
 practical_tips:
-  - "{실용 팁 1}"
-  - "{실용 팁 2}"
+  - "{practical tip 1}"
+  - "{practical tip 2}"
 recent_changes:
-  - "{최신 동향}"
+  - "{recent trend}"
 ```
 
 ---
 
-## 4-5. 참조 파일 생성
+## 4-5. Generate Reference File
 
-수집 결과를 참조.md 파일로 저장합니다:
+Save collection results to 참조.md file:
 
 ```python
 from scripts.writer import generate_references, save_blog_files
 
 references_md = generate_references(
-    topic="{주제}",
+    topic="{topic}",
     text_sources={
-        "네이버 뉴스": news_results,
-        "네이버 블로그": blog_results,
-        "웹 검색": web_results
+        "Naver News": news_results,
+        "Naver Blog": blog_results,
+        "Web Search": web_results
     },
     images=collected_images
 )
@@ -144,6 +144,6 @@ references_md = generate_references(
 
 ---
 
-## 다음 단계
+## Next Step
 
-사용자가 "진행"을 선택하면 → **[STEP 5: 글 작성 옵션 선택](step5-options.md)**
+When user selects "Proceed" → **[STEP 5: Select Writing Options](step5-options.md)**

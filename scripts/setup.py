@@ -1,7 +1,7 @@
 """
-프로젝트 초기화 모듈
+Project initialization module
 
-출력 디렉토리 자동 생성, 메타데이터 초기화 등을 담당합니다.
+Handles automatic output directory creation, metadata initialization, etc.
 """
 
 import json
@@ -20,21 +20,21 @@ def create_project_structure(
     config: Optional[Dict] = None
 ) -> Path:
     """
-    블로그 글 작성을 위한 프로젝트 디렉토리 구조를 생성합니다.
+    Create project directory structure for blog post writing.
 
-    구조:
-    ./경제 블로그/YYYY-MM-DD/주제명/
+    Structure:
+    ./경제 블로그/YYYY-MM-DD/topic-name/
     ├── images/
     └── .metadata.json
 
     Args:
-        topic: 주제명
-        base_dir: 기본 디렉토리 (없으면 설정에서 로드)
-        date: 날짜 (없으면 오늘 날짜)
-        config: 설정 딕셔너리
+        topic: Topic name
+        base_dir: Base directory (loads from config if not provided)
+        date: Date (uses today's date if not provided)
+        config: Configuration dictionary
 
     Returns:
-        생성된 프로젝트 디렉토리 경로
+        Created project directory path
     """
     if config is None:
         config = get_config()
@@ -46,21 +46,21 @@ def create_project_structure(
         date_format = get_config_value(config, "output", "date_format", default="%Y-%m-%d")
         date = get_today_date(date_format)
 
-    # 주제명 정규화
+    # Normalize topic name
     normalized_topic = normalize_filename(topic)
 
-    # 프로젝트 경로 생성
+    # Create project path
     project_path = Path(base_dir) / date / normalized_topic
 
-    # 디렉토리 생성
+    # Create directory
     project_path.mkdir(parents=True, exist_ok=True)
 
-    # 하위 디렉토리 생성
+    # Create subdirectories
     subdirs = get_config_value(config, "output", "subdirs", default=["images"])
     for subdir in subdirs:
         (project_path / subdir).mkdir(exist_ok=True)
 
-    # 메타데이터 파일 생성
+    # Create metadata file
     create_metadata_file(project_path, topic, config)
 
     return project_path
@@ -72,15 +72,15 @@ def create_metadata_file(
     config: Optional[Dict] = None
 ) -> Path:
     """
-    프로젝트 메타데이터 파일을 생성합니다.
+    Create project metadata file.
 
     Args:
-        project_path: 프로젝트 디렉토리 경로
-        topic: 주제명
-        config: 설정 딕셔너리
+        project_path: Project directory path
+        topic: Topic name
+        config: Configuration dictionary
 
     Returns:
-        메타데이터 파일 경로
+        Metadata file path
     """
     if config is None:
         config = get_config()
@@ -116,14 +116,14 @@ def update_metadata(
     updates: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
-    메타데이터 파일을 업데이트합니다.
+    Update metadata file.
 
     Args:
-        project_path: 프로젝트 디렉토리 경로
-        updates: 업데이트할 내용
+        project_path: Project directory path
+        updates: Content to update
 
     Returns:
-        업데이트된 메타데이터
+        Updated metadata
     """
     metadata_path = project_path / ".metadata.json"
 
@@ -133,7 +133,7 @@ def update_metadata(
     else:
         metadata = {}
 
-    # 깊은 업데이트
+    # Deep update
     def deep_update(base: dict, updates: dict):
         for key, value in updates.items():
             if key in base and isinstance(base[key], dict) and isinstance(value, dict):
@@ -152,13 +152,13 @@ def update_metadata(
 
 def load_metadata(project_path: Path) -> Optional[Dict[str, Any]]:
     """
-    메타데이터 파일을 로드합니다.
+    Load metadata file.
 
     Args:
-        project_path: 프로젝트 디렉토리 경로
+        project_path: Project directory path
 
     Returns:
-        메타데이터 딕셔너리 (없으면 None)
+        Metadata dictionary (None if not found)
     """
     metadata_path = project_path / ".metadata.json"
 
@@ -176,16 +176,16 @@ def find_existing_project(
     config: Optional[Dict] = None
 ) -> Optional[Path]:
     """
-    기존 프로젝트 디렉토리를 찾습니다.
+    Find existing project directory.
 
     Args:
-        topic: 주제명
-        base_dir: 기본 디렉토리
-        date: 날짜
-        config: 설정 딕셔너리
+        topic: Topic name
+        base_dir: Base directory
+        date: Date
+        config: Configuration dictionary
 
     Returns:
-        프로젝트 경로 (없으면 None)
+        Project path (None if not found)
     """
     if config is None:
         config = get_config()
@@ -211,15 +211,15 @@ def list_projects(
     config: Optional[Dict] = None
 ) -> list:
     """
-    프로젝트 목록을 반환합니다.
+    Return list of projects.
 
     Args:
-        base_dir: 기본 디렉토리
-        date: 특정 날짜 (없으면 모든 날짜)
-        config: 설정 딕셔너리
+        base_dir: Base directory
+        date: Specific date (all dates if not provided)
+        config: Configuration dictionary
 
     Returns:
-        프로젝트 정보 리스트
+        Project info list
     """
     if config is None:
         config = get_config()
@@ -255,42 +255,42 @@ def list_projects(
 
 def print_project_info(project_path: Path) -> None:
     """
-    프로젝트 정보를 출력합니다.
+    Print project information.
 
     Args:
-        project_path: 프로젝트 디렉토리 경로
+        project_path: Project directory path
     """
     metadata = load_metadata(project_path)
 
     print("=" * 50)
-    print(f"📁 프로젝트: {project_path}")
+    print(f"📁 Project: {project_path}")
     print("=" * 50)
 
     if metadata:
-        print(f"주제: {metadata.get('topic', 'N/A')}")
-        print(f"생성일: {metadata.get('created_at', 'N/A')}")
-        print(f"상태: {metadata.get('status', 'N/A')}")
+        print(f"Topic: {metadata.get('topic', 'N/A')}")
+        print(f"Created: {metadata.get('created_at', 'N/A')}")
+        print(f"Status: {metadata.get('status', 'N/A')}")
 
         if metadata.get("files"):
-            print("\n📄 파일:")
+            print("\n📄 Files:")
             for file_type, file_path in metadata["files"].items():
                 status = "✅" if file_path else "⬜"
-                print(f"  {status} {file_type}: {file_path or '미생성'}")
+                print(f"  {status} {file_type}: {file_path or 'Not created'}")
 
         if metadata.get("images"):
-            print(f"\n🖼️ 이미지: {len(metadata['images'])}개")
+            print(f"\n🖼️ Images: {len(metadata['images'])}")
     else:
-        print("메타데이터 없음")
+        print("No metadata")
 
     print("=" * 50)
 
 
 if __name__ == "__main__":
-    # 테스트
+    # Test
     test_topic = "2026년 육아휴직 변경사항"
 
-    print("프로젝트 구조 생성 테스트")
+    print("Project structure creation test")
     project_path = create_project_structure(test_topic)
-    print(f"생성된 경로: {project_path}")
+    print(f"Created path: {project_path}")
 
     print_project_info(project_path)
