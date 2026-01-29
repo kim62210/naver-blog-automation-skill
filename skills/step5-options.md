@@ -90,7 +90,7 @@ Based on topic analysis, **N images** are recommended:
 | Article Length | Recommended Images | Composition |
 |----------------|-------------------|-------------|
 | Under 1500 chars | 3 | Thumbnail + 2 core images |
-| 1500~2000 chars | 5 | Thumbnail + 1 per section + infographic |
+| 1500~2000 chars | 4 | Thumbnail + 2 core images + 1 infographic |
 | Over 2000 chars | 7+ | Images for all sections |
 
 > Detailed guide: See `references/image-guide.md`

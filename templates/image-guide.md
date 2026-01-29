@@ -18,7 +18,7 @@
 
 ### 🎨 AI Generation (Background Only)
 
-> **Note**: AI generates background image only. Text is added via SVG overlay.
+> **Note**: AI generates background image only. Text is added locally (Pillow) for clean Korean typography.
 
 **Korean Description:**
 ${thumbnail_description_kr}

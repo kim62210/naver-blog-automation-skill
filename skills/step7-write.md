@@ -130,66 +130,79 @@ All image guides are written separately in the **이미지 가이드.md** file.
 ### Image Guide Modes
 
 #### 📷 Mode A: Use Reference Image
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {image role description}
+```md
+## [Image N] {image role description}
 
-📷 Downloaded image: ./images/{filename}
-📍 Original source: {URL}
-💡 Usage: {direct use / reference layout / reference colors}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+### 📷 Reference Image
+- File: ./images/{filename}
+- Source: {URL}
+- Usage: direct use / layout reference / color reference
 ```
 
 #### 🎨 Mode B: AI Image Generation (Auto-generated via Gemini API)
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {image role description}
+````md
+## [Image N] {image role description}
 
-🎨 AI Generation
+### 🎨 AI Generation Prompt
 
-[Korean Description]
+**Korean Description:**
 {detailed description of image content in Korean}
 
-[AI Generation Prompt]
-{English prompt - auto-generated via Gemini API}
+**AI Generation Prompt:**
+```text
+{English prompt}
+```
 
-[Style Guide]
+**Style:**
 - Colors: {main colors}
 - Mood: {mood keywords}
 - Format: {infographic/illustration/photo style/flat design}
 - Ratio: {16:9 / 1:1 / 4:3}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+````
 
 **Gemini API Auto-Generation**:
 Mode B images are automatically generated via Gemini API.
 After writing the prompt, images are saved to `./images/` folder without manual work.
 
-#### 🔷 Mode C: SVG Image Generation Guide
+#### 🎨 Mode B-2: Background Only + Text Overlay (Recommended for thumbnails)
+
+````md
+## [Image N] {image role description}
+
+### 🎨 AI Generation (Background Only)
+
+**Korean Description:**
+{배경 설명 - 텍스트 제외}
+
+**AI Generation Prompt (Background Only):**
+```text
+{배경 전용 프롬프트 - NO TEXT 포함}
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {image role description}
 
-🔷 SVG Generation
+**[Text Overlay Config]**
+- main_text: "{main text}"
+- sub_text: "{sub text}" (optional)
+- position: "center" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right"
+- font_size: 48
+- font_color: "#FFFFFF"
+- shadow: true
+- background_box: false
+````
 
-[Image Description]
-{detailed description of image content}
+#### 🔷 Mode C: SVG Image Generation Guide
+```md
+## [Image N] {image role description}
 
-[SVG Guidance]
-- Canvas size: {width}x{height}
-- Background color: {hex color code}
-- Key elements:
-  1. {element1}: {position}, {size}, {color}
-  2. {element2}: {position}, {size}, {color}
+### 🔷 SVG Generation Guide
 
-[Color Palette]
-- Main: {hex}
-- Point: {hex}
-- Background: {hex}
+**Canvas:** {width}x{height}
+**Background:** {hex color code}
 
-[Save Path]
-./images/{filename}.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Elements:**
+1. {element1}: {position}, {size}, {color}
+2. {element2}: {position}, {size}, {color}
+
+**Save Path:** ./images/{filename}.svg
 ```
 
 ---
@@ -214,7 +227,7 @@ Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
 
 For better Korean text quality, use the new pipeline:
 1. Generate background image via Gemini (no text)
-2. Add text overlay via SVG composition
+2. Add text overlay locally (Pillow)
 3. Export final PNG
 
 ```python
@@ -279,7 +292,7 @@ with open("이미지 가이드.md", "r", encoding="utf-8") as f:
 result = await pipeline.process_image_guide(
     image_guide_content=image_guide_content,
     output_dir="./images/",
-    use_text_overlay=True  # Enable SVG text overlay for Mode B-2 items
+    use_text_overlay=True  # Enable local text overlay for Mode B-2 items
 )
 
 print(result.summary())
@@ -290,6 +303,8 @@ print(result.summary())
 
 ```bash
 export GOOGLE_API_KEY="your-api-key"
+# or
+export GEMINI_API_KEY="your-api-key"
 ```
 
 ### Generation Limits
@@ -300,14 +315,15 @@ export GOOGLE_API_KEY="your-api-key"
 
 ### Text Overlay Dependencies
 
-For SVG to PNG conversion, install one of:
+For text overlay, install dependencies:
 ```bash
-pip install cairosvg  # Recommended
-# or
-sudo apt install librsvg2-bin  # rsvg-convert
-# or
-pip install svglib reportlab  # Fallback
+python3 -m pip install -r requirements.txt
+# or (minimum)
+python3 -m pip install pillow
 ```
+
+> If Korean text renders poorly, set a font file path:
+> `export BLOG_FONT_PATH="/path/to/NanumGothic.ttf"`
 
 ---
 

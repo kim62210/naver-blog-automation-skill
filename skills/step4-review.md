@@ -17,28 +17,18 @@ Summarize collected materials and get user confirmation.
 
 [Text Materials]
 • Naver News: N items
-• Naver Blog: N items
-• Web search: N items
-• Total collected: N items
+• Official/Institutional: N items
+• Practical guide: N items
+• Total collected: N items (target: 6~10)
 
-[Reference Images - Download Complete]
-• News images: N items
-• Blog images: N items
-• Image search: N items
-• Total downloaded: N items
-• Save location: ./images/
+[Reference Images (Optional)]
+• Downloaded: N items (target: 0~3)
+• Save location: ./images/ (if any)
 
 [Key Information Summary]
 1. {key information 1}
 2. {key information 2}
 3. {key information 3}
-...
-
-[Downloaded Image List]
-1. 📷 01_뉴스_{description}.jpg - {type}
-   └ Source: {source URL}
-2. 📷 02_블로그_{description}.png - {type}
-   └ Source: {source URL}
 ...
 
 [Material Sufficiency Assessment]
@@ -55,22 +45,20 @@ Proceed with writing?
 ## 4-2. Material Sufficiency Criteria
 
 ### ✅ Sufficient
-- 15+ text materials
-- 5+ key information points extracted
-- Diverse sources (news/blog/official sites)
-- 8+ reference images
+- **6~10 text sources**
+- **5~8 key information points extracted**
+- At least **1 news** + **1 official** source included
+- Reference images are optional (0~3 is fine)
 
 ### ⚠️ Moderate
-- 10~15 text materials
-- 3~5 key information points extracted
-- Some source bias
-- 5~8 reference images
+- 4~5 text sources
+- 3~4 key information points extracted
+- Missing either news or official source
 
 ### ❌ Insufficient
-- Less than 10 text materials
+- 3 or fewer text sources
 - Less than 3 key information points extracted
-- Single source
-- Less than 5 reference images
+- Source diversity is missing (single-source)
 
 ---
 

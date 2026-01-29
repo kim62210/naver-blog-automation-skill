@@ -10,7 +10,7 @@
 - writer: HTML/MD 생성
 - gemini_image: Gemini API 이미지 생성
 - prompt_converter: 프롬프트 변환
-- text_overlay: SVG 텍스트 오버레이
+- text_overlay: 이미지 텍스트 오버레이 (Pillow)
 - image_pipeline: 통합 이미지 생성 파이프라인
 """
 

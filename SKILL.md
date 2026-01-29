@@ -56,7 +56,7 @@ Automates the entire workflow from trending topic collection on Naver Economy Sh
 |------|-------------|----------------|
 | **STEP 1** | Trending topic collection and selection | [skills/step1-collect.md](skills/step1-collect.md) |
 | **STEP 2** | Topic confirmation and keyword expansion | [skills/step2-confirm.md](skills/step2-confirm.md) |
-| **STEP 3** | Parallel research (6 agents) | [skills/step3-research.md](skills/step3-research.md) |
+| **STEP 3** | Parallel research (3 agents) | [skills/step3-research.md](skills/step3-research.md) |
 | **STEP 4** | Research summary and review | [skills/step4-review.md](skills/step4-review.md) |
 | **STEP 5** | Writing options selection | [skills/step5-options.md](skills/step5-options.md) |
 | **STEP 6** | Title selection | [skills/step6-title.md](skills/step6-title.md) |
@@ -120,7 +120,7 @@ print(result.message)  # ✅ Valid / ⚠️ Over / ⚠️ Under
 | Option | Count | Composition |
 |--------|-------|-------------|
 | Minimum | 3 | Thumbnail + 2 core images |
-| Recommended | 5 | Thumbnail + 1 per section |
+| Recommended | 4 | Thumbnail + 2 core images + 1 infographic |
 | Rich | 7+ | Images for all sections |
 
 ---
@@ -136,7 +136,7 @@ writing:
   char_tolerance: 50
 
 images:
-  default_count: 5
+  default_count: 4
 
 tags:
   count: 8
@@ -252,3 +252,4 @@ naver-blog-automation/
   - Python automation scripts added
   - YAML configuration file introduced
   - Template system implemented
+  - (v2.1+) Research/image pipeline optimized for faster single-post creation

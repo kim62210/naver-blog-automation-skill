@@ -606,7 +606,7 @@ class GeminiImageGenerator:
         Workflow:
         1. Strip text instructions from prompt (if background_only=True)
         2. Generate background image via Gemini
-        3. Apply text overlay using SVG composition
+        3. Apply text overlay locally (Pillow)
         4. Export final PNG
 
         Args:

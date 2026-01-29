@@ -126,6 +126,8 @@ Infographic:
 
 > **Automation**: Mode B images are automatically generated via Gemini API.
 > Just write the prompt and images will be saved to `./images/` folder without manual generation.
+>
+> **Important (for auto-generation scripts)**: Use the heading-based format `## [Image N] ...` (see `templates/image-guide.md`).
 
 ### Mode B-1: Basic Format (AI generates everything including text)
 
@@ -151,7 +153,7 @@ Infographic:
 
 ### Mode B-2: Background Only + Text Overlay (Recommended for thumbnails)
 
-> **New**: AI generates background only, text is added via SVG overlay for better Korean text quality.
+> **New**: AI generates background only, then text is added locally (Pillow) for better Korean text quality.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -225,18 +225,18 @@ def convert_to_gemini_prompt(
     # 3. Convert style guide
     style_parts = []
 
-    if "색상" in style_guide:
-        color = style_guide["색상"]
+    color = _get_style_value(style_guide, "색상", "Color", "Colors")
+    if color:
         color_en = translate_color(color)
         style_parts.append(f"Color scheme: {color_en}")
 
-    if "분위기" in style_guide:
-        mood = style_guide["분위기"]
+    mood = _get_style_value(style_guide, "분위기", "Mood")
+    if mood:
         mood_en = translate_mood(mood)
         style_parts.append(f"Mood: {mood_en}")
 
-    if "형식" in style_guide:
-        format_type = style_guide["형식"]
+    format_type = _get_style_value(style_guide, "형식", "Format", "Style")
+    if format_type:
         format_en = translate_format(format_type)
         style_parts.append(f"Style: {format_en}")
 
@@ -342,20 +342,141 @@ def parse_image_guide_markdown(content: str) -> List[ImageGuideItem]:
     Returns:
         List of ImageGuideItem
     """
-    items = []
+    # Prefer the canonical heading format used by templates/writer:
+    #   ## [Image 1] Role
+    if re.search(r"^##\s*\[Image\s*\d+\]", content, flags=re.MULTILINE | re.IGNORECASE):
+        return _parse_image_guide_heading_format(content)
 
-    # Split image blocks (by ━ separator)
+    # Legacy format: blocks separated by ━━━━━━━━━ and headers like "[이미지 N]" or "[Image N]"
+    return _parse_image_guide_legacy_blocks(content)
+
+
+def _parse_image_guide_legacy_blocks(content: str) -> List[ImageGuideItem]:
+    items: List[ImageGuideItem] = []
+
     blocks = re.split(r"━{20,}", content)
-
     for block in blocks:
         if not block.strip():
             continue
-
         item = _parse_image_block(block)
+        if item:
+            items.append(item)
+    return items
+
+
+def _parse_image_guide_heading_format(content: str) -> List[ImageGuideItem]:
+    items: List[ImageGuideItem] = []
+
+    pattern = re.compile(
+        r"^##\s*\[Image\s*(\d+)\]\s*(.+?)\s*$",
+        flags=re.MULTILINE | re.IGNORECASE,
+    )
+    matches = list(pattern.finditer(content))
+    if not matches:
+        return items
+
+    for idx, match in enumerate(matches):
+        index = int(match.group(1))
+        role = match.group(2).strip()
+        start = match.end()
+        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(content)
+        section = content[start:end]
+
+        item = _parse_image_heading_section(index=index, role=role, section=section)
         if item:
             items.append(item)
 
     return items
+
+
+def _parse_image_heading_section(index: int, role: str, section: str) -> Optional[ImageGuideItem]:
+    # Determine modes present in the section
+    has_ai = "🎨" in section or re.search(r"AI\s+Generation", section, re.IGNORECASE)
+    has_svg = "🔷" in section or re.search(r"SVG\s+Generation", section, re.IGNORECASE)
+    has_ref = "📷" in section or re.search(r"Reference\s+Image", section, re.IGNORECASE)
+
+    # Default mode semantics:
+    # - Prefer AI when a prompt exists
+    # - Else SVG when svg guide exists
+    # - Else reference
+    mode = "B" if has_ai else ("C" if has_svg else ("A" if has_ref else "B"))
+
+    korean_desc = ""
+    desc_match = re.search(
+        r"\*\*Korean\s+Description:\*\*\s*\n(.*?)(?=\n\*\*|\n###|\n##|\Z)",
+        section,
+        re.DOTALL | re.IGNORECASE,
+    )
+    if desc_match:
+        korean_desc = desc_match.group(1).strip()
+
+    prompt = ""
+    prompt_match = re.search(
+        r"AI\s+Generation\s+Prompt.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
+        section,
+        re.DOTALL | re.IGNORECASE,
+    )
+    if prompt_match:
+        prompt = prompt_match.group(1).strip()
+
+    # Style guide (bullet list under "**Style:**" or "**Style Guide:**")
+    style_guide: Dict[str, str] = {}
+    style_match = re.search(
+        r"\*\*(?:Style\s+Guide|Style):\*\*\s*\n(.*?)(?=\n###|\n##|\Z)",
+        section,
+        re.DOTALL | re.IGNORECASE,
+    )
+    if style_match:
+        style_text = style_match.group(1)
+        for line in style_text.split("\n"):
+            line = line.strip()
+            if not line.startswith("-"):
+                continue
+            line = line.lstrip("-").strip()
+            if ":" not in line:
+                continue
+            key, value = line.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+            if key and value:
+                style_guide[key] = value
+
+    # Text overlay config (optional) - keep as best-effort only
+    overlay = TextOverlayConfig()
+    overlay_match = re.search(r"main_text[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+    if overlay_match:
+        overlay.main_text = overlay_match.group(1)
+        sub_match = re.search(r"sub_text[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if sub_match:
+            overlay.sub_text = sub_match.group(1)
+        pos_match = re.search(r"position[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if pos_match:
+            overlay.position = pos_match.group(1)
+        size_match = re.search(r"font_size[:\s]*(\d+)", section, re.IGNORECASE)
+        if size_match:
+            overlay.font_size = int(size_match.group(1))
+        color_match = re.search(r"font_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if color_match:
+            overlay.font_color = color_match.group(1)
+        shadow_match = re.search(r"shadow[:\s]*(true|false)", section, re.IGNORECASE)
+        if shadow_match:
+            overlay.shadow = shadow_match.group(1).lower() == "true"
+        bg_box_match = re.search(r"background_box[:\s]*(true|false)", section, re.IGNORECASE)
+        if bg_box_match:
+            overlay.background_box = bg_box_match.group(1).lower() == "true"
+        bg_box_color_match = re.search(r"background_box_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if bg_box_color_match:
+            overlay.background_box_color = bg_box_color_match.group(1)
+
+    return ImageGuideItem(
+        index=index,
+        role=role,
+        mode=mode,
+        korean_description=korean_desc,
+        prompt=prompt,
+        style_guide=style_guide,
+        text_overlay=overlay,
+    )
 
 
 def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
@@ -365,8 +486,8 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
     if not lines:
         return None
 
-    # Extract image number and role from first line
-    header_match = re.match(r"\[이미지\s*(\d+)\]\s*(.+)", lines[0])
+    # Extract image number and role from first line (legacy format)
+    header_match = re.match(r"\[(?:이미지|Image)\s*(\d+)\]\s*(.+)", lines[0], flags=re.IGNORECASE)
     if not header_match:
         # Also handle [썸네일] format
         header_match = re.match(r"\[(\w+)\]\s*(.+)", lines[0])
@@ -395,15 +516,15 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
             mode=mode,
         )
 
-    # Extract Korean description
+    # Extract Korean description (legacy label style)
     korean_desc = ""
-    desc_match = re.search(r"\[한글 설명\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL)
+    desc_match = re.search(r"\[(?:한글\s*설명|Korean\s*Description)\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL | re.IGNORECASE)
     if desc_match:
         korean_desc = desc_match.group(1).strip()
 
-    # Extract AI generation prompt
+    # Extract AI generation prompt (legacy label style)
     prompt = ""
-    prompt_match = re.search(r"\[AI 생성 프롬프트\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL)
+    prompt_match = re.search(r"\[(?:AI\s*생성\s*프롬프트|AI\s*Generation\s*Prompt)\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL | re.IGNORECASE)
     if prompt_match:
         prompt = prompt_match.group(1).strip()
 
@@ -464,8 +585,8 @@ def extract_gemini_prompts(
         # Generate filename
         filename = f"{item.index:02d}_{sanitize_filename(item.role)}.png"
 
-        # Extract ratio
-        aspect_ratio = item.style_guide.get("비율", "16:9")
+        # Extract ratio (Korean/English key support)
+        aspect_ratio = _get_style_value(item.style_guide, "비율", "Ratio") or "16:9"
 
         prompts.append(GeminiPrompt(
             prompt=optimized_prompt,
@@ -475,6 +596,19 @@ def extract_gemini_prompts(
         ))
 
     return prompts
+
+
+def _get_style_value(style_guide: Dict[str, str], *keys: str) -> Optional[str]:
+    if not style_guide:
+        return None
+    for key in keys:
+        if key in style_guide:
+            return style_guide[key]
+        lowered_key = key.lower()
+        for k, v in style_guide.items():
+            if isinstance(k, str) and k.lower() == lowered_key:
+                return v
+    return None
 
 
 def sanitize_filename(name: str) -> str:

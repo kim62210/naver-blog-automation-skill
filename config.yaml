@@ -15,9 +15,9 @@ writing:
 
 # Image settings
 images:
-  default_count: 5        # Default image count
+  default_count: 4        # Default image count (optimized for 1800~2000 chars)
   min_count: 3            # Minimum image count
-  max_count: 10           # Maximum image count
+  max_count: 7            # Maximum image count
   download_timeout: 30    # Download timeout (seconds)
   user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
@@ -38,8 +38,8 @@ output:
 search:
   trending_url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
   max_topics: 10          # Maximum topics to collect
-  parallel_agents: 6      # Number of parallel search agents
-  results_per_source: 5   # Results per source
+  parallel_agents: 3      # Number of parallel search agents (optimized)
+  results_per_source: 3   # Results per source (optimized)
 
 # Tone & manner presets
 tones:

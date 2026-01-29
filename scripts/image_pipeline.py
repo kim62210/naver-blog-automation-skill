@@ -2,13 +2,13 @@
 Image Pipeline Module
 
 Integrated pipeline for generating blog images with text overlay support.
-Combines Gemini API image generation with SVG text composition.
+Combines Gemini API image generation with local text overlay (Pillow).
 
 Workflow:
 1. Parse image guide content
 2. Extract prompts and text overlay configs
 3. Generate background images via Gemini API
-4. Apply text overlay using SVG composition
+4. Apply text overlay locally (Pillow)
 5. Export final PNG images
 """
 
@@ -73,7 +73,7 @@ class ImagePipeline:
 
     Combines:
     - Gemini API for background image generation
-    - SVG composition for text overlay
+    - Local text overlay for Korean typography
     - PNG export for final output
 
     Usage:
@@ -285,19 +285,12 @@ class ImagePipeline:
         self, index: int, role: str, content: str
     ) -> Optional[PipelineItem]:
         """Parse Mode B (AI Generation) section"""
-        # Extract prompt from code block
+        # Extract prompt from the first fenced code block after "AI Generation Prompt"
         prompt_match = re.search(
-            r"AI Generation Prompt[:\s]*\n```\n?(.*?)\n?```",
+            r"AI\s+Generation\s+Prompt.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
             content,
-            re.DOTALL | re.IGNORECASE
+            re.DOTALL | re.IGNORECASE,
         )
-        if not prompt_match:
-            # Try alternative format
-            prompt_match = re.search(
-                r"\*\*AI Generation Prompt[:\s]*\*\*\s*\n```\n?(.*?)\n?```",
-                content,
-                re.DOTALL | re.IGNORECASE
-            )
 
         if not prompt_match:
             return None
@@ -320,12 +313,19 @@ class ImagePipeline:
         self, index: int, role: str, content: str
     ) -> Optional[PipelineItem]:
         """Parse Mode B-2 (AI Generation + Text Overlay) section"""
-        # Extract background-only prompt
+        # Extract background-only prompt (supports labels like "**AI Generation Prompt (Background Only):**")
         prompt_match = re.search(
-            r"(?:AI Generation Prompt|Background Only)[:\s]*\n```\n?(.*?)\n?```",
+            r"AI\s+Generation\s+Prompt.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
             content,
-            re.DOTALL | re.IGNORECASE
+            re.DOTALL | re.IGNORECASE,
         )
+        if not prompt_match:
+            # Fallback: look for any "Background Only" label followed by a fenced code block
+            prompt_match = re.search(
+                r"Background\s+Only.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
+                content,
+                re.DOTALL | re.IGNORECASE,
+            )
         if not prompt_match:
             return None
 
