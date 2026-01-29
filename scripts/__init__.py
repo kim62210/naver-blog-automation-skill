@@ -8,7 +8,18 @@
 - setup: 프로젝트 디렉토리 초기화
 - collector: 이미지 수집
 - writer: HTML/MD 생성
+- gemini_image: Gemini API 이미지 생성
+- prompt_converter: 프롬프트 변환
 """
 
-__version__ = "2.0.0"
-__all__ = ["config", "utils", "validator", "setup", "collector", "writer"]
+__version__ = "2.1.0"
+__all__ = [
+    "config",
+    "utils",
+    "validator",
+    "setup",
+    "collector",
+    "writer",
+    "gemini_image",
+    "prompt_converter",
+]

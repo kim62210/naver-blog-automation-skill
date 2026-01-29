@@ -109,6 +109,23 @@ structures:
     description: "AI가 주제에 맞게 유연하게 구성"
     sections: null
 
+# Gemini API 설정
+gemini:
+  enabled: true
+  models:
+    primary: "gemini-2.0-flash-exp"    # 이미지 생성 지원 모델
+    fallback: "imagen-3.0-generate-002" # 폴백 모델
+  default_size: "1024x1024"
+  timeout: 60
+  retry_count: 3
+  rate_limit:
+    requests_per_minute: 15
+    delay_between_requests: 4.0  # 초
+  fallback_on:
+    - "429"           # Rate limit exceeded
+    - "QUOTA_EXCEEDED"
+    - "ResourceExhausted"
+
 # 이미지 가이드 모드
 image_modes:
   reference:
@@ -117,8 +134,9 @@ image_modes:
     symbol: "📷"
   ai_generate:
     name: "AI 생성"
-    description: "Midjourney/DALL-E 프롬프트 제공"
+    description: "Gemini API로 자동 생성"
     symbol: "🎨"
+    provider: "gemini"
   svg_create:
     name: "SVG 생성"
     description: "svg-canvas-mcp로 직접 생성"
