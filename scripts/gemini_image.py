@@ -12,15 +12,15 @@ import asyncio
 import base64
 import os
 import re
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from .config import get_config, get_config_value
+from .shared_types import ImageResult, BatchResult
 
 if TYPE_CHECKING:
-    from .prompt_converter import TextOverlayConfig as PromptTextOverlayConfig
+    from .prompt_converter import TextStyleConfig as PromptTextStyleConfig
 
 
 # API configuration constants - 3-tier fallback system
@@ -32,46 +32,6 @@ DEFAULT_SIZE = "1024x1024"
 DEFAULT_TIMEOUT = 60
 DEFAULT_RETRY_COUNT = 3
 RATE_LIMIT_DELAY = 6.0  # 안전 간격: 60초/10요청 = 6초
-
-
-@dataclass
-class ImageResult:
-    """Data class for image generation result"""
-
-    success: bool
-    file_path: Optional[str] = None
-    prompt: str = ""
-    model_used: str = ""
-    error_message: Optional[str] = None
-    generation_time: float = 0.0
-
-    def __str__(self) -> str:
-        if self.success:
-            return f"✅ Generation complete: {self.file_path} ({self.model_used})"
-        return f"❌ Generation failed: {self.error_message}"
-
-
-@dataclass
-class BatchResult:
-    """Batch image generation result"""
-
-    total: int = 0
-    success_count: int = 0
-    failed_count: int = 0
-    results: List[ImageResult] = field(default_factory=list)
-    total_time: float = 0.0
-
-    @property
-    def success_rate(self) -> float:
-        if self.total == 0:
-            return 0.0
-        return (self.success_count / self.total) * 100
-
-    def summary(self) -> str:
-        return (
-            f"📊 Batch generation result: {self.success_count}/{self.total} succeeded "
-            f"({self.success_rate:.1f}%), time elapsed: {self.total_time:.1f}s"
-        )
 
 
 class GeminiImageGenerator:
@@ -595,7 +555,7 @@ class GeminiImageGenerator:
         self,
         prompt: str,
         output_path: str,
-        text_config: "PromptTextOverlayConfig",
+        text_config: "PromptTextStyleConfig",
         size: str = DEFAULT_SIZE,
         use_fallback: bool = True,
         background_only: bool = True,

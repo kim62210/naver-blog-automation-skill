@@ -1,0 +1,31 @@
+# Color Palettes Reference
+# Separated from config.yaml for token efficiency
+
+# 2025-2026 trend palettes
+trend:
+  bold_gradient: ["#667eea", "#764ba2"]
+  sunset_gradient: ["#f093fb", "#f5576c"]
+  ocean_gradient: ["#4facfe", "#00f2fe"]
+  sunset_warm: ["#fa709a", "#fee140"]
+  deep_ocean: ["#667eea", "#00d2ff"]
+  glassmorphism: ["rgba(255,255,255,0.25)", "#f0f4f8"]
+  warm_analog: ["#f7d794", "#e77f67", "#cf6a87"]
+  modern_minimal: ["#2d3436", "#636e72", "#b2bec3"]
+
+# Topic-based palettes
+topic:
+  finance:
+    main: ["#1a365d", "#d69e2e"]
+    accent: ["#38b2ac", "#ffffff"]
+  parenting:
+    main: ["#fbb6ce", "#90cdf4"]
+    accent: ["#faf089", "#9ae6b4"]
+  health:
+    main: ["#48bb78", "#ffffff"]
+    accent: ["#4299e1", "#9ae6b4"]
+  tech:
+    main: ["#4c51bf", "#667eea"]
+    accent: ["#38b2ac", "#f0fff4"]
+  lifestyle:
+    main: ["#ed8936", "#faf089"]
+    accent: ["#fc8181", "#fed7d7"]

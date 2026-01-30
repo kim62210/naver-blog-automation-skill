@@ -1,0 +1,32 @@
+# Naver Blog Image Size Standards
+# Separated from config.yaml for token efficiency
+
+thumbnail:
+  width: 1300
+  height: 885
+  ratio: "1.47:1"
+
+content_basic:
+  width: 693
+  height: 450
+
+content_wide:
+  width: 886
+  height: 500
+
+square:
+  width: 700
+  height: 700
+  ratio: "1:1"
+
+wide_title:
+  width: 1920
+  height: 400
+
+chart:
+  width: 800
+  height: 500
+
+infographic:
+  width: 886
+  height: 800

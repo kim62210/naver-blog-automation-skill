@@ -1,0 +1,19 @@
+# Typography Settings
+# Separated from config.yaml for token efficiency
+
+font_family: "Nanum Gothic, Pretendard, sans-serif"
+base_size: 16
+line_height: 1.8
+
+sizes:
+  title_large: { min: 28, max: 38, weight: "700-900" }
+  title_medium: { min: 22, max: 26, weight: "600-700" }
+  body: { min: 15, max: 17, weight: "400" }
+  emphasis: { min: 18, max: 20, weight: "600-700" }
+  caption: { min: 12, max: 14, weight: "300-400" }
+
+svg_defaults:
+  main_title: 48
+  sub_title: 24
+  body: 16
+  caption: 12
