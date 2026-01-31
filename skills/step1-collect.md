@@ -1,113 +1,92 @@
-# STEP 1: Category Selection & Trending Topic Collection
+# STEP 1: Trending Topic Collection and Selection
 
-Use Chrome DevTools MCP to collect today's topics from Naver Shortents. See `_flow.md` for progress.
+Use Chrome DevTools MCP to collect today's popular topics from Naver Economy Shortents, and let the user select one.
 
----
-
-## 1-0. Category Selection (NEW)
-
-First, ask the user to select a category using AskUserQuestion:
+## Progress Status
 
 ```
-📂 블로그 카테고리를 선택해주세요
-
-어떤 주제의 트렌딩 토픽을 수집할까요?
-```
-
-**Option groups (present in order):**
-
-| Group | Categories |
-|-------|------------|
-| 경제/금융 | 경제 종합, 생활경제, 증권, 부동산 |
-| 엔터테인먼트 | 엔터 종합, 영화, 드라마, 뮤직 |
-| 스포츠 | 스포츠 종합, 야구, 해외야구, 축구, 해외축구, 농구, 배구, 동계올림픽 |
-| 여행/맛집 | 여행맛집 종합, 국내여행, 세계여행, 맛집/카페, 푸드 |
-| 패션/뷰티 | 패션뷰티 종합, 패션트렌드, 뷰티 |
-| 라이프스타일 | 리빙푸드 종합, 카테크 종합, 자동차, 지식 종합 |
-
-**Implementation:**
-1. Use AskUserQuestion with 4 options at a time (tool limit)
-2. First ask for category group, then specific category
-3. Store selected category for URL construction and output directory
-
-**URL Construction:**
-```
-Base: https://search.naver.com/search.naver
-Params:
-  - category={URL encoded category param}
-  - query={category name} 숏텐츠
-  - sm=tab_sht.ctg
-  - ssc=tab.shortents.all
-
-Example (증권):
-https://search.naver.com/search.naver?category=%EC%A6%9D%EA%B6%8C&query=%EC%A6%9D%EA%B6%8C+%EC%88%8F%ED%85%90%EC%B8%A0&sm=tab_sht.ctg&ssc=tab.shortents.all
+[STEP 1/8] Topic collection ████░░░░░░░░░░░░░░░░░░░░░░░░ 12%
 ```
 
 ---
 
-## 1-1. Access Page
+## 1-1. Access Naver Economy Shortents Page
 
-After category selection, navigate to the constructed URL:
+Use Chrome DevTools MCP tools to access the page:
 
 ```
-mcp__chrome-devtools__navigate_page:
-  type: "url"
-  url: "{constructed_url_from_category}"
+1. Call mcp__chrome-devtools__navigate_page:
+   - type: "url"
+   - url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
+   - timeout: 30000
 
-mcp__chrome-devtools__take_snapshot
+2. Call mcp__chrome-devtools__take_snapshot:
+   - Capture page content snapshot
 ```
 
 ---
 
-## 1-2. Extract Topics
+## 1-2. Topic Extraction
 
-Parse shortents links from snapshot:
-- Title (main text)
+Parse economy-related shortents links from the snapshot:
+
+**Extraction targets:**
+- `link` elements for shortents content (identify by uid pattern)
+- Extract title (StaticText) and time information from each link
+
+**Extracted data:**
+- Title (main title)
 - Subtitle/description
-- Post time (N hours/days ago)
+- Post time (N hours ago, N days ago)
 
 ---
 
-## 1-3. Present Top 10
+## 1-3. Select and Present 10 Topics
+
+Select 10 topics from collected items based on timeliness and blog suitability, then present in a table:
 
 ```
-📊 Today's Top 10 {category_name} Topics
+📊 Today's Top 10 Recommended Economy Blog Topics
 
-| # | Topic | Key Content | Time | Reason |
-|---|-------|-------------|------|--------|
-| 1 | {title} | {description} | {time} | {analysis} |
+| # | Topic | Key Content | Time | Recommendation Reason |
+|---|-------|-------------|------|----------------------|
+| 1 | {title} | {subtitle/description} | {time} | {timeliness/interest analysis} |
+| 2 | {title} | {subtitle/description} | {time} | {timeliness/interest analysis} |
 | ... | ... | ... | ... | ... |
+| 10 | {title} | {subtitle/description} | {time} | {timeliness/interest analysis} |
 ```
 
-**Selection criteria**: Timeliness (24h) > Trending rank > Blog suitability > Reader interest
+### Topic Selection Criteria
+1. **Timeliness**: Prioritize news within 24 hours
+2. **Search volume**: Prioritize higher trending rankings
+3. **Blog suitability**: Suitable for informational content
+4. **Reader interest**: Relevance to daily life
 
 ---
 
 ## 1-4. User Selection
 
-Use AskUserQuestion:
-- Options 1-4, then 5-8
-- Include "Other" for custom input
+Use AskUserQuestion tool to let user select a topic:
 
-**Direct input**: If user provides `/search-blogging topic`, skip category selection and go to STEP 2.
+**Question structure:**
+- First question: Topic choices 1-4
+- Second question: Topic choices 5-8 (if not in above)
+- "Other" option for custom input
+
+**After selection:**
+- Proceed to STEP 2 based on selected topic
+- Use the keyword if user directly inputs
 
 ---
 
-## Output Directory
+## 1-5. Direct Topic Input (Optional)
 
-Based on selected category, use the corresponding `output_dir` from config:
-
-```
-./{category_output_dir}/YYYY-MM-DD/topic-name/
-```
-
-Examples:
-- 경제 종합 → `./경제 블로그/2026-01-31/...`
-- 증권 → `./증권 블로그/2026-01-31/...`
-- 야구 → `./야구 블로그/2026-01-31/...`
+If user directly inputs a topic in `/search-blogging topic` format:
+- Skip STEP 1 and proceed directly to STEP 2
+- Use the input topic keyword
 
 ---
 
 ## Next Step
 
-→ **[STEP 2: Topic Confirmation](step2-confirm.md)**
+When topic is selected → **[STEP 2: Topic Confirmation and Keyword Expansion](step2-confirm.md)**

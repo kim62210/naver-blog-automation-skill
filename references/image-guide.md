@@ -126,8 +126,6 @@ Infographic:
 
 > **Automation**: Mode B images are automatically generated via Gemini API.
 > Just write the prompt and images will be saved to `./images/` folder without manual generation.
->
-> **Important (for auto-generation scripts)**: Use the heading-based format `## [Image N] ...` (see `templates/image-guide.md`).
 
 ### Mode B-1: Basic Format (AI generates everything including text)
 
@@ -151,58 +149,28 @@ Infographic:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### Mode B-2: Background Only + Text Overlay (Recommended for thumbnails)
+### Mode B-3: AI Text Rendering + Watermark Only (Recommended for thumbnails)
 
-> **New**: AI generates background only, then text is added locally (Pillow) for better Korean text quality.
-
-#### 제목 단어화 규칙 (Thumbnail Text)
-
-긴 제목을 **2~3개 핵심 단어로 압축**하여 가독성 높은 썸네일을 생성합니다:
-
-| 원본 제목 | 압축된 텍스트 |
-|----------|--------------|
-| 2026년 0세 적금 금리 비교 완벽 가이드 | 0세 적금 필수! |
-| 육아휴직 급여 신청 방법 총정리 | 육아휴직 급여 |
-| 전세대출 금리 비교 및 조건 안내 | 전세대출 총정리 |
-
-#### 썸네일 레이아웃 (1300×885 기준)
-
-```
-┌────────────────────────────────────────────┐
-│                                            │
-│         ┌──────────────────────┐           │
-│         │   [main_text: 64px]  │           │  ← Y: 35% (310px)
-│         │   Bold, 중앙 정렬     │           │
-│         └──────────────────────┘           │
-│                                            │
-│         ┌──────────────────────┐           │
-│         │   [sub_text: 32px]   │           │  ← Y: 50% (443px)
-│         │   Regular, 중앙 정렬  │           │
-│         └──────────────────────┘           │
-│                                            │
-│         ───@money-lab-brian───             │  ← Y: 하단에서 60px 위
-└────────────────────────────────────────────┘
-```
-
-#### 텍스트 위치 상세
-
-| 요소 | X 좌표 | Y 좌표 | 정렬 | 크기 | 비고 |
-|------|--------|--------|------|------|------|
-| main_text | 650 (중앙) | 35% (310px) | center | 64px Bold | 이미지 상단 1/3 |
-| sub_text | 650 (중앙) | 50% (443px) | center | 32px Regular | main 아래 |
-| watermark | 650 (중앙) | 하단-60px | center | 18px Light | 반투명 |
+> **New Workflow**: AI renders text directly in the image. PIL only adds watermark at bottom-center.
+> This approach leverages improved AI text rendering capabilities.
+>
+> **Font Style Guidance for AI Prompts:**
+> - Always specify "bold modern sans-serif Korean font" in prompts
+> - Request clean, high-contrast text for readability
+> - AI handles: main_text (title), sub_text (subtitle)
+> - PIL handles: watermark only
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Image N] {image role}
 
-🎨 AI Generation (Background Only)
+🎨 AI Generation (With Text)
 
 [Korean Description]
-{배경 이미지 설명 - 텍스트 제외}
+{이미지 전체 설명 - 텍스트 포함}
 
 [AI Generation Prompt]
-{배경 전용 프롬프트 - NO TEXT, NO TYPOGRAPHY 포함}
+{AI가 텍스트까지 렌더링하는 프롬프트}
 
 [Style Guide]
 - Color: {color}
@@ -210,29 +178,7 @@ Infographic:
 - Format: {format}
 - Ratio: {ratio}
 
-[Text Overlay Config]
-# 메인 텍스트 (이미지 상단 1/3 중앙)
-- main_text: "{핵심 키워드 2~3개}"
-- main_text_y: "35%"
-- font_size: 64
-- font_weight: "bold"
-- font_color: "#FFFFFF"
-- shadow: true
-- shadow_offset: 2
-- shadow_color: "rgba(0,0,0,0.5)"
-
-# 부제목 (메인 텍스트 아래, 중앙)
-- sub_text: "{부제목}"
-- sub_text_y: "50%"
-- sub_font_size: 32
-- sub_font_color: "rgba(255,255,255,0.9)"
-
-# 배경 박스 (선택)
-- background_box: true
-- background_box_color: "rgba(0,0,0,0.3)"
-- background_box_padding: 20
-
-# 워터마크 (필수) - 하단 중앙에서 살짝 위로
+[Watermark Config]
 - watermark_text: "@money-lab-brian"
 - watermark_position: "bottom-center"
 - watermark_margin_bottom: 60
@@ -241,39 +187,11 @@ Infographic:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-#### 본문 이미지 텍스트 배치
-
-| 이미지 타입 | 텍스트 위치 | 크기 | 특징 |
-|------------|------------|------|------|
-| 인포그래픽 | 상단 타이틀 (Y: 10%) | 32px | Bold, 중앙정렬 |
-| 비교표 | 상단 헤더 (Y: 8%) | 28px | Bold, 좌측정렬 |
-| 프로세스 | 각 단계 라벨 | 18px | Regular, 중앙정렬 |
-| 무드 이미지 | 하단 캡션 (Y: 90%) | 16px | Light, 중앙정렬 |
-
-**본문 이미지용 Text Overlay Config:**
-```
-[Text Overlay Config]
-# 타이틀 (이미지 상단)
-- main_text: "{이미지 제목}"
-- main_text_y: "10%"
-- font_size: 32
-- font_weight: "bold"
-- font_color: "#333333"
-
-# 워터마크 (필수)
-- watermark_text: "@money-lab-brian"
-- watermark_position: "bottom-center"
-- watermark_margin_bottom: 30
-- watermark_font_size: 14
-- watermark_font_color: "rgba(0,0,0,0.4)"
-```
-
-**Benefits of Mode B-2:**
-1. Better Korean text rendering (AI struggles with Korean characters)
-2. Easy text editing without regenerating images
-3. Consistent font styling across all thumbnails
-4. Professional typography control (shadows, positioning, etc.)
-5. **Watermark support** for brand recognition
+**Benefits of Mode B-3:**
+1. AI handles all text rendering directly
+2. Simpler workflow - no complex text overlay configuration
+3. Watermark added consistently at bottom-center
+4. Faster generation (no separate SVG composition step)
 
 ### Gemini API Usage
 
@@ -301,94 +219,55 @@ result = await generator.generate_batch(prompts, "./images/")
 
 ### 1. Thumbnail Image
 
-#### Option A: AI generates text (legacy)
+#### Recommended: AI Text Rendering + Watermark
 ```
 [AI Generation Prompt]
 Blog thumbnail image, {topic keywords} concept,
 {core object} as main element,
-bold "{thumbnail text}" text overlay,
+bold modern sans-serif Korean font text "{제목 텍스트}" in upper third,
+subtitle "{부제목}" in modern clean font in center,
 {color} gradient background,
-eye-catching modern design, 16:9 ratio
+eye-catching modern design, high contrast text, 16:9 ratio
 
 [Style Guide]
 - Color: {main color} + {accent color} gradient
 - Mood: Eye-catching and click-inducing
 - Format: Modern thumbnail design
 - Ratio: 16:9
+
+[Watermark Config]
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 60
+- watermark_font_size: 18
+- watermark_font_color: "rgba(255,255,255,0.6)"
 ```
 
-#### Option B: Background + Text Overlay (Recommended)
-```
-[AI Generation Prompt]
-Blog thumbnail background image, {topic keywords} concept,
-{core object} as main element,
-{color} gradient background,
-NO TEXT, NO LETTERS, NO TYPOGRAPHY,
-clean background suitable for text overlay,
-eye-catching modern design, 16:9 ratio
-
-[Style Guide]
-- Color: {main color} + {accent color} gradient
-- Mood: Eye-catching and click-inducing
-- Format: Modern thumbnail background
-- Ratio: 16:9
-
-[Text Overlay Config]
-- main_text: "{제목 텍스트}"
-- sub_text: "{부제목}"
-- position: "center"
-- font_size: 48
-- font_color: "#FFFFFF"
-- shadow: true
-```
-
-**Example (Recommended - Background + Text Overlay):**
+**Example (AI Text Rendering + Watermark):**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Thumbnail] 0세 적금 고금리 안내
 
-🎨 AI Generation (Background Only)
+🎨 AI Generation (With Text)
 
 [Korean Description]
-아기 손과 돼지저금통이 있는 따뜻한 배경 이미지 (텍스트 없음)
+아기 손과 돼지저금통이 있는 따뜻한 썸네일 이미지, "0세 적금 필수!" 텍스트 포함
 
 [AI Generation Prompt]
-Blog thumbnail background image, baby savings account concept,
+Blog thumbnail image, baby savings account concept,
 cute piggy bank and baby hands as main elements,
+bold modern sans-serif Korean font text "0세 적금 필수!" in upper third,
+subtitle "연 12% 고금리" in clean modern font in center,
 warm yellow to soft orange gradient background,
-NO TEXT, NO LETTERS, NO TYPOGRAPHY, NO WORDS,
-clean background suitable for text overlay,
-eye-catching modern design, 16:9 ratio
+eye-catching modern design, high contrast readable text, 16:9 ratio
 
 [Style Guide]
 - Color: Warm yellow + Soft orange gradient
 - Mood: Warm, friendly, trustworthy
-- Format: Modern thumbnail background
+- Format: Modern thumbnail design
 - Ratio: 16:9
 
-[Text Overlay Config]
-# 메인 텍스트 (상단 1/3, 중앙)
-- main_text: "0세 적금 필수!"
-- main_text_y: "35%"
-- font_size: 64
-- font_weight: "bold"
-- font_color: "#FFFFFF"
-- shadow: true
-- shadow_offset: 2
-- shadow_color: "rgba(0,0,0,0.5)"
-
-# 부제목 (중앙)
-- sub_text: "연 12% 고금리"
-- sub_text_y: "50%"
-- sub_font_size: 32
-- sub_font_color: "rgba(255,255,255,0.9)"
-
-# 배경 박스
-- background_box: true
-- background_box_color: "rgba(0,0,0,0.3)"
-- background_box_padding: 20
-
-# 워터마크 (하단 중앙)
+[Watermark Config]
 - watermark_text: "@money-lab-brian"
 - watermark_position: "bottom-center"
 - watermark_margin_bottom: 60

@@ -1,23 +1,21 @@
 ---
 name: search-blogging
 description: |
-  A skill for collecting trending topics from Naver Shortents (multi-category) and automating blog post writing.
-  Supports 27 categories: Economy, Entertainment, Sports, Travel/Food, Fashion/Beauty, Lifestyle.
-  In step 1, select category and collect today's top 10 trending topics for user selection.
+  A skill for collecting trending topics from Naver Economy Shortents and automating blog post writing.
+  In step 1, collect today's top 10 economy news using Chrome DevTools for user selection.
   Then collect materials via parallel web search and write a blog post of around 1850 characters.
 
   When to use:
   (1) When blog post writing is needed
-  (2) When writing about trending topics (any category)
+  (2) When writing about today's trending economy topics
   (3) When /search-blogging command is entered
 
-  Trigger keywords: blog post writing, write a blog post, research and write, trending blog
+  Trigger keywords: blog post writing, write a blog post, research and write, economy blog
 ---
 
-# search-blogging Skill v2.1
+# search-blogging Skill v2.0
 
-Automates the entire workflow from trending topic collection on Naver Shortents to blog post writing.
-**Now supports 27 categories** across Economy, Entertainment, Sports, Travel/Food, Fashion/Beauty, and Lifestyle.
+Automates the entire workflow from trending topic collection on Naver Economy Shortents to blog post writing.
 
 ## Quick Start
 
@@ -43,18 +41,12 @@ Automates the entire workflow from trending topic collection on Naver Shortents 
 ### Save Path
 
 ```
-./{카테고리별 폴더}/YYYY-MM-DD/topic-name/
+./경제 블로그/YYYY-MM-DD/topic-name/
 ├── 본문.html
 ├── 이미지 가이드.md
 ├── 참조.md
 └── images/
 ```
-
-**Category folder examples:**
-- 경제 종합 → `./경제 블로그/`
-- 증권 → `./증권 블로그/`
-- 야구 → `./야구 블로그/`
-- 맛집/카페 → `./맛집카페 블로그/`
 
 ---
 
@@ -64,7 +56,7 @@ Automates the entire workflow from trending topic collection on Naver Shortents 
 |------|-------------|----------------|
 | **STEP 1** | Trending topic collection and selection | [skills/step1-collect.md](skills/step1-collect.md) |
 | **STEP 2** | Topic confirmation and keyword expansion | [skills/step2-confirm.md](skills/step2-confirm.md) |
-| **STEP 3** | Parallel research (3 agents) | [skills/step3-research.md](skills/step3-research.md) |
+| **STEP 3** | Parallel research (6 agents) | [skills/step3-research.md](skills/step3-research.md) |
 | **STEP 4** | Research summary and review | [skills/step4-review.md](skills/step4-review.md) |
 | **STEP 5** | Writing options selection | [skills/step5-options.md](skills/step5-options.md) |
 | **STEP 6** | Title selection | [skills/step6-title.md](skills/step6-title.md) |
@@ -128,21 +120,8 @@ print(result.message)  # ✅ Valid / ⚠️ Over / ⚠️ Under
 | Option | Count | Composition |
 |--------|-------|-------------|
 | Minimum | 3 | Thumbnail + 2 core images |
-| Recommended | 4 | Thumbnail + 2 core images + 1 infographic |
+| Recommended | 5 | Thumbnail + 1 per section |
 | Rich | 7+ | Images for all sections |
-
----
-
-## Supported Categories
-
-| Group | Categories |
-|-------|------------|
-| **경제/금융** | 경제 종합, 생활경제, 증권, 부동산 |
-| **엔터테인먼트** | 엔터 종합, 영화, 드라마, 뮤직 |
-| **스포츠** | 스포츠 종합, 야구, 해외야구, 축구, 해외축구, 농구, 배구, 동계올림픽 |
-| **여행/맛집** | 여행맛집 종합, 국내여행, 세계여행, 맛집/카페, 푸드 |
-| **패션/뷰티** | 패션뷰티 종합, 패션트렌드, 뷰티 |
-| **라이프스타일** | 리빙푸드 종합, 카테크 종합, 자동차, 지식 종합 |
 
 ---
 
@@ -157,18 +136,13 @@ writing:
   char_tolerance: 50
 
 images:
-  default_count: 4
+  default_count: 5
 
 tags:
   count: 8
 
-# Category-specific output directories
-categories:
-  economy:
-    - id: "economy_general"
-      name: "경제 종합"
-      output_dir: "경제 블로그"
-  # ... (27 categories total)
+output:
+  base_dir: "./경제 블로그"
 ```
 
 ---
@@ -272,12 +246,6 @@ naver-blog-automation/
 ---
 
 ## Version Information
-
-- **v2.1.0** (2026-01-31)
-  - **Multi-category support**: 27 categories across 6 groups
-  - Category selection step added (STEP 1-0)
-  - Dynamic output directory based on selected category
-  - Updated URL construction for category-specific trending pages
 
 - **v2.0.0** (2026-01-27)
   - Skill modularization (separated into 8 step files)

@@ -1,26 +1,24 @@
 """
 Text Overlay Module
 
-Adds text overlay to images and exports to PNG.
-
-This is a **local raster operation** (no external API calls).
-
-Dependency:
-- Pillow (PIL): `python3 -m pip install pillow`
+Adds text overlay to images using SVG composition and exports to PNG.
+Uses svg-canvas MCP tools for SVG generation.
 
 Workflow:
 1. Load background image (PNG/JPG)
-2. Draw text (optional shadow / background box)
-3. Save final PNG
+2. Create SVG canvas with same dimensions
+3. Insert background image
+4. Add text elements with styling
+5. Export to PNG
 """
 
-from __future__ import annotations
-
+import base64
 import os
-import re
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from PIL import Image
 import tempfile
 
 
@@ -59,7 +57,7 @@ class TextOverlayConfig:
 
 class TextOverlayProcessor:
     """
-    Processor for adding text overlay to images via Pillow.
+    Processor for adding text overlay to images via SVG composition.
 
     Example usage:
         processor = TextOverlayProcessor()
@@ -102,95 +100,48 @@ class TextOverlayProcessor:
             Dict with 'success', 'output_path', 'error' keys
         """
         try:
-            Image, ImageDraw, ImageFont = _load_pillow()
+            # 1. Get image dimensions
+            width, height = self._get_image_dimensions(
+                config.background_image_path,
+                config.width,
+                config.height
+            )
 
-            with Image.open(config.background_image_path) as img:
-                base = img.convert("RGBA")
+            # 2. Generate SVG content
+            svg_content = self._generate_svg(
+                config.background_image_path,
+                width,
+                height,
+                config.text_elements
+            )
 
-            width, height = base.size
+            # 3. Save temporary SVG
+            svg_path = Path(self.temp_dir) / f"overlay_{os.getpid()}.svg"
+            with open(svg_path, "w", encoding="utf-8") as f:
+                f.write(svg_content)
 
-            overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-            draw = ImageDraw.Draw(overlay)
-
-            for elem in config.text_elements:
-                if not elem.text:
-                    continue
-                font = _load_font(ImageFont, elem.font_family, elem.font_size)
-
-                max_width = int(width * 0.86)
-                lines = _wrap_text(draw, elem.text, font, max_width=max_width)
-
-                line_boxes = [_text_bbox(draw, line, font) for line in lines]
-                line_widths = [b[2] - b[0] for b in line_boxes]
-                line_heights = [b[3] - b[1] for b in line_boxes]
-                if not line_widths or not line_heights:
-                    continue
-
-                line_spacing = max(6, int(elem.font_size * 0.18))
-                block_width = max(line_widths)
-                block_height = sum(line_heights) + line_spacing * (len(lines) - 1)
-
-                if elem.text_anchor == "middle":
-                    block_left = elem.x - (block_width / 2)
-                elif elem.text_anchor == "end":
-                    block_left = elem.x - block_width
-                else:  # "start"
-                    block_left = elem.x
-
-                block_top = elem.y - (block_height / 2)
-
-                # Background box (optional)
-                if elem.background_box:
-                    pad = elem.background_box_padding
-                    box = (
-                        int(block_left - pad),
-                        int(block_top - pad),
-                        int(block_left + block_width + pad),
-                        int(block_top + block_height + pad),
-                    )
-                    _draw_rounded_rect(
-                        draw=draw,
-                        box=box,
-                        radius=elem.background_box_radius,
-                        fill=_parse_color(elem.background_box_color),
-                    )
-
-                # Draw each line
-                y_cursor = float(block_top)
-                for line, line_w, line_h in zip(lines, line_widths, line_heights):
-                    if elem.text_anchor == "middle":
-                        x_line = elem.x - (line_w / 2)
-                    elif elem.text_anchor == "end":
-                        x_line = elem.x - line_w
-                    else:
-                        x_line = elem.x
-
-                    y_line = y_cursor
-
-                    if elem.shadow:
-                        draw.text(
-                            (x_line + elem.shadow_offset_x, y_line + elem.shadow_offset_y),
-                            line,
-                            font=font,
-                            fill=_parse_color(elem.shadow_color),
-                        )
-
-                    draw.text(
-                        (x_line, y_line),
-                        line,
-                        font=font,
-                        fill=_parse_color(elem.fill),
-                    )
-
-                    y_cursor += line_h + line_spacing
-
-            final_img = Image.alpha_composite(base, overlay)
-
+            # 4. Convert SVG to PNG
             output_path = Path(config.output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            final_img.save(output_path, format="PNG")
 
-            return {"success": True, "output_path": str(output_path), "error": None}
+            success = self._convert_svg_to_png(str(svg_path), str(output_path), width, height)
+
+            # 5. Cleanup
+            if svg_path.exists():
+                svg_path.unlink()
+
+            if success:
+                return {
+                    "success": True,
+                    "output_path": str(output_path),
+                    "error": None
+                }
+            else:
+                return {
+                    "success": False,
+                    "output_path": None,
+                    "error": "SVG to PNG conversion failed"
+                }
 
         except Exception as e:
             return {
@@ -198,6 +149,204 @@ class TextOverlayProcessor:
                 "output_path": None,
                 "error": str(e)
             }
+
+    def _get_image_dimensions(
+        self,
+        image_path: str,
+        override_width: int = 0,
+        override_height: int = 0
+    ) -> Tuple[int, int]:
+        """Get image dimensions, using overrides if provided."""
+        if override_width > 0 and override_height > 0:
+            return override_width, override_height
+
+        with Image.open(image_path) as img:
+            return img.size
+
+    def _generate_svg(
+        self,
+        background_path: str,
+        width: int,
+        height: int,
+        text_elements: List[TextElement]
+    ) -> str:
+        """Generate SVG content with background image and text overlay."""
+        # Convert background image to base64 data URI
+        image_data_uri = self._image_to_data_uri(background_path)
+
+        # Build SVG content
+        svg_parts = [
+            f'<?xml version="1.0" encoding="UTF-8"?>',
+            f'<svg xmlns="http://www.w3.org/2000/svg" '
+            f'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+            f'  <defs>',
+            f'    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">',
+            f'      <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.5)" flood-opacity="0.5"/>',
+            f'    </filter>',
+            f'  </defs>',
+            f'  <!-- Background Image -->',
+            f'  <image href="{image_data_uri}" x="0" y="0" width="{width}" height="{height}" preserveAspectRatio="xMidYMid slice"/>',
+        ]
+
+        # Add text elements
+        for i, elem in enumerate(text_elements):
+            svg_parts.append(f'  <!-- Text Element {i + 1} -->')
+
+            # Add background box if enabled
+            if elem.background_box:
+                # Estimate text width (rough approximation)
+                text_width = len(elem.text) * elem.font_size * 0.6
+                text_height = elem.font_size * 1.2
+
+                box_x = elem.x - text_width / 2 - elem.background_box_padding if elem.text_anchor == "middle" else elem.x - elem.background_box_padding
+                box_y = elem.y - elem.font_size - elem.background_box_padding
+
+                svg_parts.append(
+                    f'  <rect x="{box_x}" y="{box_y}" '
+                    f'width="{text_width + elem.background_box_padding * 2}" '
+                    f'height="{text_height + elem.background_box_padding * 2}" '
+                    f'rx="{elem.background_box_radius}" '
+                    f'fill="{elem.background_box_color}"/>'
+                )
+
+            # Add shadow text if enabled
+            if elem.shadow:
+                svg_parts.append(
+                    f'  <text x="{elem.x + elem.shadow_offset_x}" y="{elem.y + elem.shadow_offset_y}" '
+                    f'font-family="{elem.font_family}" font-size="{elem.font_size}px" '
+                    f'font-weight="{elem.font_weight}" fill="{elem.shadow_color}" '
+                    f'text-anchor="{elem.text_anchor}">{self._escape_xml(elem.text)}</text>'
+                )
+
+            # Add main text
+            svg_parts.append(
+                f'  <text x="{elem.x}" y="{elem.y}" '
+                f'font-family="{elem.font_family}" font-size="{elem.font_size}px" '
+                f'font-weight="{elem.font_weight}" fill="{elem.fill}" '
+                f'text-anchor="{elem.text_anchor}">{self._escape_xml(elem.text)}</text>'
+            )
+
+        svg_parts.append('</svg>')
+        return '\n'.join(svg_parts)
+
+    def _image_to_data_uri(self, image_path: str) -> str:
+        """Convert image file to base64 data URI."""
+        with open(image_path, "rb") as f:
+            image_data = f.read()
+
+        # Detect MIME type
+        ext = Path(image_path).suffix.lower()
+        mime_types = {
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".gif": "image/gif",
+            ".webp": "image/webp",
+        }
+        mime_type = mime_types.get(ext, "image/png")
+
+        # Encode to base64
+        b64_data = base64.b64encode(image_data).decode("utf-8")
+        return f"data:{mime_type};base64,{b64_data}"
+
+    def _escape_xml(self, text: str) -> str:
+        """Escape special XML characters."""
+        return (
+            text
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;")
+        )
+
+    def _convert_svg_to_png(
+        self,
+        svg_path: str,
+        output_path: str,
+        width: int,
+        height: int
+    ) -> bool:
+        """
+        Convert SVG to PNG using available tools.
+
+        Tries multiple methods in order:
+        1. cairosvg (Python library)
+        2. rsvg-convert (command line)
+        3. inkscape (command line)
+        """
+        # Method 1: cairosvg
+        try:
+            import cairosvg
+            cairosvg.svg2png(
+                url=svg_path,
+                write_to=output_path,
+                output_width=width,
+                output_height=height
+            )
+            return True
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+        # Method 2: rsvg-convert
+        try:
+            result = subprocess.run(
+                [
+                    "rsvg-convert",
+                    "-w", str(width),
+                    "-h", str(height),
+                    "-o", output_path,
+                    svg_path
+                ],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode == 0:
+                return True
+        except FileNotFoundError:
+            pass
+        except Exception:
+            pass
+
+        # Method 3: inkscape
+        try:
+            result = subprocess.run(
+                [
+                    "inkscape",
+                    svg_path,
+                    "--export-type=png",
+                    f"--export-filename={output_path}",
+                    f"--export-width={width}",
+                    f"--export-height={height}"
+                ],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode == 0:
+                return True
+        except FileNotFoundError:
+            pass
+        except Exception:
+            pass
+
+        # Method 4: Pillow with svglib (fallback)
+        try:
+            from svglib.svglib import svg2rlg
+            from reportlab.graphics import renderPM
+
+            drawing = svg2rlg(svg_path)
+            renderPM.drawToFile(drawing, output_path, fmt="PNG")
+            return True
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+        return False
+
 
 def create_thumbnail_with_text(
     background_image: str,
@@ -225,11 +374,7 @@ def create_thumbnail_with_text(
     Returns:
         Dict with 'success', 'output_path', 'error'
     """
-    try:
-        Image, _, _ = _load_pillow()
-    except ImportError as e:
-        return {"success": False, "output_path": None, "error": str(e)}
-
+    # Get image dimensions
     with Image.open(background_image) as img:
         width, height = img.size
 
@@ -282,46 +427,16 @@ def create_thumbnail_with_text(
     return processor.process(config)
 
 
-def _parse_y_position(y_value: str, height: int) -> int:
-    """
-    Parse Y position value (percentage or pixel).
-
-    Args:
-        y_value: Y position as percentage (e.g., "35%") or pixel (e.g., "310")
-        height: Image height in pixels
-
-    Returns:
-        Y position in pixels
-    """
-    if not y_value:
-        return height // 2  # default to center
-
-    y_str = str(y_value).strip()
-    if y_str.endswith("%"):
-        try:
-            percent = float(y_str[:-1])
-            return int(height * percent / 100)
-        except ValueError:
-            return height // 2
-    else:
-        try:
-            return int(y_str)
-        except ValueError:
-            return height // 2
-
-
 def add_text_to_existing_image(
     image_path: str,
     text_config: 'TextOverlayConfig',
     output_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Add text overlay to an existing image using TextOverlayConfig from prompt_converter.
+    DEPRECATED: Use add_watermark_to_image() instead.
 
-    Supports:
-    - main_text with configurable Y position (main_text_y: "35%" or "310")
-    - sub_text with configurable Y position (sub_text_y: "50%" or auto)
-    - watermark at bottom center with margin
+    Add text overlay to an existing image using TextOverlayConfig from prompt_converter.
+    As of the new workflow, AI renders text directly. Use add_watermark_to_image() for watermark only.
 
     Args:
         image_path: Path to source image
@@ -331,33 +446,25 @@ def add_text_to_existing_image(
     Returns:
         Dict with 'success', 'output_path', 'error'
     """
-    try:
-        Image, _, _ = _load_pillow()
-    except ImportError as e:
-        return {"success": False, "output_path": None, "error": str(e)}
+    from .prompt_converter import TextOverlayConfig as PromptTextConfig
 
-    try:
-        with Image.open(image_path) as img:
-            width, height = img.size
-    except Exception as e:
-        return {"success": False, "output_path": None, "error": str(e)}
+    # Get image dimensions
+    with Image.open(image_path) as img:
+        width, height = img.size
 
-    # Calculate X position based on position parameter
+    # Calculate position
     center_x = width // 2
-    position_x_map = {
-        "center": center_x,
-        "top": center_x,
-        "bottom": center_x,
-        "top-left": width // 6,
-        "top-right": width * 5 // 6,
-        "bottom-left": width // 6,
-        "bottom-right": width * 5 // 6,
-        "bottom-center": center_x,
+    positions = {
+        "center": (center_x, height // 2),
+        "top": (center_x, height // 4),
+        "bottom": (center_x, height * 3 // 4),
+        "top-left": (width // 6, height // 4),
+        "top-right": (width * 5 // 6, height // 4),
+        "bottom-left": (width // 6, height * 3 // 4),
+        "bottom-right": (width * 5 // 6, height * 3 // 4),
     }
-    x = position_x_map.get(text_config.position, center_x)
 
-    # Calculate main text Y position
-    main_y = _parse_y_position(text_config.main_text_y, height)
+    x, y = positions.get(text_config.position, positions["center"])
 
     # Create text elements
     text_elements = []
@@ -367,10 +474,9 @@ def add_text_to_existing_image(
             TextElement(
                 text=text_config.main_text,
                 x=x,
-                y=main_y,
+                y=y,
                 font_size=text_config.font_size,
                 font_family=text_config.font_family,
-                font_weight=getattr(text_config, 'font_weight', 'bold'),
                 fill=text_config.font_color,
                 text_anchor="middle" if "left" not in text_config.position else "start",
                 shadow=text_config.shadow,
@@ -384,54 +490,17 @@ def add_text_to_existing_image(
         )
 
     if text_config.sub_text:
-        # Calculate sub_text Y position
-        if text_config.sub_text_y:
-            sub_y = _parse_y_position(text_config.sub_text_y, height)
-        else:
-            # Auto position: main_text + gap
-            gap = max(20, int(text_config.font_size * 0.8))
-            sub_y = main_y + text_config.font_size // 2 + gap
-
-        sub_font_size = getattr(text_config, 'sub_font_size', int(text_config.font_size * 0.5))
-        sub_font_color = getattr(text_config, 'sub_font_color', text_config.font_color)
-
+        sub_y = y + text_config.font_size + 20
         text_elements.append(
             TextElement(
                 text=text_config.sub_text,
                 x=x,
                 y=sub_y,
-                font_size=sub_font_size,
+                font_size=int(text_config.font_size * 0.5),
                 font_family=text_config.font_family,
-                font_weight="regular",
-                fill=sub_font_color,
+                fill=text_config.font_color,
                 text_anchor="middle" if "left" not in text_config.position else "start",
                 shadow=text_config.shadow,
-            )
-        )
-
-    # Add watermark if enabled
-    watermark_enabled = getattr(text_config, 'watermark_enabled', True)
-    watermark_text = getattr(text_config, 'watermark_text', '@money-lab-brian')
-
-    if watermark_enabled and watermark_text:
-        watermark_margin_bottom = getattr(text_config, 'watermark_margin_bottom', 60)
-        watermark_font_size = getattr(text_config, 'watermark_font_size', 18)
-        watermark_font_color = getattr(text_config, 'watermark_font_color', 'rgba(255,255,255,0.6)')
-
-        # Watermark at bottom center
-        watermark_y = height - watermark_margin_bottom
-
-        text_elements.append(
-            TextElement(
-                text=watermark_text,
-                x=center_x,
-                y=watermark_y,
-                font_size=watermark_font_size,
-                font_family=text_config.font_family,
-                font_weight="light",
-                fill=watermark_font_color,
-                text_anchor="middle",
-                shadow=False,  # No shadow for watermark
             )
         )
 
@@ -447,161 +516,145 @@ def add_text_to_existing_image(
     return processor.process(config)
 
 
-def _load_pillow():
-    try:
-        from PIL import Image, ImageDraw, ImageFont  # type: ignore
-        return Image, ImageDraw, ImageFont
-    except ImportError as e:
-        raise ImportError(
-            "Pillow is required for text overlay. "
-            "Install with: python3 -m pip install pillow"
-        ) from e
+def add_watermark_to_image(
+    image_path: str,
+    watermark_config: 'WatermarkConfig',
+    output_path: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Add watermark only to an existing image.
 
+    This is the new recommended function for the updated workflow where
+    AI renders text directly and PIL only adds watermark.
 
-def _parse_color(value: str) -> Tuple[int, int, int, int]:
-    if not value:
-        return (255, 255, 255, 255)
+    Args:
+        image_path: Path to source image
+        watermark_config: WatermarkConfig from prompt_converter module
+        output_path: Output path (overwrites source if None)
 
-    value = value.strip()
+    Returns:
+        Dict with 'success', 'output_path', 'error'
 
-    # Hex: #RRGGBB or #RRGGBBAA
-    if value.startswith("#"):
-        hex_value = value[1:]
-        if len(hex_value) == 3:
-            r = int(hex_value[0] * 2, 16)
-            g = int(hex_value[1] * 2, 16)
-            b = int(hex_value[2] * 2, 16)
-            return (r, g, b, 255)
-        if len(hex_value) == 6:
-            r = int(hex_value[0:2], 16)
-            g = int(hex_value[2:4], 16)
-            b = int(hex_value[4:6], 16)
-            return (r, g, b, 255)
-        if len(hex_value) == 8:
-            r = int(hex_value[0:2], 16)
-            g = int(hex_value[2:4], 16)
-            b = int(hex_value[4:6], 16)
-            a = int(hex_value[6:8], 16)
-            return (r, g, b, a)
+    Example:
+        from scripts.prompt_converter import WatermarkConfig
 
-    # rgba(r,g,b,a)
-    rgba_match = re.match(
-        r"rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)",
-        value,
-        flags=re.IGNORECASE,
-    )
-    if rgba_match:
-        r = int(rgba_match.group(1))
-        g = int(rgba_match.group(2))
-        b = int(rgba_match.group(3))
-        alpha = float(rgba_match.group(4))
-        a = int(max(0.0, min(1.0, alpha)) * 255)
-        return (r, g, b, a)
+        config = WatermarkConfig(
+            watermark_text="@money-lab-brian",
+            watermark_position="bottom-center",
+            watermark_margin_bottom=60,
+            watermark_font_size=18,
+            watermark_font_color="rgba(255,255,255,0.6)"
+        )
 
-    # rgb(r,g,b)
-    rgb_match = re.match(
-        r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)",
-        value,
-        flags=re.IGNORECASE,
-    )
-    if rgb_match:
-        r = int(rgb_match.group(1))
-        g = int(rgb_match.group(2))
-        b = int(rgb_match.group(3))
-        return (r, g, b, 255)
+        result = add_watermark_to_image(
+            image_path="./images/01_thumbnail.png",
+            watermark_config=config,
+            output_path="./images/01_thumbnail_final.png"
+        )
+    """
+    from .prompt_converter import WatermarkConfig as PromptWatermarkConfig
 
-    # Fallback: white
-    return (255, 255, 255, 255)
+    # Check if watermark is enabled
+    if not watermark_config.watermark_enabled:
+        # Just copy the file if watermark is disabled
+        if output_path and output_path != image_path:
+            import shutil
+            shutil.copy2(image_path, output_path)
+        return {
+            "success": True,
+            "output_path": output_path or image_path,
+            "error": None
+        }
 
+    # Get image dimensions
+    with Image.open(image_path) as img:
+        width, height = img.size
 
-def _load_font(ImageFont, font_family: str, font_size: int):
-    # Allow explicit font path override
-    explicit_path = os.environ.get("BLOG_FONT_PATH") or os.environ.get("FONT_PATH")
-    if explicit_path:
-        try:
-            return ImageFont.truetype(explicit_path, font_size)
-        except Exception:
-            pass
+    # Calculate watermark position
+    center_x = width // 2
+    watermark_y = height - watermark_config.watermark_margin_bottom
 
-    candidates: List[Tuple[str, Optional[int]]] = [
-        # macOS common Korean fonts
-        ("/System/Library/Fonts/AppleSDGothicNeo.ttc", 0),
-        ("/System/Library/Fonts/Supplemental/AppleGothic.ttf", None),
-        ("/System/Library/Fonts/Supplemental/AppleMyungjo.ttf", None),
-        ("/Library/Fonts/AppleGothic.ttf", None),
-        ("/Library/Fonts/NanumGothic.ttf", None),
-        ("/Library/Fonts/NanumGothicBold.ttf", None),
-        # Linux common locations (best-effort)
-        ("/usr/share/fonts/truetype/nanum/NanumGothic.ttf", None),
-        ("/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf", None),
+    # Adjust x position based on watermark_position
+    if watermark_config.watermark_position == "bottom-left":
+        watermark_x = width // 6
+        text_anchor = "start"
+    elif watermark_config.watermark_position == "bottom-right":
+        watermark_x = width * 5 // 6
+        text_anchor = "end"
+    else:  # bottom-center (default)
+        watermark_x = center_x
+        text_anchor = "middle"
+
+    # Create watermark text element
+    text_elements = [
+        TextElement(
+            text=watermark_config.watermark_text,
+            x=watermark_x,
+            y=watermark_y,
+            font_size=watermark_config.watermark_font_size,
+            font_family=watermark_config.watermark_font_family,
+            fill=watermark_config.watermark_font_color,
+            text_anchor=text_anchor,
+            shadow=False,  # No shadow for watermark
+            background_box=False,
+        )
     ]
 
-    for path, index in candidates:
-        if not Path(path).exists():
-            continue
-        try:
-            if index is None:
-                return ImageFont.truetype(path, font_size)
-            return ImageFont.truetype(path, font_size, index=index)
-        except Exception:
-            continue
+    # Process
+    final_output = output_path or image_path
+    config = TextOverlayConfig(
+        background_image_path=image_path,
+        output_path=final_output,
+        text_elements=text_elements,
+    )
 
-    return ImageFont.load_default()
-
-
-def _text_bbox(draw, text: str, font) -> Tuple[int, int, int, int]:
-    try:
-        return draw.textbbox((0, 0), text, font=font)
-    except Exception:
-        # Very old Pillow fallback
-        w, h = draw.textsize(text, font=font)  # type: ignore[attr-defined]
-        return (0, 0, w, h)
+    processor = TextOverlayProcessor()
+    return processor.process(config)
 
 
-def _wrap_text(draw, text: str, font, max_width: int) -> List[str]:
-    if not text:
-        return []
-    if "\n" in text:
-        return [line for line in text.splitlines() if line.strip()]
+def add_watermark_only(
+    image_path: str,
+    output_path: str,
+    watermark_text: str = "@money-lab-brian",
+    watermark_position: str = "bottom-center",
+    watermark_margin_bottom: int = 60,
+    watermark_font_size: int = 18,
+    watermark_font_color: str = "rgba(255,255,255,0.6)",
+) -> Dict[str, Any]:
+    """
+    Add watermark only to an existing image (no main/sub text).
 
-    def width_of(s: str) -> int:
-        b = _text_bbox(draw, s, font)
-        return int(b[2] - b[0])
+    This is a convenience function with a simple interface.
+    For more control, use add_watermark_to_image() with WatermarkConfig.
 
-    # Space-based wrap first
-    if " " in text:
-        words = [w for w in text.split(" ") if w]
-        lines: List[str] = []
-        current = ""
-        for word in words:
-            candidate = f"{current} {word}".strip() if current else word
-            if width_of(candidate) <= max_width or not current:
-                current = candidate
-            else:
-                lines.append(current)
-                current = word
-        if current:
-            lines.append(current)
-        return lines
+    Args:
+        image_path: Path to source image
+        output_path: Path for output image
+        watermark_text: Watermark text (default: @money-lab-brian)
+        watermark_position: Position ("bottom-center", "bottom-left", "bottom-right")
+        watermark_margin_bottom: Margin from bottom in pixels
+        watermark_font_size: Font size for watermark
+        watermark_font_color: Font color (hex or rgba)
 
-    # Fallback: character-based wrap (useful for Korean)
-    lines = []
-    current = ""
-    for ch in text:
-        candidate = f"{current}{ch}"
-        if width_of(candidate) <= max_width or not current:
-            current = candidate
-        else:
-            lines.append(current)
-            current = ch
-    if current:
-        lines.append(current)
-    return lines
+    Returns:
+        Dict with 'success', 'output_path', 'error'
 
+    Example:
+        result = add_watermark_only(
+            image_path="./images/01_thumbnail.png",
+            output_path="./images/01_thumbnail_final.png",
+            watermark_text="@money-lab-brian"
+        )
+    """
+    from .prompt_converter import WatermarkConfig
 
-def _draw_rounded_rect(draw, box: Tuple[int, int, int, int], radius: int, fill: Tuple[int, int, int, int]):
-    try:
-        draw.rounded_rectangle(box, radius=radius, fill=fill)  # type: ignore[attr-defined]
-    except Exception:
-        # Basic fallback without rounded corners
-        draw.rectangle(box, fill=fill)
+    config = WatermarkConfig(
+        watermark_text=watermark_text,
+        watermark_position=watermark_position,
+        watermark_margin_bottom=watermark_margin_bottom,
+        watermark_font_size=watermark_font_size,
+        watermark_font_color=watermark_font_color,
+        watermark_enabled=True,
+    )
+
+    return add_watermark_to_image(image_path, config, output_path)

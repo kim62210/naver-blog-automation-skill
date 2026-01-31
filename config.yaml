@@ -15,9 +15,9 @@ writing:
 
 # Image settings
 images:
-  default_count: 4        # Default image count (optimized for 1800~2000 chars)
+  default_count: 5        # Default image count
   min_count: 3            # Minimum image count
-  max_count: 7            # Maximum image count
+  max_count: 10           # Maximum image count
   download_timeout: 30    # Download timeout (seconds)
   user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
@@ -36,149 +36,10 @@ output:
 
 # Search settings
 search:
-  base_url: "https://search.naver.com/search.naver"
-  query_params:
-    query: "숏텐츠"
-    sm: "tab_sht.ctg"
-    ssc: "tab.shortents.all"
+  trending_url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
   max_topics: 10          # Maximum topics to collect
-  parallel_agents: 3      # Number of parallel search agents (optimized)
-  results_per_source: 3   # Results per source (optimized)
-
-# Category settings
-categories:
-  # 경제/금융
-  economy:
-    - id: "economy_general"
-      name: "경제 종합"
-      param: "경제 종합"
-      output_dir: "경제 블로그"
-    - id: "living_economy"
-      name: "생활경제"
-      param: "생활경제"
-      output_dir: "생활경제 블로그"
-    - id: "stock"
-      name: "증권"
-      param: "증권"
-      output_dir: "증권 블로그"
-    - id: "real_estate"
-      name: "부동산"
-      param: "부동산"
-      output_dir: "부동산 블로그"
-
-  # 엔터테인먼트
-  entertainment:
-    - id: "enter_general"
-      name: "엔터 종합"
-      param: "엔터 종합"
-      output_dir: "엔터 블로그"
-    - id: "movie"
-      name: "영화"
-      param: "영화"
-      output_dir: "영화 블로그"
-    - id: "drama"
-      name: "드라마"
-      param: "드라마"
-      output_dir: "드라마 블로그"
-    - id: "music"
-      name: "뮤직"
-      param: "뮤직"
-      output_dir: "뮤직 블로그"
-
-  # 스포츠
-  sports:
-    - id: "sports_general"
-      name: "스포츠 종합"
-      param: "스포츠 종합"
-      output_dir: "스포츠 블로그"
-    - id: "baseball"
-      name: "야구"
-      param: "야구"
-      output_dir: "야구 블로그"
-    - id: "overseas_baseball"
-      name: "해외야구"
-      param: "해외야구"
-      output_dir: "해외야구 블로그"
-    - id: "soccer"
-      name: "축구"
-      param: "축구"
-      output_dir: "축구 블로그"
-    - id: "overseas_soccer"
-      name: "해외축구"
-      param: "해외축구"
-      output_dir: "해외축구 블로그"
-    - id: "basketball"
-      name: "농구"
-      param: "농구"
-      output_dir: "농구 블로그"
-    - id: "volleyball"
-      name: "배구"
-      param: "배구"
-      output_dir: "배구 블로그"
-    - id: "winter_olympics"
-      name: "동계올림픽"
-      param: "동계올림픽"
-      output_dir: "동계올림픽 블로그"
-
-  # 여행/맛집
-  travel_food:
-    - id: "travel_food_general"
-      name: "여행맛집 종합"
-      param: "여행맛집 종합"
-      output_dir: "여행맛집 블로그"
-    - id: "domestic_travel"
-      name: "국내여행"
-      param: "국내여행"
-      output_dir: "국내여행 블로그"
-    - id: "world_travel"
-      name: "세계여행"
-      param: "세계여행"
-      output_dir: "세계여행 블로그"
-    - id: "restaurant_cafe"
-      name: "맛집/카페"
-      param: "맛집/카페"
-      output_dir: "맛집카페 블로그"
-    - id: "food"
-      name: "푸드"
-      param: "푸드"
-      output_dir: "푸드 블로그"
-
-  # 패션/뷰티
-  fashion_beauty:
-    - id: "fashion_beauty_general"
-      name: "패션뷰티 종합"
-      param: "패션뷰티 종합"
-      output_dir: "패션뷰티 블로그"
-    - id: "fashion_trend"
-      name: "패션트렌드"
-      param: "패션트렌드"
-      output_dir: "패션트렌드 블로그"
-    - id: "beauty"
-      name: "뷰티"
-      param: "뷰티"
-      output_dir: "뷰티 블로그"
-
-  # 라이프스타일
-  lifestyle:
-    - id: "living_food_general"
-      name: "리빙푸드 종합"
-      param: "리빙푸드 종합"
-      output_dir: "리빙푸드 블로그"
-    - id: "cartech_general"
-      name: "카테크 종합"
-      param: "카테크 종합"
-      output_dir: "카테크 블로그"
-    - id: "car"
-      name: "자동차"
-      param: "자동차"
-      output_dir: "자동차 블로그"
-    - id: "knowledge_general"
-      name: "지식 종합"
-      param: "지식 종합"
-      output_dir: "지식 블로그"
-
-# Default category
-default_category: "economy_general"
+  parallel_agents: 6      # Number of parallel search agents
+  results_per_source: 5   # Results per source
 
 # Tone & manner presets
 tones:

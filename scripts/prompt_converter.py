@@ -12,17 +12,37 @@ from .config import get_config, get_config_value
 
 
 @dataclass
-class TextOverlayConfig:
-    """Data class for text overlay configuration"""
+class WatermarkConfig:
+    """
+    Data class for watermark configuration.
 
-    # 메인 텍스트 설정
+    Used for adding watermark only to AI-generated images.
+    Text rendering is now handled by AI, not PIL overlay.
+    """
+
+    watermark_text: str = "@money-lab-brian"
+    watermark_position: str = "bottom-center"  # "bottom-center", "bottom-left", "bottom-right"
+    watermark_margin_bottom: int = 60
+    watermark_font_size: int = 18
+    watermark_font_color: str = "rgba(255,255,255,0.6)"
+    watermark_font_family: str = "Pretendard, Nanum Gothic, sans-serif"
+    watermark_enabled: bool = True
+
+
+# Keep TextOverlayConfig as alias for backward compatibility during transition
+@dataclass
+class TextOverlayConfig:
+    """
+    DEPRECATED: Use WatermarkConfig instead.
+
+    This class is kept for backward compatibility only.
+    New code should use WatermarkConfig directly.
+    """
+
     main_text: str = ""
-    main_text_y: str = "50%"  # Y 위치 (퍼센트 또는 픽셀)
     sub_text: str = ""
-    sub_text_y: str = ""  # 비어있으면 main_text 아래에 자동 배치
-    position: str = "center"  # "center", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right"
+    position: str = "center"
     font_size: int = 48
-    font_weight: str = "bold"  # "bold", "regular", "light"
     font_color: str = "#FFFFFF"
     font_family: str = "Pretendard, Nanum Gothic, sans-serif"
     shadow: bool = True
@@ -31,18 +51,13 @@ class TextOverlayConfig:
     background_box: bool = False
     background_box_color: str = "rgba(0,0,0,0.3)"
     background_box_padding: int = 20
-
-    # 부제목 설정
-    sub_font_size: int = 24
-    sub_font_color: str = "rgba(255,255,255,0.9)"
-
-    # 워터마크 설정
+    # Watermark fields (new)
     watermark_text: str = "@money-lab-brian"
-    watermark_position: str = "bottom-center"  # 하단 중앙
-    watermark_margin_bottom: int = 60  # 하단에서 60px 위
+    watermark_position: str = "bottom-center"
+    watermark_margin_bottom: int = 60
     watermark_font_size: int = 18
     watermark_font_color: str = "rgba(255,255,255,0.6)"
-    watermark_enabled: bool = True  # 워터마크 활성화 여부
+    watermark_enabled: bool = True
 
 
 @dataclass
@@ -193,12 +208,16 @@ def convert_to_gemini_prompt(
     """
     Convert image guide prompt to Gemini optimized format.
 
+    NOTE: As of the new workflow, AI now renders text directly.
+    The background_only parameter is deprecated and kept for backward compatibility.
+    Text is no longer stripped from prompts.
+
     Args:
         image_guide: Image guide dictionary
             - korean_description: Korean description
             - prompt: English prompt
             - style_guide: Style guide (colors, mood, format, ratio)
-        background_only: If True, removes text-related instructions for background generation
+        background_only: DEPRECATED - no longer used, kept for backward compatibility
 
     Returns:
         Optimized prompt string for Gemini API
@@ -206,13 +225,11 @@ def convert_to_gemini_prompt(
     Example:
         >>> guide = {
         ...     "korean_description": "아기 손과 돼지저금통 썸네일",
-        ...     "prompt": "Blog thumbnail, baby savings concept...",
+        ...     "prompt": "Blog thumbnail, baby savings concept, bold Korean text '0세 적금 필수!'",
         ...     "style_guide": {"색상": "따뜻한 노랑", "분위기": "친근한"}
         ... }
         >>> convert_to_gemini_prompt(guide)
-        "Create a high-quality blog thumbnail image. ..."
-        >>> convert_to_gemini_prompt(guide, background_only=True)
-        "Create a high-quality blog background image. ..."  # No text instructions
+        "Create a high-quality blog image. Blog thumbnail, baby savings concept..."
     """
     korean_desc = image_guide.get("korean_description", "")
     original_prompt = image_guide.get("prompt", "")
@@ -221,49 +238,39 @@ def convert_to_gemini_prompt(
     # Prompt components
     parts = []
 
-    # 1. Base instruction (modified for background_only mode)
-    if background_only:
-        parts.append("Create a high-quality background image for a Korean blog. No text, no letters, no typography, no words.")
-    else:
-        parts.append("Create a high-quality image for a Korean blog.")
+    # 1. Base instruction
+    parts.append("Create a high-quality image for a Korean blog.")
 
-    # 2. English prompt (use existing prompt)
+    # 2. English prompt (use existing prompt as-is, including text instructions)
     if original_prompt:
         # Remove ratio information (handled separately)
         cleaned_prompt = re.sub(r"\d+:\d+\s*ratio", "", original_prompt)
-
-        # Remove text instructions if background_only mode
-        if background_only:
-            cleaned_prompt = strip_text_instructions(cleaned_prompt)
-
+        # NOTE: No longer strip text instructions - AI renders text directly
         parts.append(cleaned_prompt.strip())
 
     # 3. Convert style guide
     style_parts = []
 
-    color = _get_style_value(style_guide, "색상", "Color", "Colors")
-    if color:
+    if "색상" in style_guide:
+        color = style_guide["색상"]
         color_en = translate_color(color)
         style_parts.append(f"Color scheme: {color_en}")
 
-    mood = _get_style_value(style_guide, "분위기", "Mood")
-    if mood:
+    if "분위기" in style_guide:
+        mood = style_guide["분위기"]
         mood_en = translate_mood(mood)
         style_parts.append(f"Mood: {mood_en}")
 
-    format_type = _get_style_value(style_guide, "형식", "Format", "Style")
-    if format_type:
+    if "형식" in style_guide:
+        format_type = style_guide["형식"]
         format_en = translate_format(format_type)
         style_parts.append(f"Style: {format_en}")
 
     if style_parts:
         parts.append(" ".join(style_parts))
 
-    # 4. Quality assurance phrase (modified for background_only mode)
-    if background_only:
-        parts.append("High resolution, professional quality, clean background without any text or typography, suitable for text overlay later.")
-    else:
-        parts.append("High resolution, professional quality, suitable for blog use.")
+    # 4. Quality assurance phrase
+    parts.append("High resolution, professional quality, suitable for blog use.")
 
     return " ".join(parts)
 
@@ -358,182 +365,20 @@ def parse_image_guide_markdown(content: str) -> List[ImageGuideItem]:
     Returns:
         List of ImageGuideItem
     """
-    # Prefer the canonical heading format used by templates/writer:
-    #   ## [Image 1] Role
-    if re.search(r"^##\s*\[Image\s*\d+\]", content, flags=re.MULTILINE | re.IGNORECASE):
-        return _parse_image_guide_heading_format(content)
+    items = []
 
-    # Legacy format: blocks separated by ━━━━━━━━━ and headers like "[이미지 N]" or "[Image N]"
-    return _parse_image_guide_legacy_blocks(content)
-
-
-def _parse_image_guide_legacy_blocks(content: str) -> List[ImageGuideItem]:
-    items: List[ImageGuideItem] = []
-
+    # Split image blocks (by ━ separator)
     blocks = re.split(r"━{20,}", content)
+
     for block in blocks:
         if not block.strip():
             continue
+
         item = _parse_image_block(block)
         if item:
             items.append(item)
-    return items
-
-
-def _parse_image_guide_heading_format(content: str) -> List[ImageGuideItem]:
-    items: List[ImageGuideItem] = []
-
-    pattern = re.compile(
-        r"^##\s*\[Image\s*(\d+)\]\s*(.+?)\s*$",
-        flags=re.MULTILINE | re.IGNORECASE,
-    )
-    matches = list(pattern.finditer(content))
-    if not matches:
-        return items
-
-    for idx, match in enumerate(matches):
-        index = int(match.group(1))
-        role = match.group(2).strip()
-        start = match.end()
-        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(content)
-        section = content[start:end]
-
-        item = _parse_image_heading_section(index=index, role=role, section=section)
-        if item:
-            items.append(item)
 
     return items
-
-
-def _parse_image_heading_section(index: int, role: str, section: str) -> Optional[ImageGuideItem]:
-    # Determine modes present in the section
-    has_ai = "🎨" in section or re.search(r"AI\s+Generation", section, re.IGNORECASE)
-    has_svg = "🔷" in section or re.search(r"SVG\s+Generation", section, re.IGNORECASE)
-    has_ref = "📷" in section or re.search(r"Reference\s+Image", section, re.IGNORECASE)
-
-    # Default mode semantics:
-    # - Prefer AI when a prompt exists
-    # - Else SVG when svg guide exists
-    # - Else reference
-    mode = "B" if has_ai else ("C" if has_svg else ("A" if has_ref else "B"))
-
-    korean_desc = ""
-    desc_match = re.search(
-        r"\*\*Korean\s+Description:\*\*\s*\n(.*?)(?=\n\*\*|\n###|\n##|\Z)",
-        section,
-        re.DOTALL | re.IGNORECASE,
-    )
-    if desc_match:
-        korean_desc = desc_match.group(1).strip()
-
-    prompt = ""
-    prompt_match = re.search(
-        r"AI\s+Generation\s+Prompt.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
-        section,
-        re.DOTALL | re.IGNORECASE,
-    )
-    if prompt_match:
-        prompt = prompt_match.group(1).strip()
-
-    # Style guide (bullet list under "**Style:**" or "**Style Guide:**")
-    style_guide: Dict[str, str] = {}
-    style_match = re.search(
-        r"\*\*(?:Style\s+Guide|Style):\*\*\s*\n(.*?)(?=\n###|\n##|\Z)",
-        section,
-        re.DOTALL | re.IGNORECASE,
-    )
-    if style_match:
-        style_text = style_match.group(1)
-        for line in style_text.split("\n"):
-            line = line.strip()
-            if not line.startswith("-"):
-                continue
-            line = line.lstrip("-").strip()
-            if ":" not in line:
-                continue
-            key, value = line.split(":", 1)
-            key = key.strip()
-            value = value.strip()
-            if key and value:
-                style_guide[key] = value
-
-    # Text overlay config (optional) - keep as best-effort only
-    overlay = TextOverlayConfig()
-    overlay_match = re.search(r"main_text[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-    if overlay_match:
-        overlay.main_text = overlay_match.group(1)
-        sub_match = re.search(r"sub_text[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if sub_match:
-            overlay.sub_text = sub_match.group(1)
-        pos_match = re.search(r"position[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if pos_match:
-            overlay.position = pos_match.group(1)
-        size_match = re.search(r"font_size[:\s]*(\d+)", section, re.IGNORECASE)
-        if size_match:
-            overlay.font_size = int(size_match.group(1))
-        color_match = re.search(r"font_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if color_match:
-            overlay.font_color = color_match.group(1)
-        shadow_match = re.search(r"(?<![_-])shadow[:\s]*(true|false)", section, re.IGNORECASE)
-        if shadow_match:
-            overlay.shadow = shadow_match.group(1).lower() == "true"
-        bg_box_match = re.search(r"background_box[:\s]*(true|false)", section, re.IGNORECASE)
-        if bg_box_match:
-            overlay.background_box = bg_box_match.group(1).lower() == "true"
-        bg_box_color_match = re.search(r"background_box_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if bg_box_color_match:
-            overlay.background_box_color = bg_box_color_match.group(1)
-
-        # 메인 텍스트 Y 위치
-        main_y_match = re.search(r"main_text_y[:\s]*[\"']?(\d+%?)[\"']?", section, re.IGNORECASE)
-        if main_y_match:
-            overlay.main_text_y = main_y_match.group(1)
-
-        # 부제목 설정
-        sub_y_match = re.search(r"sub_text_y[:\s]*[\"']?(\d+%?)[\"']?", section, re.IGNORECASE)
-        if sub_y_match:
-            overlay.sub_text_y = sub_y_match.group(1)
-        sub_font_size_match = re.search(r"sub_font_size[:\s]*(\d+)", section, re.IGNORECASE)
-        if sub_font_size_match:
-            overlay.sub_font_size = int(sub_font_size_match.group(1))
-        sub_font_color_match = re.search(r"sub_font_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if sub_font_color_match:
-            overlay.sub_font_color = sub_font_color_match.group(1)
-
-        # 폰트 굵기
-        font_weight_match = re.search(r"font_weight[:\s]*[\"']?(\w+)[\"']?", section, re.IGNORECASE)
-        if font_weight_match:
-            overlay.font_weight = font_weight_match.group(1)
-
-        # 워터마크 설정
-        wm_text_match = re.search(r"watermark_text[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if wm_text_match:
-            overlay.watermark_text = wm_text_match.group(1)
-        wm_pos_match = re.search(r"watermark_position[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if wm_pos_match:
-            overlay.watermark_position = wm_pos_match.group(1)
-        wm_margin_match = re.search(r"watermark_margin_bottom[:\s]*(\d+)", section, re.IGNORECASE)
-        if wm_margin_match:
-            overlay.watermark_margin_bottom = int(wm_margin_match.group(1))
-        wm_size_match = re.search(r"watermark_font_size[:\s]*(\d+)", section, re.IGNORECASE)
-        if wm_size_match:
-            overlay.watermark_font_size = int(wm_size_match.group(1))
-        wm_color_match = re.search(r"watermark_font_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
-        if wm_color_match:
-            overlay.watermark_font_color = wm_color_match.group(1)
-        wm_enabled_match = re.search(r"watermark_enabled[:\s]*(true|false)", section, re.IGNORECASE)
-        if wm_enabled_match:
-            overlay.watermark_enabled = wm_enabled_match.group(1).lower() == "true"
-
-    return ImageGuideItem(
-        index=index,
-        role=role,
-        mode=mode,
-        korean_description=korean_desc,
-        prompt=prompt,
-        style_guide=style_guide,
-        text_overlay=overlay,
-    )
 
 
 def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
@@ -543,8 +388,8 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
     if not lines:
         return None
 
-    # Extract image number and role from first line (legacy format)
-    header_match = re.match(r"\[(?:이미지|Image)\s*(\d+)\]\s*(.+)", lines[0], flags=re.IGNORECASE)
+    # Extract image number and role from first line
+    header_match = re.match(r"\[이미지\s*(\d+)\]\s*(.+)", lines[0])
     if not header_match:
         # Also handle [썸네일] format
         header_match = re.match(r"\[(\w+)\]\s*(.+)", lines[0])
@@ -573,15 +418,15 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
             mode=mode,
         )
 
-    # Extract Korean description (legacy label style)
+    # Extract Korean description
     korean_desc = ""
-    desc_match = re.search(r"\[(?:한글\s*설명|Korean\s*Description)\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL | re.IGNORECASE)
+    desc_match = re.search(r"\[한글 설명\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL)
     if desc_match:
         korean_desc = desc_match.group(1).strip()
 
-    # Extract AI generation prompt (legacy label style)
+    # Extract AI generation prompt
     prompt = ""
-    prompt_match = re.search(r"\[(?:AI\s*생성\s*프롬프트|AI\s*Generation\s*Prompt)\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL | re.IGNORECASE)
+    prompt_match = re.search(r"\[AI 생성 프롬프트\]\s*\n(.+?)(?=\n\[|$)", block, re.DOTALL)
     if prompt_match:
         prompt = prompt_match.group(1).strip()
 
@@ -642,8 +487,8 @@ def extract_gemini_prompts(
         # Generate filename
         filename = f"{item.index:02d}_{sanitize_filename(item.role)}.png"
 
-        # Extract ratio (Korean/English key support)
-        aspect_ratio = _get_style_value(item.style_guide, "비율", "Ratio") or "16:9"
+        # Extract ratio
+        aspect_ratio = item.style_guide.get("비율", "16:9")
 
         prompts.append(GeminiPrompt(
             prompt=optimized_prompt,
@@ -653,19 +498,6 @@ def extract_gemini_prompts(
         ))
 
     return prompts
-
-
-def _get_style_value(style_guide: Dict[str, str], *keys: str) -> Optional[str]:
-    if not style_guide:
-        return None
-    for key in keys:
-        if key in style_guide:
-            return style_guide[key]
-        lowered_key = key.lower()
-        for k, v in style_guide.items():
-            if isinstance(k, str) and k.lower() == lowered_key:
-                return v
-    return None
 
 
 def sanitize_filename(name: str) -> str:
@@ -707,58 +539,54 @@ def get_prompt_for_thumbnail(
     title: str,
     keywords: List[str],
     color_scheme: str = "modern gradient",
-    background_only: bool = False,
-) -> Tuple[str, Optional[TextOverlayConfig]]:
+    sub_text: str = "",
+    background_only: bool = False,  # DEPRECATED - kept for backward compatibility
+) -> Tuple[str, Optional[WatermarkConfig]]:
     """
-    Generate thumbnail prompt.
+    Generate thumbnail prompt with AI-rendered text.
+
+    As of the new workflow, AI now renders text directly in the image.
+    Only watermark is added via PIL overlay.
 
     Args:
-        title: Blog title
+        title: Blog title (rendered by AI)
         keywords: Keyword list
         color_scheme: Color scheme
-        background_only: If True, generates background-only prompt without text
+        sub_text: Optional subtitle (rendered by AI)
+        background_only: DEPRECATED - no longer used
 
     Returns:
-        Tuple of (prompt_string, TextOverlayConfig or None)
-        - If background_only=False: (full_prompt, None)
-        - If background_only=True: (background_prompt, TextOverlayConfig)
+        Tuple of (prompt_string, WatermarkConfig)
+        - prompt includes text rendering instructions for AI
+        - WatermarkConfig for adding watermark only
     """
     keywords_str = ", ".join(keywords[:3])
 
-    if background_only:
-        # Background-only prompt without text instructions
-        prompt = (
-            f"Create a professional blog thumbnail background image. "
-            f"Topic: {keywords_str}. "
-            f"Use {color_scheme} color scheme. "
-            f"Eye-catching, modern design, 16:9 aspect ratio. "
-            f"Clean background suitable for text overlay. "
-            f"No text, no letters, no typography, no words. "
-            f"High resolution, professional quality."
-        )
+    # Build prompt with text instructions for AI
+    text_instruction = f'bold Korean text "{title}" in upper third'
+    if sub_text:
+        text_instruction += f', subtitle "{sub_text}" in center'
 
-        # Create text overlay config
-        text_config = TextOverlayConfig(
-            main_text=title,
-            sub_text="",
-            position="center",
-            font_size=48,
-            font_color="#FFFFFF",
-            shadow=True,
-        )
+    prompt = (
+        f"Create a professional blog thumbnail image. "
+        f"Topic: {keywords_str}. "
+        f"{text_instruction}. "
+        f"Use {color_scheme} color scheme. "
+        f"Eye-catching, modern design, 16:9 aspect ratio. "
+        f"High resolution, suitable for social media preview."
+    )
 
-        return (prompt, text_config)
-    else:
-        # Original behavior with text included
-        prompt = (
-            f"Create a professional blog thumbnail image. "
-            f"Topic: {keywords_str}. "
-            f"Include bold Korean text overlay: \"{title}\". "
-            f"Use {color_scheme} color scheme. "
-            f"Eye-catching, modern design, 16:9 aspect ratio. "
-            f"High resolution, suitable for social media preview."
-        )
-        return (prompt, None)
+    # Watermark config (only watermark, no text overlay)
+    watermark_config = WatermarkConfig(
+        watermark_text="@money-lab-brian",
+        watermark_position="bottom-center",
+        watermark_margin_bottom=60,
+        watermark_font_size=18,
+        watermark_font_color="rgba(255,255,255,0.6)",
+        watermark_enabled=True,
+    )
+
+    return (prompt, watermark_config)
 
 
 def get_prompt_for_infographic(
@@ -813,3 +641,88 @@ def get_prompt_for_process(
         f"Clean, minimal style with icons for each step. "
         f"16:9 aspect ratio, professional look."
     )
+
+
+def extract_watermark_config(content: str) -> Optional[WatermarkConfig]:
+    """
+    Extract WatermarkConfig from markdown section content.
+
+    Looks for patterns like:
+    - watermark_text: "@money-lab-brian"
+    - watermark_position: "bottom-center"
+    - watermark_margin_bottom: 60
+    - watermark_font_size: 18
+    - watermark_font_color: "rgba(255,255,255,0.6)"
+    - watermark_enabled: true
+
+    Args:
+        content: Markdown section content
+
+    Returns:
+        WatermarkConfig if watermark settings found, else None
+    """
+    config_kwargs = {}
+
+    # Extract watermark_text
+    text_match = re.search(
+        r"watermark_text[:\s]*[\"'](.+?)[\"']",
+        content,
+        re.IGNORECASE
+    )
+    if text_match:
+        config_kwargs["watermark_text"] = text_match.group(1)
+
+    # Extract watermark_position
+    position_match = re.search(
+        r"watermark_position[:\s]*[\"'](.+?)[\"']",
+        content,
+        re.IGNORECASE
+    )
+    if position_match:
+        config_kwargs["watermark_position"] = position_match.group(1)
+
+    # Extract watermark_margin_bottom
+    margin_match = re.search(
+        r"watermark_margin_bottom[:\s]*(\d+)",
+        content,
+        re.IGNORECASE
+    )
+    if margin_match:
+        config_kwargs["watermark_margin_bottom"] = int(margin_match.group(1))
+
+    # Extract watermark_font_size
+    font_size_match = re.search(
+        r"watermark_font_size[:\s]*(\d+)",
+        content,
+        re.IGNORECASE
+    )
+    if font_size_match:
+        config_kwargs["watermark_font_size"] = int(font_size_match.group(1))
+
+    # Extract watermark_font_color
+    color_match = re.search(
+        r"watermark_font_color[:\s]*[\"'](.+?)[\"']",
+        content,
+        re.IGNORECASE
+    )
+    if color_match:
+        config_kwargs["watermark_font_color"] = color_match.group(1)
+
+    # Extract watermark_enabled
+    enabled_match = re.search(
+        r"watermark_enabled[:\s]*(true|false)",
+        content,
+        re.IGNORECASE
+    )
+    if enabled_match:
+        config_kwargs["watermark_enabled"] = enabled_match.group(1).lower() == "true"
+
+    # Return config if any watermark settings found, otherwise return default
+    if config_kwargs:
+        return WatermarkConfig(**config_kwargs)
+
+    # Return default watermark config if [Watermark Config] section exists
+    if "[Watermark Config]" in content or "[watermark config]" in content.lower():
+        return WatermarkConfig()
+
+    return None

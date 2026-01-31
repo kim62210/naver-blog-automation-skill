@@ -1,6 +1,6 @@
 # STEP 3: Parallel Research
 
-Run a small number of agents in parallel to collect only the minimum materials needed for a 1800~2000자 글.
+Run 6 agents simultaneously to collect materials and images.
 
 ## Progress Status
 
@@ -12,15 +12,16 @@ Run a small number of agents in parallel to collect only the minimum materials n
 
 ## 3-1. Execution Method
 
-Launch 3 librarian agents **in parallel** using the Task tool:
+Launch 6 librarian agents **in parallel** using the Task tool:
 
 ```
-Agent 1: Naver News search (WebSearch - site:news.naver.com)
-Agent 2: Official/Institutional sources (WebSearch - gov/agency/bank/company)
-Agent 3: Practical guide / explanation (Naver Blog or general web)
+Agent 1: Naver News search (WebSearch - site:news.naver.com) + News image collection
+Agent 2: Naver Blog search (mcp__naver-search__search_blog) + Blog image collection
+Agent 3: General web search (WebSearch)
+Agent 4: Extended keyword search 1 (AI generates related keywords then searches)
+Agent 5: Extended keyword search 2 (AI generates related keywords then searches)
+Agent 6: Image-only search (WebSearch - Naver/Google image search)
 ```
-
-> ✅ Stop early rule: When you have **6~10 sources** and can extract **5~8 key points + 2~4 numbers/data**, proceed to STEP 4 (do not keep searching).
 
 ---
 
@@ -28,55 +29,69 @@ Agent 3: Practical guide / explanation (Naver Blog or general web)
 
 | Item | Target |
 |------|--------|
-| Text materials | 2~3 per source, **6~10 total** |
-| Reference images | **0~3 (optional)** — only when Mode A is needed |
+| Text materials | 5 per source, 15~25 total |
+| Reference images | 10~15 (combined from news/blog/image search) |
 
 ---
 
 ## 3-3. Agent Prompt Templates
 
-### Agent 1 - Naver News (3 results)
+### Agent 1 - Naver News + Images
 
 ```
-Search for the latest 3 Naver news articles about "{topic}" (site:news.naver.com).
-For each result, extract:
-- title
-- URL
-- publish date/time
-- 2~3 bullet key facts (numbers/changes/quotes if present)
+Search for the latest 5 Naver news articles about "{topic}".
+Extract title, URL, and key content summary from each result.
+
+**Image collection**: Also collect representative image URLs from news articles.
+- Access article pages via WebFetch and extract og:image or main images from the body
+- Also record image descriptions (alt text or captions)
 ```
 
-### Agent 2 - Official / Institutional (3 results)
+### Agent 2 - Naver Blog + Images
 
 ```
-Search for 3 reliable official sources about "{topic}".
-Prioritize:
-- Government/agency (go.kr, or.kr, etc.)
-- Public institutions
-- Bank/company official pages (when topic is product/policy)
+Use mcp__naver-search__search_blog tool to search "{topic}" and collect 5 results.
+Organize title, URL, and summary for each result.
 
-For each result, extract:
-- title
-- URL
-- 2~3 bullet key facts (definition/requirements/process/criteria)
+**Image collection**: Collect image URLs embedded in blog posts.
+- Prioritize infographics, tables, chart images
+- Record brief description per image (e.g., "interest rate comparison table", "application process guide")
 ```
 
-### Agent 3 - Practical Guide (2 results)
+### Agent 3 - Web Search
 
 ```
-Search for 2 practical explanation sources about "{topic}" (Naver Blog or reliable web).
-Extract:
-- title
-- URL
-- 3~5 bullet tips or FAQ-style answers (what readers actually ask)
+Search for 5 reliable web sources about "{topic}".
+Prioritize official agencies, financial companies, government sites.
 ```
 
-### Optional - Minimal Reference Images (0~3)
+### Agent 4, 5 - Extended Keywords
 
 ```
-Only if you need Mode A (reference image insertion):
-- Find up to 3 infographics/tables that directly match the article’s key sections.
-- Record: image URL, source page URL, 1-line description, type (infographic/table/photo).
+Search for additional information using related keyword "{expanded keyword}" for "{topic}".
+```
+
+### Agent 6 - Image-Only Search
+
+```
+Search for reference images about "{topic}".
+
+**Search query examples:**
+- "{topic} 인포그래픽"
+- "{topic} 비교표"
+- "{topic} 설명 이미지"
+
+**Collection items:**
+- Image URL
+- Source page URL
+- Image description (search result or alt text)
+- Image type (photo/infographic/table/illustration)
+
+**Priority collection targets:**
+1. Infographics (data visualization)
+2. Comparison tables/charts
+3. Procedure/process guides
+4. Related product/service images
 ```
 
 ---
@@ -86,8 +101,8 @@ Only if you need Mode A (reference image insertion):
 | Priority | Image Type | Usage |
 |----------|-----------|-------|
 | 1 | Infographic | Reference for key information sections |
-| 2 | Comparison table/chart | Reference for comparisons / numbers |
-| 3 | Procedure guide | Reference for steps / checklist |
+| 2 | Comparison table/chart | Use for data comparison sections |
+| 3 | Procedure guide | Reference for guide/tips sections |
 | 4 | Product/service image | Visual material for body |
 | 5 | Emotional image | Mood for intro/closing |
 

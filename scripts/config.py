@@ -23,9 +23,9 @@ DEFAULT_CONFIG = {
         "max_chars": 1900,
     },
     "images": {
-        "default_count": 4,
+        "default_count": 5,
         "min_count": 3,
-        "max_count": 7,
+        "max_count": 10,
         "download_timeout": 30,
         "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
     },

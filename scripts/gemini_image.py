@@ -12,15 +12,16 @@ import asyncio
 import base64
 import os
 import re
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from .config import get_config, get_config_value
-from .shared_types import ImageResult, BatchResult
 
 if TYPE_CHECKING:
-    from .prompt_converter import TextStyleConfig as PromptTextStyleConfig
+    from .prompt_converter import TextOverlayConfig as PromptTextOverlayConfig
+    from .prompt_converter import WatermarkConfig
 
 
 # API configuration constants - 3-tier fallback system
@@ -32,6 +33,46 @@ DEFAULT_SIZE = "1024x1024"
 DEFAULT_TIMEOUT = 60
 DEFAULT_RETRY_COUNT = 3
 RATE_LIMIT_DELAY = 6.0  # 안전 간격: 60초/10요청 = 6초
+
+
+@dataclass
+class ImageResult:
+    """Data class for image generation result"""
+
+    success: bool
+    file_path: Optional[str] = None
+    prompt: str = ""
+    model_used: str = ""
+    error_message: Optional[str] = None
+    generation_time: float = 0.0
+
+    def __str__(self) -> str:
+        if self.success:
+            return f"✅ Generation complete: {self.file_path} ({self.model_used})"
+        return f"❌ Generation failed: {self.error_message}"
+
+
+@dataclass
+class BatchResult:
+    """Batch image generation result"""
+
+    total: int = 0
+    success_count: int = 0
+    failed_count: int = 0
+    results: List[ImageResult] = field(default_factory=list)
+    total_time: float = 0.0
+
+    @property
+    def success_rate(self) -> float:
+        if self.total == 0:
+            return 0.0
+        return (self.success_count / self.total) * 100
+
+    def summary(self) -> str:
+        return (
+            f"📊 Batch generation result: {self.success_count}/{self.total} succeeded "
+            f"({self.success_rate:.1f}%), time elapsed: {self.total_time:.1f}s"
+        )
 
 
 class GeminiImageGenerator:
@@ -555,7 +596,7 @@ class GeminiImageGenerator:
         self,
         prompt: str,
         output_path: str,
-        text_config: "PromptTextStyleConfig",
+        text_config: "PromptTextOverlayConfig",
         size: str = DEFAULT_SIZE,
         use_fallback: bool = True,
         background_only: bool = True,
@@ -566,7 +607,7 @@ class GeminiImageGenerator:
         Workflow:
         1. Strip text instructions from prompt (if background_only=True)
         2. Generate background image via Gemini
-        3. Apply text overlay locally (Pillow)
+        3. Apply text overlay using SVG composition
         4. Export final PNG
 
         Args:
@@ -676,6 +717,133 @@ class GeminiImageGenerator:
             except Exception:
                 pass
 
+    async def generate_with_watermark(
+        self,
+        prompt: str,
+        output_path: str,
+        watermark_config: "WatermarkConfig",
+        size: str = DEFAULT_SIZE,
+        use_fallback: bool = True,
+    ) -> ImageResult:
+        """
+        Generate image with AI-rendered text and add watermark only.
+
+        This is the NEW workflow where:
+        1. AI renders text directly in the image (prompt includes text instructions)
+        2. PIL only adds watermark at bottom-center
+
+        Args:
+            prompt: Image generation prompt (includes text rendering instructions)
+            output_path: Final output path for PNG
+            watermark_config: WatermarkConfig from prompt_converter module
+            size: Image size (default: 1024x1024)
+            use_fallback: Whether to use fallback models on failure
+
+        Returns:
+            ImageResult: Generation result with final PNG path
+
+        Example:
+            from scripts.prompt_converter import WatermarkConfig
+
+            watermark_config = WatermarkConfig(
+                watermark_text="@money-lab-brian",
+                watermark_position="bottom-center",
+                watermark_font_size=18,
+                watermark_font_color="rgba(255,255,255,0.6)"
+            )
+
+            result = await generator.generate_with_watermark(
+                prompt="Blog thumbnail, bold Korean text '0세 적금 필수!' in center...",
+                output_path="./images/01_썸네일.png",
+                watermark_config=watermark_config
+            )
+        """
+        import tempfile
+        from pathlib import Path as PathLib
+
+        start_time = datetime.now()
+
+        # Step 1: Generate image with AI-rendered text (no text stripping)
+        # Prompt already contains text instructions for AI to render
+        temp_dir = tempfile.mkdtemp()
+        temp_img_path = PathLib(temp_dir) / "generated.png"
+
+        gen_result = await self.generate_image(
+            prompt=prompt,
+            save_path=str(temp_img_path),
+            size=size,
+            use_fallback=use_fallback,
+        )
+
+        if not gen_result.success:
+            return ImageResult(
+                success=False,
+                prompt=prompt,
+                model_used=gen_result.model_used,
+                error_message=f"Image generation failed: {gen_result.error_message}",
+                generation_time=(datetime.now() - start_time).total_seconds(),
+            )
+
+        # Step 2: Add watermark only (if enabled)
+        try:
+            from .text_overlay import add_watermark_to_image
+
+            # Check if watermark is enabled
+            if not watermark_config.watermark_enabled:
+                # Just move the file to output path
+                import shutil
+                PathLib(output_path).parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(temp_img_path), output_path)
+
+                return ImageResult(
+                    success=True,
+                    file_path=output_path,
+                    prompt=prompt,
+                    model_used=gen_result.model_used,
+                    generation_time=(datetime.now() - start_time).total_seconds(),
+                )
+
+            # Add watermark
+            overlay_result = add_watermark_to_image(
+                image_path=str(temp_img_path),
+                watermark_config=watermark_config,
+                output_path=output_path,
+            )
+
+            if not overlay_result.get("success"):
+                return ImageResult(
+                    success=False,
+                    prompt=prompt,
+                    model_used=gen_result.model_used,
+                    error_message=f"Watermark failed: {overlay_result.get('error')}",
+                    generation_time=(datetime.now() - start_time).total_seconds(),
+                )
+
+            return ImageResult(
+                success=True,
+                file_path=output_path,
+                prompt=prompt,
+                model_used=gen_result.model_used,
+                generation_time=(datetime.now() - start_time).total_seconds(),
+            )
+
+        except ImportError as e:
+            return ImageResult(
+                success=False,
+                prompt=prompt,
+                model_used=gen_result.model_used,
+                error_message=f"Watermark module not available: {e}",
+                generation_time=(datetime.now() - start_time).total_seconds(),
+            )
+        finally:
+            # Cleanup temp files
+            try:
+                if temp_img_path.exists():
+                    temp_img_path.unlink()
+                PathLib(temp_dir).rmdir()
+            except Exception:
+                pass
+
     async def generate_batch_with_text_overlay(
         self,
         items: List[Dict[str, Any]],
@@ -732,10 +900,18 @@ class GeminiImageGenerator:
                 prompt = item.get("prompt", "")
                 filename = item.get("filename", f"image_{len(results):02d}.png")
                 text_config = item.get("text_config")
+                watermark_config = item.get("watermark_config")
                 save_path = str(output_path / filename)
 
-                if text_config:
-                    # Use text overlay pipeline
+                if watermark_config:
+                    # NEW WORKFLOW: AI renders text, PIL adds watermark only
+                    result = await self.generate_with_watermark(
+                        prompt=prompt,
+                        output_path=save_path,
+                        watermark_config=watermark_config,
+                    )
+                elif text_config:
+                    # LEGACY: Use text overlay pipeline (deprecated)
                     result = await self.generate_with_text_overlay(
                         prompt=prompt,
                         output_path=save_path,

@@ -16,16 +16,20 @@
 
 ## [Image 1] Thumbnail
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation (With Text)
 
-> **Note**: AI generates background image only. Text is added locally (Pillow) for clean Korean typography.
+> **Note**: AI renders text directly. PIL adds watermark only.
 
 **Korean Description:**
 ${thumbnail_description_kr}
 
-**AI Generation Prompt (Background Only):**
+**AI Generation Prompt:**
 ```
-${thumbnail_prompt_en_background}
+Blog thumbnail image, ${topic} concept,
+bold Korean text "${title}" in upper third,
+subtitle "${subtitle}" in center,
+${thumbnail_colors} gradient background,
+eye-catching modern design, 16:9 ratio
 ```
 
 **Style:**
@@ -34,14 +38,12 @@ ${thumbnail_prompt_en_background}
 - Format: ${thumbnail_format}
 - Ratio: 16:9
 
-**[Text Overlay Config]**
-- main_text: "${title}"
-- sub_text: "${subtitle}"
-- position: "center"
-- font_size: 48
-- font_color: "#FFFFFF"
-- shadow: true
-- background_box: false
+**[Watermark Config]**
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 60
+- watermark_font_size: 18
+- watermark_font_color: "rgba(255,255,255,0.6)"
 
 ### 🔷 SVG Generation Guide
 

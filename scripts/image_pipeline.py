@@ -2,13 +2,13 @@
 Image Pipeline Module
 
 Integrated pipeline for generating blog images with text overlay support.
-Combines Gemini API image generation with local text overlay (Pillow).
+Combines Gemini API image generation with SVG text composition.
 
 Workflow:
 1. Parse image guide content
 2. Extract prompts and text overlay configs
 3. Generate background images via Gemini API
-4. Apply text overlay locally (Pillow)
+4. Apply text overlay using SVG composition
 5. Export final PNG images
 """
 
@@ -20,8 +20,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from .gemini_image import GeminiImageGenerator, ImageResult, BatchResult
-from .prompt_converter import TextOverlayConfig, extract_text_config, strip_text_instructions
-from .text_overlay import TextOverlayProcessor, create_thumbnail_with_text
+from .prompt_converter import (
+    TextOverlayConfig,
+    WatermarkConfig,
+    extract_watermark_config,
+)
+from .text_overlay import TextOverlayProcessor, add_watermark_to_image
 
 
 @dataclass
@@ -43,8 +47,10 @@ class PipelineItem:
     role: str  # e.g., "Thumbnail", "Infographic", etc.
     prompt: str
     filename: str
+    watermark_config: Optional[WatermarkConfig] = None
+    # Keep text_config for backward compatibility
     text_config: Optional[TextOverlayConfig] = None
-    mode: str = "B"  # A: Reference, B: AI Generation, B-2: AI + Text Overlay, C: SVG
+    mode: str = "B"  # A: Reference, B: AI Generation (with text), B-3: AI + Watermark Only, C: SVG
 
 
 @dataclass
@@ -73,7 +79,7 @@ class ImagePipeline:
 
     Combines:
     - Gemini API for background image generation
-    - Local text overlay for Korean typography
+    - SVG composition for text overlay
     - PNG export for final output
 
     Usage:
@@ -118,6 +124,8 @@ class ImagePipeline:
         size: str = "1024x1024",
     ) -> ImageResult:
         """
+        DEPRECATED: Use generate_with_watermark() instead.
+
         Generate a single image with text overlay.
 
         Args:
@@ -133,6 +141,47 @@ class ImagePipeline:
             prompt=prompt,
             output_path=output_path,
             text_config=text_config,
+            size=size,
+        )
+
+    async def generate_with_watermark(
+        self,
+        prompt: str,
+        output_path: str,
+        watermark_config: Optional[WatermarkConfig] = None,
+        size: str = "1024x1024",
+    ) -> ImageResult:
+        """
+        Generate a single image with AI-rendered text + watermark only.
+
+        This is the new recommended method where:
+        - AI renders all text directly in the image (main_text, sub_text in prompt)
+        - PIL only adds watermark at bottom-center
+
+        Args:
+            prompt: Image generation prompt (including text instructions for AI)
+            output_path: Final output path for PNG
+            watermark_config: Watermark configuration (optional, uses default if None)
+            size: Image size
+
+        Returns:
+            ImageResult: Generation result
+
+        Example:
+            result = await pipeline.generate_with_watermark(
+                prompt="Blog thumbnail, bold Korean text '제목' in upper third...",
+                output_path="./images/01_썸네일.png",
+                watermark_config=WatermarkConfig(watermark_text="@money-lab-brian")
+            )
+        """
+        # Use default watermark config if not provided
+        if watermark_config is None:
+            watermark_config = WatermarkConfig()
+
+        return await self.generator.generate_with_watermark(
+            prompt=prompt,
+            output_path=output_path,
+            watermark_config=watermark_config,
             size=size,
         )
 
@@ -179,7 +228,10 @@ class ImagePipeline:
             batch_item = {
                 "prompt": item.prompt,
                 "filename": item.filename,
-                "text_config": item.text_config if use_text_overlay else None,
+                # New workflow: use watermark_config for Mode B-3
+                "watermark_config": item.watermark_config if item.mode == "B-3" else None,
+                # Legacy support: use text_config for Mode B-2
+                "text_config": item.text_config if (use_text_overlay and item.mode == "B-2") else None,
             }
             batch_items.append(batch_item)
 
@@ -255,11 +307,16 @@ class ImagePipeline:
         Returns:
             PipelineItem or None if parsing fails
         """
-        # Check for Mode B-2 (Background Only + Text Overlay)
-        if "AI Generation (Background Only)" in content or "Background Only" in content:
-            return self._parse_mode_b2(index, role, content)
+        # Check for Mode B-3 (AI renders text + Watermark Only) - NEW FORMAT
+        if "[Watermark Config]" in content or "Watermark Config" in content.lower():
+            return self._parse_mode_b3(index, role, content)
 
-        # Check for Mode B (Regular AI Generation)
+        # Check for Mode B-2 (DEPRECATED: Background Only + Text Overlay)
+        # Keep for backward compatibility but treat as Mode B
+        if "AI Generation (Background Only)" in content or "Background Only" in content:
+            return self._parse_mode_b2_legacy(index, role, content)
+
+        # Check for Mode B (Regular AI Generation with text in prompt)
         if "🎨 AI Generation" in content or "AI Generation Prompt" in content:
             return self._parse_mode_b(index, role, content)
 
@@ -285,12 +342,19 @@ class ImagePipeline:
         self, index: int, role: str, content: str
     ) -> Optional[PipelineItem]:
         """Parse Mode B (AI Generation) section"""
-        # Extract prompt from the first fenced code block after "AI Generation Prompt"
+        # Extract prompt from code block
         prompt_match = re.search(
-            r"AI\s+Generation\s+Prompt.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
+            r"AI Generation Prompt[:\s]*\n```\n?(.*?)\n?```",
             content,
-            re.DOTALL | re.IGNORECASE,
+            re.DOTALL | re.IGNORECASE
         )
+        if not prompt_match:
+            # Try alternative format
+            prompt_match = re.search(
+                r"\*\*AI Generation Prompt[:\s]*\*\*\s*\n```\n?(.*?)\n?```",
+                content,
+                re.DOTALL | re.IGNORECASE
+            )
 
         if not prompt_match:
             return None
@@ -309,29 +373,63 @@ class ImagePipeline:
             mode="B",
         )
 
-    def _parse_mode_b2(
+    def _parse_mode_b3(
         self, index: int, role: str, content: str
     ) -> Optional[PipelineItem]:
-        """Parse Mode B-2 (AI Generation + Text Overlay) section"""
-        # Extract background-only prompt (supports labels like "**AI Generation Prompt (Background Only):**")
+        """
+        Parse Mode B-3 (AI renders text + Watermark Only) section.
+
+        This is the NEW format where:
+        - AI prompt includes text rendering instructions
+        - PIL only adds watermark to the final image
+        """
+        # Extract prompt (includes text instructions for AI)
         prompt_match = re.search(
-            r"AI\s+Generation\s+Prompt.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
+            r"(?:AI Generation Prompt)[:\s]*\n```\n?(.*?)\n?```",
             content,
-            re.DOTALL | re.IGNORECASE,
+            re.DOTALL | re.IGNORECASE
         )
-        if not prompt_match:
-            # Fallback: look for any "Background Only" label followed by a fenced code block
-            prompt_match = re.search(
-                r"Background\s+Only.*?\n\s*```(?:\w+)?\s*\n(.*?)\n\s*```",
-                content,
-                re.DOTALL | re.IGNORECASE,
-            )
         if not prompt_match:
             return None
 
         prompt = prompt_match.group(1).strip()
 
-        # Extract text overlay config
+        # Extract watermark config
+        watermark_config = extract_watermark_config(content)
+
+        # Generate filename
+        filename = self._generate_filename(index, role)
+
+        return PipelineItem(
+            index=index,
+            role=role,
+            prompt=prompt,
+            filename=filename,
+            watermark_config=watermark_config,
+            mode="B-3",
+        )
+
+    def _parse_mode_b2_legacy(
+        self, index: int, role: str, content: str
+    ) -> Optional[PipelineItem]:
+        """
+        DEPRECATED: Parse Mode B-2 (Background Only + Text Overlay) section.
+
+        This is kept for backward compatibility only.
+        New code should use Mode B-3 (AI renders text + Watermark Only).
+        """
+        # Extract background-only prompt
+        prompt_match = re.search(
+            r"(?:AI Generation Prompt|Background Only)[:\s]*\n```\n?(.*?)\n?```",
+            content,
+            re.DOTALL | re.IGNORECASE
+        )
+        if not prompt_match:
+            return None
+
+        prompt = prompt_match.group(1).strip()
+
+        # Extract text overlay config (old format)
         text_config = self._extract_text_overlay_config(content)
 
         # Generate filename
