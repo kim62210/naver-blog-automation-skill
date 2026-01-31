@@ -282,6 +282,34 @@ def create_thumbnail_with_text(
     return processor.process(config)
 
 
+def _parse_y_position(y_value: str, height: int) -> int:
+    """
+    Parse Y position value (percentage or pixel).
+
+    Args:
+        y_value: Y position as percentage (e.g., "35%") or pixel (e.g., "310")
+        height: Image height in pixels
+
+    Returns:
+        Y position in pixels
+    """
+    if not y_value:
+        return height // 2  # default to center
+
+    y_str = str(y_value).strip()
+    if y_str.endswith("%"):
+        try:
+            percent = float(y_str[:-1])
+            return int(height * percent / 100)
+        except ValueError:
+            return height // 2
+    else:
+        try:
+            return int(y_str)
+        except ValueError:
+            return height // 2
+
+
 def add_text_to_existing_image(
     image_path: str,
     text_config: 'TextOverlayConfig',
@@ -289,6 +317,11 @@ def add_text_to_existing_image(
 ) -> Dict[str, Any]:
     """
     Add text overlay to an existing image using TextOverlayConfig from prompt_converter.
+
+    Supports:
+    - main_text with configurable Y position (main_text_y: "35%" or "310")
+    - sub_text with configurable Y position (sub_text_y: "50%" or auto)
+    - watermark at bottom center with margin
 
     Args:
         image_path: Path to source image
@@ -309,19 +342,22 @@ def add_text_to_existing_image(
     except Exception as e:
         return {"success": False, "output_path": None, "error": str(e)}
 
-    # Calculate position
+    # Calculate X position based on position parameter
     center_x = width // 2
-    positions = {
-        "center": (center_x, height // 2),
-        "top": (center_x, height // 4),
-        "bottom": (center_x, height * 3 // 4),
-        "top-left": (width // 6, height // 4),
-        "top-right": (width * 5 // 6, height // 4),
-        "bottom-left": (width // 6, height * 3 // 4),
-        "bottom-right": (width * 5 // 6, height * 3 // 4),
+    position_x_map = {
+        "center": center_x,
+        "top": center_x,
+        "bottom": center_x,
+        "top-left": width // 6,
+        "top-right": width * 5 // 6,
+        "bottom-left": width // 6,
+        "bottom-right": width * 5 // 6,
+        "bottom-center": center_x,
     }
+    x = position_x_map.get(text_config.position, center_x)
 
-    x, y = positions.get(text_config.position, positions["center"])
+    # Calculate main text Y position
+    main_y = _parse_y_position(text_config.main_text_y, height)
 
     # Create text elements
     text_elements = []
@@ -331,9 +367,10 @@ def add_text_to_existing_image(
             TextElement(
                 text=text_config.main_text,
                 x=x,
-                y=y,
+                y=main_y,
                 font_size=text_config.font_size,
                 font_family=text_config.font_family,
+                font_weight=getattr(text_config, 'font_weight', 'bold'),
                 fill=text_config.font_color,
                 text_anchor="middle" if "left" not in text_config.position else "start",
                 shadow=text_config.shadow,
@@ -347,17 +384,54 @@ def add_text_to_existing_image(
         )
 
     if text_config.sub_text:
-        sub_y = y + text_config.font_size + 20
+        # Calculate sub_text Y position
+        if text_config.sub_text_y:
+            sub_y = _parse_y_position(text_config.sub_text_y, height)
+        else:
+            # Auto position: main_text + gap
+            gap = max(20, int(text_config.font_size * 0.8))
+            sub_y = main_y + text_config.font_size // 2 + gap
+
+        sub_font_size = getattr(text_config, 'sub_font_size', int(text_config.font_size * 0.5))
+        sub_font_color = getattr(text_config, 'sub_font_color', text_config.font_color)
+
         text_elements.append(
             TextElement(
                 text=text_config.sub_text,
                 x=x,
                 y=sub_y,
-                font_size=int(text_config.font_size * 0.5),
+                font_size=sub_font_size,
                 font_family=text_config.font_family,
-                fill=text_config.font_color,
+                font_weight="regular",
+                fill=sub_font_color,
                 text_anchor="middle" if "left" not in text_config.position else "start",
                 shadow=text_config.shadow,
+            )
+        )
+
+    # Add watermark if enabled
+    watermark_enabled = getattr(text_config, 'watermark_enabled', True)
+    watermark_text = getattr(text_config, 'watermark_text', '@money-lab-brian')
+
+    if watermark_enabled and watermark_text:
+        watermark_margin_bottom = getattr(text_config, 'watermark_margin_bottom', 60)
+        watermark_font_size = getattr(text_config, 'watermark_font_size', 18)
+        watermark_font_color = getattr(text_config, 'watermark_font_color', 'rgba(255,255,255,0.6)')
+
+        # Watermark at bottom center
+        watermark_y = height - watermark_margin_bottom
+
+        text_elements.append(
+            TextElement(
+                text=watermark_text,
+                x=center_x,
+                y=watermark_y,
+                font_size=watermark_font_size,
+                font_family=text_config.font_family,
+                font_weight="light",
+                fill=watermark_font_color,
+                text_anchor="middle",
+                shadow=False,  # No shadow for watermark
             )
         )
 

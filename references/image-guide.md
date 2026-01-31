@@ -155,6 +155,43 @@ Infographic:
 
 > **New**: AI generates background only, then text is added locally (Pillow) for better Korean text quality.
 
+#### 제목 단어화 규칙 (Thumbnail Text)
+
+긴 제목을 **2~3개 핵심 단어로 압축**하여 가독성 높은 썸네일을 생성합니다:
+
+| 원본 제목 | 압축된 텍스트 |
+|----------|--------------|
+| 2026년 0세 적금 금리 비교 완벽 가이드 | 0세 적금 필수! |
+| 육아휴직 급여 신청 방법 총정리 | 육아휴직 급여 |
+| 전세대출 금리 비교 및 조건 안내 | 전세대출 총정리 |
+
+#### 썸네일 레이아웃 (1300×885 기준)
+
+```
+┌────────────────────────────────────────────┐
+│                                            │
+│         ┌──────────────────────┐           │
+│         │   [main_text: 64px]  │           │  ← Y: 35% (310px)
+│         │   Bold, 중앙 정렬     │           │
+│         └──────────────────────┘           │
+│                                            │
+│         ┌──────────────────────┐           │
+│         │   [sub_text: 32px]   │           │  ← Y: 50% (443px)
+│         │   Regular, 중앙 정렬  │           │
+│         └──────────────────────┘           │
+│                                            │
+│         ───@money-lab-brian───             │  ← Y: 하단에서 60px 위
+└────────────────────────────────────────────┘
+```
+
+#### 텍스트 위치 상세
+
+| 요소 | X 좌표 | Y 좌표 | 정렬 | 크기 | 비고 |
+|------|--------|--------|------|------|------|
+| main_text | 650 (중앙) | 35% (310px) | center | 64px Bold | 이미지 상단 1/3 |
+| sub_text | 650 (중앙) | 50% (443px) | center | 32px Regular | main 아래 |
+| watermark | 650 (중앙) | 하단-60px | center | 18px Light | 반투명 |
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Image N] {image role}
@@ -174,17 +211,61 @@ Infographic:
 - Ratio: {ratio}
 
 [Text Overlay Config]
-- main_text: "{제목 텍스트}"
-- sub_text: "{부제목}" (optional)
-- position: "center" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right"
-- font_size: 48
+# 메인 텍스트 (이미지 상단 1/3 중앙)
+- main_text: "{핵심 키워드 2~3개}"
+- main_text_y: "35%"
+- font_size: 64
+- font_weight: "bold"
 - font_color: "#FFFFFF"
-- font_family: "Pretendard, Nanum Gothic, sans-serif"
 - shadow: true
+- shadow_offset: 2
 - shadow_color: "rgba(0,0,0,0.5)"
-- background_box: false (optional)
-- background_box_color: "rgba(0,0,0,0.3)" (optional)
+
+# 부제목 (메인 텍스트 아래, 중앙)
+- sub_text: "{부제목}"
+- sub_text_y: "50%"
+- sub_font_size: 32
+- sub_font_color: "rgba(255,255,255,0.9)"
+
+# 배경 박스 (선택)
+- background_box: true
+- background_box_color: "rgba(0,0,0,0.3)"
+- background_box_padding: 20
+
+# 워터마크 (필수) - 하단 중앙에서 살짝 위로
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 60
+- watermark_font_size: 18
+- watermark_font_color: "rgba(255,255,255,0.6)"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+#### 본문 이미지 텍스트 배치
+
+| 이미지 타입 | 텍스트 위치 | 크기 | 특징 |
+|------------|------------|------|------|
+| 인포그래픽 | 상단 타이틀 (Y: 10%) | 32px | Bold, 중앙정렬 |
+| 비교표 | 상단 헤더 (Y: 8%) | 28px | Bold, 좌측정렬 |
+| 프로세스 | 각 단계 라벨 | 18px | Regular, 중앙정렬 |
+| 무드 이미지 | 하단 캡션 (Y: 90%) | 16px | Light, 중앙정렬 |
+
+**본문 이미지용 Text Overlay Config:**
+```
+[Text Overlay Config]
+# 타이틀 (이미지 상단)
+- main_text: "{이미지 제목}"
+- main_text_y: "10%"
+- font_size: 32
+- font_weight: "bold"
+- font_color: "#333333"
+
+# 워터마크 (필수)
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 30
+- watermark_font_size: 14
+- watermark_font_color: "rgba(0,0,0,0.4)"
 ```
 
 **Benefits of Mode B-2:**
@@ -192,6 +273,7 @@ Infographic:
 2. Easy text editing without regenerating images
 3. Consistent font styling across all thumbnails
 4. Professional typography control (shadows, positioning, etc.)
+5. **Watermark support** for brand recognition
 
 ### Gemini API Usage
 
@@ -285,14 +367,33 @@ eye-catching modern design, 16:9 ratio
 - Ratio: 16:9
 
 [Text Overlay Config]
+# 메인 텍스트 (상단 1/3, 중앙)
 - main_text: "0세 적금 필수!"
-- sub_text: "연 12% 고금리"
-- position: "center"
-- font_size: 48
+- main_text_y: "35%"
+- font_size: 64
+- font_weight: "bold"
 - font_color: "#FFFFFF"
 - shadow: true
+- shadow_offset: 2
+- shadow_color: "rgba(0,0,0,0.5)"
+
+# 부제목 (중앙)
+- sub_text: "연 12% 고금리"
+- sub_text_y: "50%"
+- sub_font_size: 32
+- sub_font_color: "rgba(255,255,255,0.9)"
+
+# 배경 박스
 - background_box: true
 - background_box_color: "rgba(0,0,0,0.3)"
+- background_box_padding: 20
+
+# 워터마크 (하단 중앙)
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 60
+- watermark_font_size: 18
+- watermark_font_color: "rgba(255,255,255,0.6)"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

@@ -15,10 +15,14 @@ from .config import get_config, get_config_value
 class TextOverlayConfig:
     """Data class for text overlay configuration"""
 
+    # 메인 텍스트 설정
     main_text: str = ""
+    main_text_y: str = "50%"  # Y 위치 (퍼센트 또는 픽셀)
     sub_text: str = ""
+    sub_text_y: str = ""  # 비어있으면 main_text 아래에 자동 배치
     position: str = "center"  # "center", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right"
     font_size: int = 48
+    font_weight: str = "bold"  # "bold", "regular", "light"
     font_color: str = "#FFFFFF"
     font_family: str = "Pretendard, Nanum Gothic, sans-serif"
     shadow: bool = True
@@ -27,6 +31,18 @@ class TextOverlayConfig:
     background_box: bool = False
     background_box_color: str = "rgba(0,0,0,0.3)"
     background_box_padding: int = 20
+
+    # 부제목 설정
+    sub_font_size: int = 24
+    sub_font_color: str = "rgba(255,255,255,0.9)"
+
+    # 워터마크 설정
+    watermark_text: str = "@money-lab-brian"
+    watermark_position: str = "bottom-center"  # 하단 중앙
+    watermark_margin_bottom: int = 60  # 하단에서 60px 위
+    watermark_font_size: int = 18
+    watermark_font_color: str = "rgba(255,255,255,0.6)"
+    watermark_enabled: bool = True  # 워터마크 활성화 여부
 
 
 @dataclass
@@ -458,7 +474,7 @@ def _parse_image_heading_section(index: int, role: str, section: str) -> Optiona
         color_match = re.search(r"font_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
         if color_match:
             overlay.font_color = color_match.group(1)
-        shadow_match = re.search(r"shadow[:\s]*(true|false)", section, re.IGNORECASE)
+        shadow_match = re.search(r"(?<![_-])shadow[:\s]*(true|false)", section, re.IGNORECASE)
         if shadow_match:
             overlay.shadow = shadow_match.group(1).lower() == "true"
         bg_box_match = re.search(r"background_box[:\s]*(true|false)", section, re.IGNORECASE)
@@ -467,6 +483,47 @@ def _parse_image_heading_section(index: int, role: str, section: str) -> Optiona
         bg_box_color_match = re.search(r"background_box_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
         if bg_box_color_match:
             overlay.background_box_color = bg_box_color_match.group(1)
+
+        # 메인 텍스트 Y 위치
+        main_y_match = re.search(r"main_text_y[:\s]*[\"']?(\d+%?)[\"']?", section, re.IGNORECASE)
+        if main_y_match:
+            overlay.main_text_y = main_y_match.group(1)
+
+        # 부제목 설정
+        sub_y_match = re.search(r"sub_text_y[:\s]*[\"']?(\d+%?)[\"']?", section, re.IGNORECASE)
+        if sub_y_match:
+            overlay.sub_text_y = sub_y_match.group(1)
+        sub_font_size_match = re.search(r"sub_font_size[:\s]*(\d+)", section, re.IGNORECASE)
+        if sub_font_size_match:
+            overlay.sub_font_size = int(sub_font_size_match.group(1))
+        sub_font_color_match = re.search(r"sub_font_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if sub_font_color_match:
+            overlay.sub_font_color = sub_font_color_match.group(1)
+
+        # 폰트 굵기
+        font_weight_match = re.search(r"font_weight[:\s]*[\"']?(\w+)[\"']?", section, re.IGNORECASE)
+        if font_weight_match:
+            overlay.font_weight = font_weight_match.group(1)
+
+        # 워터마크 설정
+        wm_text_match = re.search(r"watermark_text[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if wm_text_match:
+            overlay.watermark_text = wm_text_match.group(1)
+        wm_pos_match = re.search(r"watermark_position[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if wm_pos_match:
+            overlay.watermark_position = wm_pos_match.group(1)
+        wm_margin_match = re.search(r"watermark_margin_bottom[:\s]*(\d+)", section, re.IGNORECASE)
+        if wm_margin_match:
+            overlay.watermark_margin_bottom = int(wm_margin_match.group(1))
+        wm_size_match = re.search(r"watermark_font_size[:\s]*(\d+)", section, re.IGNORECASE)
+        if wm_size_match:
+            overlay.watermark_font_size = int(wm_size_match.group(1))
+        wm_color_match = re.search(r"watermark_font_color[:\s]*[\"'](.+?)[\"']", section, re.IGNORECASE)
+        if wm_color_match:
+            overlay.watermark_font_color = wm_color_match.group(1)
+        wm_enabled_match = re.search(r"watermark_enabled[:\s]*(true|false)", section, re.IGNORECASE)
+        if wm_enabled_match:
+            overlay.watermark_enabled = wm_enabled_match.group(1).lower() == "true"
 
     return ImageGuideItem(
         index=index,

@@ -166,6 +166,15 @@ After writing the prompt, images are saved to `./images/` folder without manual 
 
 #### 🎨 Mode B-2: Background Only + Text Overlay (Recommended for thumbnails)
 
+**제목 단어화 규칙**: 긴 제목을 2~3개 핵심 단어로 압축하여 가독성을 높입니다.
+- "2026년 0세 적금 금리 비교 완벽 가이드" → "0세 적금 필수!"
+- "육아휴직 급여 신청 방법 총정리" → "육아휴직 급여"
+
+**썸네일 레이아웃 (1300×885)**:
+- main_text: Y 35% (상단 1/3), 64px Bold
+- sub_text: Y 50% (중앙), 32px Regular
+- watermark: 하단에서 60px 위, 18px Light
+
 ````md
 ## [Image N] {image role description}
 
@@ -180,13 +189,51 @@ After writing the prompt, images are saved to `./images/` folder without manual 
 ```
 
 **[Text Overlay Config]**
-- main_text: "{main text}"
-- sub_text: "{sub text}" (optional)
-- position: "center" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right"
-- font_size: 48
+# 메인 텍스트 (상단 1/3, 중앙)
+- main_text: "{핵심 키워드 2~3개}"
+- main_text_y: "35%"
+- font_size: 64
+- font_weight: "bold"
 - font_color: "#FFFFFF"
 - shadow: true
-- background_box: false
+- shadow_offset: 2
+- shadow_color: "rgba(0,0,0,0.5)"
+
+# 부제목 (중앙)
+- sub_text: "{부제목}"
+- sub_text_y: "50%"
+- sub_font_size: 32
+- sub_font_color: "rgba(255,255,255,0.9)"
+
+# 배경 박스 (선택)
+- background_box: true
+- background_box_color: "rgba(0,0,0,0.3)"
+- background_box_padding: 20
+
+# 워터마크 (필수)
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 60
+- watermark_font_size: 18
+- watermark_font_color: "rgba(255,255,255,0.6)"
+````
+
+**본문 이미지용 Text Overlay Config:**
+````md
+**[Text Overlay Config]**
+# 타이틀 (상단)
+- main_text: "{이미지 제목}"
+- main_text_y: "10%"
+- font_size: 32
+- font_weight: "bold"
+- font_color: "#333333"
+
+# 워터마크 (필수)
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 30
+- watermark_font_size: 14
+- watermark_font_color: "rgba(0,0,0,0.4)"
 ````
 
 #### 🔷 Mode C: SVG Image Generation Guide
@@ -219,111 +266,137 @@ After writing the prompt, images are saved to `./images/` folder without manual 
 
 ---
 
-## 7-6. Auto-Generate Images via Gemini API
+## 7-6. 이미지 자동 생성 (필수 단계)
 
-Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
+⚠️ **필수**: 본문 작성 후 모든 이미지는 이 단계에서 자동 생성됩니다.
+이미지 가이드.md 작성이 완료되면, 반드시 이미지 파이프라인을 실행하여 이미지를 생성해야 합니다.
 
-### New: Background + Text Overlay Pipeline (Recommended)
+### 생성 파이프라인
 
-For better Korean text quality, use the new pipeline:
-1. Generate background image via Gemini (no text)
-2. Add text overlay locally (Pillow)
-3. Export final PNG
+```
+이미지 가이드.md 파싱
+       ↓
+Gemini API (배경 생성, NO TEXT)
+       ↓
+PIL 텍스트 오버레이
+       ↓
+./images/*.png 저장
+```
+
+### 이미지 타입별 생성 방식
+
+| 이미지 타입 | 생성 방식 | 비고 |
+|------------|----------|------|
+| **썸네일** | Mode B-2 (배경 + 텍스트 오버레이) | **필수** - 항상 텍스트 오버레이 적용 |
+| **본문 이미지** | Mode B (AI 생성) 또는 Mode B-2 | 텍스트 필요시 B-2 사용 |
+| **인포그래픽** | Mode C (SVG) | svg-canvas-mcp로 자동 생성 |
+| **참조 이미지** | Mode A (수집) | 웹에서 수집한 이미지 사용 |
+
+### 자동 실행 (필수)
+
+본문과 이미지 가이드 작성 후 반드시 아래 코드를 실행합니다:
+
+```python
+from scripts.image_pipeline import ImagePipeline
+
+# 이미지 가이드 파일 읽기
+with open(f"{project_path}/이미지 가이드.md", "r", encoding="utf-8") as f:
+    image_guide_content = f.read()
+
+# 파이프라인 실행 (필수)
+pipeline = ImagePipeline()
+result = await pipeline.process_image_guide(
+    image_guide_content=image_guide_content,
+    output_dir=f"{project_path}/images/",
+    use_text_overlay=True  # 항상 True
+)
+
+# 결과 확인
+print(result.summary())
+# 📊 Pipeline result: 5/5 success, 3 with text overlay
+
+# 실패한 이미지 처리
+if result.failed_count > 0:
+    print(f"⚠️ {result.failed_count}개 이미지 생성 실패")
+    for failed in result.failed_items:
+        print(f"  - {failed.filename}: {failed.error}")
+    # 재시도 또는 사용자에게 알림
+```
+
+### 단일 이미지 생성 (텍스트 오버레이)
+
+개별 이미지 생성이 필요한 경우:
 
 ```python
 from scripts.image_pipeline import ImagePipeline
 from scripts.prompt_converter import TextOverlayConfig
 
-# Initialize pipeline
 pipeline = ImagePipeline()
 
-# Example: Generate thumbnail with text overlay
+# 썸네일 생성 예시 (새로운 확장 형식)
 result = await pipeline.generate_with_text_overlay(
     prompt="Blog thumbnail background, finance concept, warm gradient, NO TEXT",
     output_path="./images/01_썸네일.png",
     text_config=TextOverlayConfig(
+        # 메인 텍스트 (상단 1/3)
         main_text="0세 적금 필수!",
-        sub_text="연 12% 고금리",
-        position="center",
-        font_size=48,
+        main_text_y="35%",
+        font_size=64,
+        font_weight="bold",
         font_color="#FFFFFF",
-        shadow=True
+        shadow=True,
+        shadow_offset=2,
+
+        # 부제목 (중앙)
+        sub_text="연 12% 고금리",
+        sub_text_y="50%",
+        sub_font_size=32,
+        sub_font_color="rgba(255,255,255,0.9)",
+
+        # 배경 박스
+        background_box=True,
+        background_box_color="rgba(0,0,0,0.3)",
+
+        # 워터마크 (필수)
+        watermark_text="@money-lab-brian",
+        watermark_margin_bottom=60,
+        watermark_font_size=18,
+        watermark_font_color="rgba(255,255,255,0.6)",
     )
 )
-# Result: Background generated → Text overlay applied → Final PNG saved
 ```
 
-### Legacy: Generate Images with Python
-
-```python
-from scripts.gemini_image import GeminiImageGenerator
-from scripts.prompt_converter import generate_image_prompts_for_batch
-
-# Extract prompts from image guide
-with open("이미지 가이드.md", "r", encoding="utf-8") as f:
-    image_guide_content = f.read()
-
-prompts = generate_image_prompts_for_batch(image_guide_content)
-# [{"prompt": "...", "filename": "01_썸네일.png"}, ...]
-
-# Batch generate via Gemini API
-generator = GeminiImageGenerator()
-result = await generator.generate_batch(
-    prompts=prompts,
-    output_dir="./images/"
-)
-
-print(result.summary())
-# 📊 Batch generation result: 5/5 success (100.0%), elapsed: 25.3s
-```
-
-### Batch Generate with Text Overlay
-
-```python
-from scripts.image_pipeline import ImagePipeline
-
-# Initialize pipeline
-pipeline = ImagePipeline()
-
-# Process entire image guide with text overlay support
-with open("이미지 가이드.md", "r", encoding="utf-8") as f:
-    image_guide_content = f.read()
-
-result = await pipeline.process_image_guide(
-    image_guide_content=image_guide_content,
-    output_dir="./images/",
-    use_text_overlay=True  # Enable local text overlay for Mode B-2 items
-)
-
-print(result.summary())
-# 📊 Pipeline result: 5/5 success, 3 with text overlay
-```
-
-### Environment Variable Setup (Required)
+### 환경 변수 설정 (필수)
 
 ```bash
 export GOOGLE_API_KEY="your-api-key"
-# or
+# 또는
 export GEMINI_API_KEY="your-api-key"
 ```
 
-### Generation Limits
+### 생성 제한
 
-- **15 requests per minute** limit (auto-delay applied)
-- **500 images/day** free quota (gemini-2.0-flash-exp)
-- Auto-fallback to imagen-3.0 when quota exceeded
+- **15 requests per minute** limit (자동 딜레이 적용)
+- **500 images/day** 무료 할당량 (gemini-2.0-flash-exp)
+- 할당량 초과시 imagen-3.0으로 자동 전환
 
-### Text Overlay Dependencies
+### 텍스트 오버레이 의존성
 
-For text overlay, install dependencies:
 ```bash
 python3 -m pip install -r requirements.txt
-# or (minimum)
+# 또는 최소 설치
 python3 -m pip install pillow
 ```
 
-> If Korean text renders poorly, set a font file path:
+> 한글 텍스트가 깨지면 폰트 경로 설정:
 > `export BLOG_FONT_PATH="/path/to/NanumGothic.ttf"`
+
+### 완료 확인
+
+이미지 생성이 완료되면 다음을 확인합니다:
+- [ ] `./images/` 폴더에 PNG 파일 생성됨
+- [ ] 썸네일에 한글 텍스트가 깔끔하게 렌더링됨
+- [ ] 모든 이미지가 이미지 가이드와 일치함
 
 ---
 
