@@ -17,6 +17,31 @@ description: |
 
 Automates the entire workflow from trending topic collection on Naver Economy Shortents to blog post writing.
 
+## Environment Setup
+
+### First Run (Auto Setup)
+```bash
+python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
+```
+
+This will:
+1. Create `.venv` virtual environment
+2. Install required packages (PyYAML, google-genai, pillow)
+3. Prompt for GOOGLE_API_KEY and save to `.env`
+
+### Running Python Scripts
+```bash
+~/.claude/skills/search-blogging/.venv/bin/python -c "..."
+```
+
+### Reset API Key
+```bash
+rm ~/.claude/skills/search-blogging/.env
+python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
+```
+
+---
+
 ## Quick Start
 
 ```bash
@@ -185,6 +210,7 @@ Reference these files as needed during skill execution:
 | `references/tone-guide.md` | Detailed tone & manner guide | STEP 5-1 |
 | `references/structure-templates.md` | Article structure templates | STEP 5-2 |
 | `references/image-guide.md` | Image guide creation | STEP 5-3, STEP 7 |
+| `references/thumbnail-templates.md` | 10가지 썸네일 템플릿 (색상팔레트, AI프롬프트, 텍스트오버레이) | STEP 5-3, STEP 7 (썸네일 생성시) |
 
 ---
 

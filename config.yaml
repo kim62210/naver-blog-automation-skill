@@ -302,3 +302,17 @@ file_extensions:
   image_guide: "이미지 가이드.md"
   references: "참조.md"
   images_dir: "images"
+
+# Virtual environment settings
+venv:
+  path: ".venv"
+  auto_create: true
+
+# Package dependencies
+dependencies:
+  required:
+    - PyYAML
+    - google-genai
+    - pillow
+  optional:
+    - cairosvg
