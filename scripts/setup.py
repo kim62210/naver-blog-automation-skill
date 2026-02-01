@@ -95,6 +95,7 @@ def create_metadata_file(
             "tag_count": get_config_value(config, "tags", "count"),
         },
         "files": {
+            "draft": None,
             "html": None,
             "image_guide": None,
             "references": None,

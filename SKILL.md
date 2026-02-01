@@ -13,7 +13,7 @@ description: |
   Trigger keywords: blog post writing, write a blog post, research and write, economy blog
 ---
 
-# search-blogging Skill v2.1
+# search-blogging Skill v2.2
 
 Automates the entire workflow from trending topic collection on Naver Economy Shortents to blog post writing.
 
@@ -59,6 +59,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 | File | Description | Purpose |
 |------|-------------|---------|
 | 본문.html | HTML for Naver Blog | Open in browser, copy → paste to blog |
+| 원본.txt | Plain text draft | Source of truth for writing/refactoring |
 | 이미지 가이드.md | AI prompts | Image generation reference |
 | 참조.md | Source list | Reference verification |
 | images/ | Generated images | Blog image insertion |
@@ -67,6 +68,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 
 ```
 ./경제 블로그/YYYY-MM-DD/topic-name/
+├── 원본.txt
 ├── 본문.html
 ├── 이미지 가이드.md
 ├── 참조.md
@@ -75,7 +77,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 
 ---
 
-## Workflow (9 Steps)
+## Workflow (10 Steps)
 
 | Step | Description | Detailed Guide |
 |------|-------------|----------------|
@@ -85,22 +87,24 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 | **STEP 4** | Research summary and review | [skills/step4-review.md](skills/step4-review.md) |
 | **STEP 5** | Writing options selection | [skills/step5-options.md](skills/step5-options.md) |
 | **STEP 6** | Title selection | [skills/step6-title.md](skills/step6-title.md) |
-| **STEP 7** | Content writing and saving | [skills/step7-write.md](skills/step7-write.md) |
-| **STEP 8** | 🖼️ **Image generation (MANDATORY)** | [skills/step8-image.md](skills/step8-image.md) |
-| **STEP 9** | Revision loop | [skills/step9-revise.md](skills/step9-revise.md) |
+| **STEP 7** | Draft writing & validation (`원본.txt`) | [skills/step7-write.md](skills/step7-write.md) |
+| **STEP 8** | Writing refactoring (txt → HTML/MD) | [skills/step8-refactor.md](skills/step8-refactor.md) |
+| **STEP 9** | 🖼️ **Image generation (MANDATORY)** | [skills/step9-image.md](skills/step9-image.md) |
+| **STEP 10** | Revision loop | [skills/step10-revise.md](skills/step10-revise.md) |
 
 ### Progress Display
 
 ```
-[STEP 1/9] Topic collection ███░░░░░░░░░░░░░░░░░░░░░░░░░ 11%
-[STEP 2/9] Topic confirmation ██████░░░░░░░░░░░░░░░░░░░░░░ 22%
-[STEP 3/9] Research █████████░░░░░░░░░░░░░░░░░░░ 33%
-[STEP 4/9] Review ████████████░░░░░░░░░░░░░░░░ 44%
-[STEP 5/9] Options ███████████████░░░░░░░░░░░░░ 55%
-[STEP 6/9] Title ██████████████████░░░░░░░░░░ 66%
-[STEP 7/9] Writing █████████████████████░░░░░░░ 77%
-[STEP 8/9] 🖼️ Image ████████████████████████░░░░ 88%
-[STEP 9/9] Review/Edit ████████████████████████████ 100%
+[STEP 1/10] Topic collection ██░░░░░░░░░░░░░░░░░░░░░░░░░ 10%
+[STEP 2/10] Topic confirmation █████░░░░░░░░░░░░░░░░░░░░░░ 20%
+[STEP 3/10] Research ████████░░░░░░░░░░░░░░░░░░░ 30%
+[STEP 4/10] Review ██████████░░░░░░░░░░░░░░░░ 40%
+[STEP 5/10] Options ████████████░░░░░░░░░░░░░░ 50%
+[STEP 6/10] Title ███████████████░░░░░░░░░░░░ 60%
+[STEP 7/10] Draft ████████████████████░░░░░░░░ 70%
+[STEP 8/10] Refactor ███████████████████████░░░░ 80%
+[STEP 9/10] 🖼️ Image ██████████████████████████░░ 90%
+[STEP 10/10] Review/Edit ████████████████████████████ 100%
 ```
 
 ---
@@ -115,8 +119,16 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 ### Character Count Validation (Python)
 
 ```python
+from pathlib import Path
+from scripts.validator import validate_draft_char_count
 from scripts.validator import validate_char_count
 
+# Draft (원본.txt)
+draft_text = Path(project_path / "원본.txt").read_text(encoding="utf-8")
+draft_result = validate_draft_char_count(draft_text)
+print(draft_result.message)
+
+# HTML (본문.html)
 result = validate_char_count(html_content)
 print(f"Character count: {result.char_count}")
 print(result.message)  # ✅ Valid / ⚠️ Over / ⚠️ Under
@@ -225,7 +237,7 @@ gemini:
 | `scripts/validator.py` | Character count validation (1900±50 chars) |
 | `scripts/setup.py` | Project directory initialization |
 | `scripts/collector.py` | Reference image collection/download |
-| `scripts/writer.py` | HTML/MD generation (본문.html, 참조.md) |
+| `scripts/writer.py` | Draft + HTML/MD generation (원본.txt, 본문.html, 이미지 가이드.md, 참조.md) |
 | `scripts/prompt_converter.py` | AI prompt conversion and text overlay config |
 | `scripts/gemini_image.py` | Gemini API integration (3-tier fallback) |
 | `scripts/text_overlay.py` | PIL-based watermark and text overlay |
@@ -265,8 +277,8 @@ Reference these files as needed during skill execution:
 |------|---------|-------------------|
 | `references/tone-guide.md` | Detailed tone & manner guide | STEP 5-1 |
 | `references/structure-templates.md` | Article structure templates | STEP 5-2 |
-| `references/image-guide.md` | Image guide creation | STEP 5-3, STEP 7 |
-| `references/thumbnail-templates.md` | 10가지 썸네일 템플릿 (색상팔레트, AI프롬프트, 텍스트오버레이) | STEP 5-3, STEP 7 (썸네일 생성시) |
+| `references/image-guide.md` | Image guide creation | STEP 5-3, STEP 8 |
+| `references/thumbnail-templates.md` | 10가지 썸네일 템플릿 (색상팔레트, AI프롬프트, 텍스트오버레이) | STEP 5-3, STEP 8 (썸네일 생성시) |
 
 ---
 
@@ -287,16 +299,17 @@ search-blogging/
 ├── SKILL.md                    # This file (entry point)
 ├── config.yaml                 # Global configuration
 ├── requirements.txt            # Python dependencies
-├── skills/                     # Modularized skills (9 files)
+├── skills/                     # Modularized skills (10 files)
 │   ├── step1-collect.md       # Trending topic collection
 │   ├── step2-confirm.md       # Topic confirmation
 │   ├── step3-research.md      # Research (parallel)
 │   ├── step4-review.md        # Review
 │   ├── step5-options.md       # Options selection
 │   ├── step6-title.md         # Title selection
-│   ├── step7-write.md         # Content writing
-│   ├── step8-image.md         # 🖼️ Image generation (MANDATORY)
-│   └── step9-revise.md        # Revision loop
+│   ├── step7-write.md         # Draft writing (원본.txt)
+│   ├── step8-refactor.md      # Writing refactoring (txt → HTML/MD)
+│   ├── step9-image.md         # 🖼️ Image generation (MANDATORY)
+│   └── step10-revise.md       # Revision loop
 ├── references/                 # Reference materials
 │   ├── tone-guide.md
 │   ├── structure-templates.md
@@ -336,9 +349,14 @@ search-blogging/
 
 ## Version Information
 
+- **v2.2.0** (2026-02-01)
+  - Inserted STEP 8: Writing refactoring (원본.txt → HTML/MD)
+  - STEP 7 now saves `원본.txt` and validates draft character count
+  - Image generation moved to STEP 9, revision loop moved to STEP 10
+
 - **v2.1.0** (2026-02-01)
-  - 9-step workflow: Image generation separated as STEP 8
-  - step8-image.md (MANDATORY) + step9-revise.md structure
+  - 9-step workflow
+  - Image generation separated as STEP 8
   - Documentation sync (CLAUDE.md, PIPELINE-ANALYSIS.md)
 
 - **v2.0.0** (2026-01-27)

@@ -25,14 +25,19 @@ rm ~/.claude/skills/search-blogging/.env && python3 ~/.claude/skills/search-blog
 
 ### Validation
 ```python
-from scripts.validator import validate_char_count
-result = validate_char_count(html_content)
+from scripts.validator import validate_draft_char_count, validate_char_count
+
+# Draft (원본.txt)
+draft_result = validate_draft_char_count(draft_text)
+
+# HTML (본문.html)
+html_result = validate_char_count(html_content)
 # Returns: ValidationResult(char_count, is_valid, message)
 ```
 
 ## Architecture
 
-### 9-Step Modular Workflow
+### 10-Step Modular Workflow
 Each step is a separate markdown file in `skills/`:
 1. **step1-collect** - Crawl Naver Economy Shortents via Chrome DevTools MCP
 2. **step2-confirm** - User confirms topic, expand keywords
@@ -40,16 +45,17 @@ Each step is a separate markdown file in `skills/`:
 4. **step4-review** - Consolidate research into outline
 5. **step5-options** - Select tone, structure, image count
 6. **step6-title** - Generate and select title
-7. **step7-write** - Write HTML + image guide + references
-8. **step8-image** - 🖼️ Image generation (MANDATORY)
-9. **step9-revise** - Revision loop
+7. **step7-write** - Draft writing + validation (`원본.txt`)
+8. **step8-refactor** - Writing refactoring (txt → HTML/MD generation)
+9. **step9-image** - 🖼️ Image generation (MANDATORY)
+10. **step10-revise** - Revision loop
 
 ### Python Modules (`scripts/`)
 
 **Core Infrastructure:**
 - `shared_types.py` - Dataclasses: `ImageResult`, `ValidationResult`, `WatermarkConfig`, `PipelineConfig`, etc.
 - `config.py` - YAML loader with env overrides and validation
-- `validator.py` - Character count validation (target: 1900 ±50)
+- `validator.py` - Character count validation (draft + HTML, target: 1900 ±50)
 
 **Image Generation Pipeline:**
 - `gemini_image.py` - Gemini API with 3-tier model fallback (rate limit: 10 req/min)
@@ -83,6 +89,7 @@ Model order is defined in `config.yaml` (`gemini.models`):
 ### Output Structure
 ```
 ./경제 블로그/YYYY-MM-DD/topic-name/
+├── 원본.txt          # Plain text draft (STEP 7)
 ├── 본문.html          # Blog HTML (copy-paste to Naver Blog)
 ├── 이미지 가이드.md   # Image generation prompts
 ├── 참조.md            # Source references

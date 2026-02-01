@@ -5,7 +5,7 @@ Present 3 title candidates and let user select.
 ## Progress Status
 
 ```
-[STEP 6/9] Title selection ██████████████████░░░░░░░░░░ 66%
+[STEP 6/10] Title selection ███████████████░░░░░░░░░░░░ 60%
 ```
 
 ---
@@ -112,4 +112,4 @@ Starting body content writing.
 
 ## Next Step
 
-Title selection complete → **[STEP 7: Content Writing and Saving](step7-write.md)**
+Title selection complete → **[STEP 7: Draft Writing & Validation](step7-write.md)**

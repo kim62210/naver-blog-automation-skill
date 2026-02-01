@@ -1,4 +1,4 @@
-# STEP 8: Image Generation (🚨 MANDATORY)
+# STEP 9: Image Generation (🚨 MANDATORY)
 
 > **⚠️ 이 단계는 건너뛸 수 없습니다.**
 > 블로그 글 작성 후 반드시 이미지 생성을 완료해야 합니다.
@@ -6,12 +6,12 @@
 ## Progress Status
 
 ```
-[STEP 8/9] Image generation ████████████████████████░░░░ 88%
+[STEP 9/10] Image generation ██████████████████████████░░ 90%
 ```
 
 ---
 
-## 8-1. Pre-flight Checklist
+## 9-1. Pre-flight Checklist
 
 Before generating images, verify the following:
 
@@ -42,7 +42,7 @@ print("✅ Pre-flight check passed!")
 
 ---
 
-## 8-2. Image Generation Pipeline
+## 9-2. Image Generation Pipeline
 
 Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
 
@@ -77,7 +77,7 @@ AI now renders text directly in the image. PIL only adds watermark:
 
 ---
 
-## 8-3. Execution (🚨 MANDATORY)
+## 9-3. Execution (🚨 MANDATORY)
 
 ### Option A: Process Entire Image Guide (Recommended)
 
@@ -152,7 +152,7 @@ print(result.summary())
 
 ---
 
-## 8-4. Environment Variable Setup
+## 9-4. Environment Variable Setup
 
 ```bash
 # Required: Set API key
@@ -170,7 +170,7 @@ export GEMINI_API_KEY="your-api-key"
 
 ---
 
-## 8-5. Limits & Fallback
+## 9-5. Limits & Fallback
 
 - Rate limiting/delay is configured in `config.yaml` (`gemini.rate_limit.*`) and enforced by the generator.
 - Model fallback order is configured in `config.yaml` (`gemini.models.primary` → `fallback` → `fallback_2`).
@@ -178,7 +178,7 @@ export GEMINI_API_KEY="your-api-key"
 
 ---
 
-## 8-6. Error Handling
+## 9-6. Error Handling
 
 ### 실패 시 처리
 
@@ -206,7 +206,7 @@ if failed_prompts:
 
 ---
 
-## 8-7. Verification Checklist
+## 9-7. Verification Checklist
 
 **⚠️ 다음 단계로 진행하기 전에 모든 항목을 확인하세요:**
 
@@ -236,4 +236,4 @@ for img in sorted(images):
 
 ## Next Step
 
-이미지 생성 완료 → **[STEP 9: Revision Loop](step9-revise.md)**
+이미지 생성 완료 → **[STEP 10: Revision Loop](step10-revise.md)**

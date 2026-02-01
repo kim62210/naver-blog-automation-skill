@@ -5,7 +5,7 @@ Run 6 agents simultaneously to collect materials and images.
 ## Progress Status
 
 ```
-[STEP 3/9] Research █████████░░░░░░░░░░░░░░░░░░░ 33%
+[STEP 3/10] Research ████████░░░░░░░░░░░░░░░░░░░ 30%
 ```
 
 ---

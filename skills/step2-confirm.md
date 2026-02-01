@@ -5,7 +5,7 @@ Confirm the selected topic and expand related keywords.
 ## Progress Status
 
 ```
-[STEP 2/9] Topic confirmation ██████░░░░░░░░░░░░░░░░░░░░░░ 22%
+[STEP 2/10] Topic confirmation █████░░░░░░░░░░░░░░░░░░░░░░ 20%
 ```
 
 ---

@@ -14,7 +14,7 @@ import yaml
 DEFAULT_CONFIG = {
     "app": {
         "name": "search-blogging",
-        "version": "2.1.0",
+        "version": "2.2.0",
     },
     "writing": {
         "char_count": 1900,

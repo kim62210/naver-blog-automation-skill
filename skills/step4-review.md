@@ -5,7 +5,7 @@ Summarize collected materials and get user confirmation.
 ## Progress Status
 
 ```
-[STEP 4/9] Review ████████████░░░░░░░░░░░░░░░░ 44%
+[STEP 4/10] Review ██████████░░░░░░░░░░░░░░░░ 40%
 ```
 
 ---

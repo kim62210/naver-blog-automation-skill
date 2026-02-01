@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Any
 
 from .config import get_config, get_config_value
 from .utils import get_today_date, clean_text
-from .validator import validate_char_count, ValidationResult
+from .validator import validate_char_count, validate_draft_char_count, ValidationResult
 from .setup import update_metadata
 
 
@@ -536,6 +536,48 @@ def save_blog_files(
     })
 
     return files
+
+
+def save_draft_file(
+    project_path: Path,
+    draft_text: str,
+    validate: bool = True
+) -> Path:
+    """
+    Save draft text as 원본.txt.
+
+    Args:
+        project_path: Project directory path
+        draft_text: Draft content (plain text)
+        validate: Whether to validate character count for the draft
+
+    Returns:
+        Draft file path
+    """
+    draft_path = project_path / "원본.txt"
+    with open(draft_path, "w", encoding="utf-8") as f:
+        f.write(draft_text)
+
+    # Validate draft character count
+    if validate:
+        validation_result = validate_draft_char_count(draft_text)
+        if not validation_result.is_valid:
+            print("⚠️ Draft character count validation warning:")
+            print(f"   {validation_result.message}")
+            print(
+                f"   Current: {validation_result.char_count} chars, "
+                f"Target: {validation_result.target} chars ({validation_result.min_chars}-{validation_result.max_chars})"
+            )
+
+    # Update metadata (keep existing fields)
+    update_metadata(project_path, {
+        "files": {
+            "draft": str(draft_path),
+        },
+        "status": "draft_ready",
+    })
+
+    return draft_path
 
 
 def print_completion_summary(

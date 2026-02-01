@@ -1,22 +1,23 @@
-# STEP 9: Revision Loop
+# STEP 10: Revision Loop
 
 Present the completed work and receive user feedback.
 
 ## Progress Status
 
 ```
-[STEP 9/9] Review/Edit ████████████████████████████ 100%
+[STEP 10/10] Review/Edit ████████████████████████████ 100%
 ```
 
 ---
 
-## 9-1. Completion Notice
+## 10-1. Completion Notice
 
 ```
 ✅ Blog post writing complete!
 
 📁 Save Location
 ./경제 블로그/YYYY-MM-DD/topic-name/
+├── 원본.txt (Plain text draft)
 ├── 본문.html (HTML file)
 ├── 이미지 가이드.md (Image generation guide)
 ├── 참조.md (Source list)
@@ -46,7 +47,7 @@ Say "done" when you're finished.
 
 ---
 
-## 9-2. Handling Revision Requests
+## 10-2. Handling Revision Requests
 
 ### Supported Revision Types
 
@@ -72,7 +73,7 @@ Say "done" when you're finished.
 
 ---
 
-## 9-3. File Update After Revision
+## 10-3. File Update After Revision
 
 ```python
 from scripts.writer import save_blog_files
@@ -89,7 +90,7 @@ files = save_blog_files(
 
 ---
 
-## 9-4. Unlimited Revision Loop
+## 10-4. Unlimited Revision Loop
 
 - Modify only relevant parts per user request
 - Present completed work again after modification
@@ -111,7 +112,7 @@ Say "done" when you're finished.
 
 ---
 
-## 9-5. Exit Conditions
+## 10-5. Exit Conditions
 
 Workflow ends when one of these occurs:
 - User indicates completion with "done", "finished", "OK", "confirm", etc.

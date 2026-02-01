@@ -1,6 +1,6 @@
 # search-blogging 파이프라인 분석 리포트
 
-> **Version**: 2.1.0
+> **Version**: 2.2.0
 > **Generated**: 2026-02-01
 > **Author**: Claude Code Analysis
 
@@ -21,13 +21,13 @@
 | **설정 관리** | PyYAML | YAML 기반 설정 |
 | **SVG 변환** | cairosvg/rsvg-convert | SVG → PNG 변환 |
 
-### 9단계 워크플로우 요약
+### 10단계 워크플로우 요약
 
 ```
-STEP 1 → STEP 2 → STEP 3 → STEP 4 → STEP 5 → STEP 6 → STEP 7 → STEP 8 → STEP 9
-트렌딩   토픽      병렬     리뷰     옵션     제목     본문     이미지    수정
-수집     확정     리서치    종합     선택     선택     작성     생성     루프
-11%     22%      33%      44%      55%      66%      77%      88%     100%
+STEP 1 → STEP 2 → STEP 3 → STEP 4 → STEP 5 → STEP 6 → STEP 7 → STEP 8 → STEP 9 → STEP 10
+트렌딩   토픽      병렬     리뷰     옵션     제목     원본     후보정    이미지    수정
+수집     확정     리서치    종합     선택     선택     작성     (리팩터)  생성     루프
+10%     20%      30%      40%      50%      60%      70%      80%      90%     100%
 ```
 
 ---
@@ -76,27 +76,35 @@ flowchart TB
         F2 --> F3[사용자 선택/재생성]
     end
 
-    subgraph STEP7["STEP 7: 본문 작성"]
-        G1[HTML 콘텐츠 생성] --> G2[글자수 검증]
+    subgraph STEP7["STEP 7: 원본.txt 작성"]
+        G1[순수 텍스트 작성] --> G2[글자수 검증]
         G2 --> G3{1850-1950자?}
-        G3 -->|Yes| G4[이미지 가이드 생성]
+        G3 -->|Yes| G4[원본.txt 저장]
         G3 -->|No| G1
-        G4 --> G5[참조.md 생성]
-        G5 --> G8[파일 저장]
     end
 
-    subgraph STEP8["STEP 8: 이미지 생성"]
-        H1[이미지 가이드 파싱] --> H2[Gemini API 호출]
-        H2 --> H3[워터마크 추가]
-        H3 --> H4[이미지 저장]
+    subgraph STEP8["STEP 8: Writing refactoring"]
+        H1[원본.txt 로드/정리] --> H2[HTML 콘텐츠 생성]
+        H2 --> H3[글자수 검증]
+        H3 --> H4{1850-1950자?}
+        H4 -->|Yes| H5[이미지 가이드 생성]
+        H4 -->|No| H2
+        H5 --> H6[참조.md 생성]
+        H6 --> H7[파일 저장]
     end
 
-    subgraph STEP9["STEP 9: 수정 루프"]
-        I1{수정 필요?}
-        I1 -->|Yes| I2[사용자 피드백]
-        I2 --> I3[콘텐츠 수정]
-        I3 --> I1
-        I1 -->|No| I4[완료]
+    subgraph STEP9["STEP 9: 이미지 생성"]
+        I1[이미지 가이드 파싱] --> I2[Gemini API 호출]
+        I2 --> I3[워터마크 추가]
+        I3 --> I4[이미지 저장]
+    end
+
+    subgraph STEP10["STEP 10: 수정 루프"]
+        J1{수정 필요?}
+        J1 -->|Yes| J2[사용자 피드백]
+        J2 --> J3[콘텐츠 수정]
+        J3 --> J1
+        J1 -->|No| J4[완료]
     end
 
     STEP1 --> STEP2
@@ -107,6 +115,7 @@ flowchart TB
     STEP6 --> STEP7
     STEP7 --> STEP8
     STEP8 --> STEP9
+    STEP9 --> STEP10
 
     style STEP1 fill:#e3f2fd
     style STEP2 fill:#e8f5e9
@@ -115,8 +124,9 @@ flowchart TB
     style STEP5 fill:#fce4ec
     style STEP6 fill:#e0f7fa
     style STEP7 fill:#fff8e1
-    style STEP8 fill:#ffe0b2
-    style STEP9 fill:#e8eaf6
+    style STEP8 fill:#f1f8e9
+    style STEP9 fill:#ffe0b2
+    style STEP10 fill:#e8eaf6
 ```
 
 ---
@@ -336,11 +346,11 @@ result: CollectionResult = collect_images(images, output_dir)
 
 ---
 
-### 3.7 STEP 7: 본문 작성 및 저장
+### 3.7 STEP 7: 원본.txt 작성 및 검증
 
 **위치**: `skills/step7-write.md`
 
-#### 7-1. 글자수 규칙
+#### 7-1. 글자수 규칙 (원본.txt)
 
 ```
 ┌─────────────────────────────────────┐
@@ -351,29 +361,43 @@ result: CollectionResult = collect_images(images, output_dir)
 │ 공백 포함: ✅                        │
 ├─────────────────────────────────────┤
 │ 제외 항목:                          │
-│ - HTML 태그                         │
 │ - [이미지 N 삽입] 플레이스홀더       │
-│ - CSS 스타일 코드                   │
+│ - [[...]] 메모                      │
+│ - [태그]/[가이드] 문자열 자체         │
 │ - 해시태그 목록                     │
 └─────────────────────────────────────┘
 ```
 
+> STEP 7은 “순수 텍스트 작성 단계”이므로, HTML/CSS는 원본.txt에 존재하면 안 됩니다.
+
 #### 7-2. 글자수 검증 (scripts/validator.py)
 
 ```python
-from scripts.validator import validate_char_count, ValidationResult
+from scripts.validator import validate_draft_char_count, ValidationResult
 
-result: ValidationResult = validate_char_count(html_content)
+result: ValidationResult = validate_draft_char_count(draft_text)
 # result.is_valid: bool
 # result.char_count: int (실제 글자수)
 # result.status: "ok" | "under" | "over"
 # result.message: str
 ```
 
-#### 7-3. HTML 생성 (scripts/writer.py)
+---
+
+### 3.8 STEP 8: Writing refactoring (txt → HTML/MD)
+
+**위치**: `skills/step8-refactor.md`
+
+#### 8-1. 산출물
+- `본문.html`
+- `이미지 가이드.md`
+- `참조.md`
+
+#### 8-2. HTML 생성 및 검증 (scripts/writer.py + scripts/validator.py)
 
 ```python
 from scripts.writer import generate_html_content, save_blog_files
+from scripts.validator import validate_char_count
 
 html_content = generate_html_content(
     title="제목",
@@ -384,6 +408,10 @@ html_content = generate_html_content(
     tags=["태그1", "태그2"]
 )
 
+# 글자수(순수 텍스트) 검증: 1850~1950자
+result = validate_char_count(html_content)
+print(result.message)
+
 files = save_blog_files(
     project_path=project_path,
     html_content=html_content,
@@ -393,20 +421,19 @@ files = save_blog_files(
 )
 ```
 
-#### 7-4. 이미지 생성 모드
+#### 8-3. 이미지 생성 모드 (이미지 가이드 기준)
 
 | 모드 | 심볼 | 설명 | 처리 방식 |
 |------|------|------|----------|
 | **A** | 📷 | 참고 이미지 | 다운로드된 이미지 사용 |
 | **B** | 🎨 | AI 생성 | Gemini API |
 | **B-3** | 🎨 | AI 생성 + 워터마크 | Gemini API + PIL |
-| **C** | 🔷 | SVG 생성 | svg-canvas-mcp |
 
 ---
 
-### 3.8 STEP 8: 이미지 생성
+### 3.9 STEP 9: 이미지 생성
 
-**위치**: `skills/step8-image.md`
+**위치**: `skills/step9-image.md`
 
 #### 이미지 생성 흐름
 
@@ -432,9 +459,9 @@ flowchart TB
 
 ---
 
-### 3.9 STEP 9: 수정 루프
+### 3.10 STEP 10: 수정 루프
 
-**위치**: `skills/step9-revise.md`
+**위치**: `skills/step10-revise.md`
 
 #### 수정 루프 흐름
 
@@ -503,7 +530,9 @@ classDiagram
         +remove_non_content()
         +normalize_whitespace()
         +count_content_chars()
+        +count_draft_chars()
         +validate_char_count()
+        +validate_draft_char_count()
         +get_section_breakdown()
         +suggest_adjustment()
     }
@@ -524,6 +553,7 @@ classDiagram
         +generate_image_guide()
         +generate_references()
         +save_blog_files()
+        +save_draft_file()
     }
 
     class collector {
@@ -860,7 +890,7 @@ async def _generate_with_model(self, ...):
 # 앱 정보
 app:
   name: search-blogging
-  version: "2.1.0"
+  version: "2.2.0"
 
 # 글쓰기 설정
 writing:

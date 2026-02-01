@@ -5,7 +5,7 @@ Ask the user 3 questions in sequence.
 ## Progress Status
 
 ```
-[STEP 5/9] Options ███████████████░░░░░░░░░░░░░ 55%
+[STEP 5/10] Options ████████████░░░░░░░░░░░░░░ 50%
 ```
 
 ---
