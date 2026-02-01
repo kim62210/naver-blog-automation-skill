@@ -5,7 +5,7 @@ Write the body content according to selected options and save to files.
 ## Progress Status
 
 ```
-[STEP 7/8] Content writing ████████████████████████████░ 87%
+[STEP 7/9] Content writing █████████████████████░░░░░░░░ 77%
 ```
 
 ---
@@ -546,164 +546,7 @@ After writing the prompt, images are saved to `./images/` folder without manual 
 
 ---
 
-## 7-6. Auto-Generate Images via Gemini API
-
-Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
-
-### New: AI Text Rendering + Watermark Pipeline (Recommended)
-
-```
-┌─────────────────────────────────────────────────┐
-│              이미지 생성 파이프라인               │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  이미지 가이드.md 파싱                           │
-│         ↓                                       │
-│  Gemini API (gemini-3-pro-image-preview)        │
-│  ├── 배경 이미지 생성                           │
-│  ├── main_text (메인 텍스트) AI 렌더링          │
-│  └── sub_text (부제목) AI 렌더링                │
-│  └── 프롬프트에 폰트 스타일 포함                 │
-│         ↓                                       │
-│  PIL (Pillow)                                   │
-│  └── watermark (워터마크)만 후처리              │
-│  └── @money-lab-brian                           │
-│         ↓                                       │
-│  ./images/*.png 저장                            │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
-
-AI now renders text directly in the image. PIL only adds watermark:
-1. AI generates image with text included in prompt
-2. PIL adds watermark at bottom-center
-3. Final PNG exported
-
-```python
-from scripts.image_pipeline import ImagePipeline
-from scripts.prompt_converter import WatermarkConfig
-
-# Initialize pipeline
-pipeline = ImagePipeline()
-
-# Example: Generate thumbnail with AI-rendered text + watermark
-result = await pipeline.generate_with_watermark(
-    prompt="Blog thumbnail, bold Korean text '0세 적금 필수!' in upper third, subtitle '연 12% 고금리' in center, warm gradient background, 16:9",
-    output_path="./images/01_썸네일.png",
-    watermark_config=WatermarkConfig(
-        watermark_text="@money-lab-brian",
-        watermark_position="bottom-center",
-        watermark_margin_bottom=60,
-        watermark_font_size=18,
-        watermark_font_color="rgba(255,255,255,0.6)"
-    )
-)
-# Result: AI renders text → Watermark added → Final PNG saved
-```
-
-### Legacy: Generate Images with Python
-
-```python
-from scripts.gemini_image import GeminiImageGenerator
-from scripts.prompt_converter import generate_image_prompts_for_batch
-
-# Extract prompts from image guide
-with open("이미지 가이드.md", "r", encoding="utf-8") as f:
-    image_guide_content = f.read()
-
-prompts = generate_image_prompts_for_batch(image_guide_content)
-# [{"prompt": "...", "filename": "01_썸네일.png"}, ...]
-
-# Batch generate via Gemini API
-generator = GeminiImageGenerator()
-result = await generator.generate_batch(
-    prompts=prompts,
-    output_dir="./images/"
-)
-
-print(result.summary())
-# 📊 Batch generation result: 5/5 success (100.0%), elapsed: 25.3s
-```
-
-### Batch Generate with Watermark
-
-```python
-from scripts.image_pipeline import ImagePipeline
-
-# Initialize pipeline
-pipeline = ImagePipeline()
-
-# Process entire image guide - AI renders text, PIL adds watermark
-with open("이미지 가이드.md", "r", encoding="utf-8") as f:
-    image_guide_content = f.read()
-
-result = await pipeline.process_image_guide(
-    image_guide_content=image_guide_content,
-    output_dir="./images/",
-    use_text_overlay=True  # Enables watermark for Mode B-3 items
-)
-
-print(result.summary())
-# 📊 Pipeline result: 5/5 success, 3 with watermark
-```
-
-### Environment Variable Setup (Required)
-
-```bash
-export GOOGLE_API_KEY="your-api-key"
-```
-
-### Generation Limits
-
-- **15 requests per minute** limit (auto-delay applied)
-- **500 images/day** free quota (gemini-2.0-flash-exp)
-- Auto-fallback to imagen-3.0 when quota exceeded
-
----
-
-## 7-6b. 🚨 이미지 생성 필수 실행 (MANDATORY)
-
-> **⚠️ 중요**: 이 단계는 건너뛸 수 없습니다. 블로그 글 작성 후 반드시 이미지 생성을 실행해야 합니다.
-
-### 필수 체크리스트
-
-- [ ] `이미지 가이드.md` 파일 생성 완료
-- [ ] Gemini API 키 설정 확인 (`GOOGLE_API_KEY` 또는 `GEMINI_API_KEY`)
-- [ ] 이미지 생성 파이프라인 실행
-
-### 자동 실행 코드
-
-```python
-from scripts.image_pipeline import ImagePipeline
-
-# 필수: 이미지 가이드 기반 자동 생성
-pipeline = ImagePipeline()
-
-with open(f"{project_path}/이미지 가이드.md", "r", encoding="utf-8") as f:
-    image_guide_content = f.read()
-
-result = await pipeline.process_image_guide(
-    image_guide_content=image_guide_content,
-    output_dir=f"{project_path}/images/",
-    use_text_overlay=True
-)
-
-# 결과 확인
-print(result.summary())
-# 📊 Pipeline result: 5/5 success, 5 with watermark
-```
-
-### 실패 시 처리
-
-1. API 키 오류 → `.env` 파일 확인 또는 `ensure_venv.py` 재실행
-2. 쿼터 초과 → 자동 fallback 모델 사용 (3-tier system)
-3. 부분 실패 → 실패한 이미지만 재생성
-
-**다음 단계로 진행하기 전에 모든 이미지가 생성되었는지 확인하세요.**
-
----
-
-## 7-7. File Saving
+## 7-6. File Saving
 
 ### Save Path
 ```
@@ -711,10 +554,7 @@ print(result.summary())
 ├── 본문.html
 ├── 이미지 가이드.md
 ├── 참조.md
-└── images/
-    ├── 01_썸네일.png      ← Gemini auto-generated
-    ├── 02_비교표.png       ← Gemini auto-generated
-    └── ...
+└── images/           ← Created in STEP 8
 ```
 
 ### Save with Python
@@ -733,7 +573,7 @@ files = save_blog_files(
 
 ---
 
-## 7-8. Character Count Validation and Adjustment
+## 7-7. Character Count Validation and Adjustment
 
 Validate character count after writing:
 
@@ -761,4 +601,6 @@ if not result.is_valid:
 
 ## Next Step
 
-File saving complete → **[STEP 8: Revision Loop](step8-revise.md)**
+File saving complete → **[STEP 8: 🖼️ Image Generation (MANDATORY)](step8-image.md)**
+
+> ⚠️ **중요**: 이미지 생성 단계는 건너뛸 수 없습니다. STEP 8에서 반드시 이미지를 생성해야 합니다.

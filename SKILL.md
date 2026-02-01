@@ -75,7 +75,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 
 ---
 
-## Workflow (8 Steps)
+## Workflow (9 Steps)
 
 | Step | Description | Detailed Guide |
 |------|-------------|----------------|
@@ -86,19 +86,21 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 | **STEP 5** | Writing options selection | [skills/step5-options.md](skills/step5-options.md) |
 | **STEP 6** | Title selection | [skills/step6-title.md](skills/step6-title.md) |
 | **STEP 7** | Content writing and saving | [skills/step7-write.md](skills/step7-write.md) |
-| **STEP 8** | Revision loop | [skills/step8-revise.md](skills/step8-revise.md) |
+| **STEP 8** | 🖼️ **Image generation (MANDATORY)** | [skills/step8-image.md](skills/step8-image.md) |
+| **STEP 9** | Revision loop | [skills/step9-revise.md](skills/step9-revise.md) |
 
 ### Progress Display
 
 ```
-[STEP 1/8] Topic collection ████░░░░░░░░░░░░░░░░░░░░░░░░ 12%
-[STEP 2/8] Topic confirmation ████████░░░░░░░░░░░░░░░░░░░░ 25%
-[STEP 3/8] Research ████████████░░░░░░░░░░░░░░░░ 37%
-[STEP 4/8] Review ████████████████░░░░░░░░░░░░ 50%
-[STEP 5/8] Options ████████████████████░░░░░░░░ 62%
-[STEP 6/8] Title ████████████████████████░░░░ 75%
-[STEP 7/8] Writing ████████████████████████████░ 87%
-[STEP 8/8] Review/Edit ████████████████████████████ 100%
+[STEP 1/9] Topic collection ███░░░░░░░░░░░░░░░░░░░░░░░░░ 11%
+[STEP 2/9] Topic confirmation ██████░░░░░░░░░░░░░░░░░░░░░░ 22%
+[STEP 3/9] Research █████████░░░░░░░░░░░░░░░░░░░ 33%
+[STEP 4/9] Review ████████████░░░░░░░░░░░░░░░░ 44%
+[STEP 5/9] Options ███████████████░░░░░░░░░░░░░ 55%
+[STEP 6/9] Title ██████████████████░░░░░░░░░░ 66%
+[STEP 7/9] Writing █████████████████████░░░░░░░ 77%
+[STEP 8/9] 🖼️ Image ████████████████████████░░░░ 88%
+[STEP 9/9] Review/Edit ████████████████████████████ 100%
 ```
 
 ---
@@ -283,7 +285,7 @@ naver-blog-automation/
 ├── SKILL.md                    # This file (entry point)
 ├── config.yaml                 # Global configuration
 ├── requirements.txt            # Python dependencies
-├── skills/                     # Modularized skills (8 files)
+├── skills/                     # Modularized skills (9 files)
 │   ├── step1-collect.md       # Trending topic collection
 │   ├── step2-confirm.md       # Topic confirmation
 │   ├── step3-research.md      # Research (parallel)
@@ -291,7 +293,8 @@ naver-blog-automation/
 │   ├── step5-options.md       # Options selection
 │   ├── step6-title.md         # Title selection
 │   ├── step7-write.md         # Content writing
-│   └── step8-revise.md        # Revision loop
+│   ├── step8-image.md         # 🖼️ Image generation (MANDATORY)
+│   └── step9-revise.md        # Revision loop
 ├── references/                 # Reference materials
 │   ├── tone-guide.md
 │   ├── structure-templates.md

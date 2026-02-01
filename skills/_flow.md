@@ -3,14 +3,15 @@
 ## Progress Status
 
 ```
-[STEP 1/8] Topic collection     ████░░░░░░░░░░░░░░░░ 12%
-[STEP 2/8] Topic confirmation   ████████░░░░░░░░░░░░ 25%
-[STEP 3/8] Research             ████████████░░░░░░░░ 37%
-[STEP 4/8] Research review      ████████████████░░░░ 50%
-[STEP 5/8] Options selection    ████████████████████ 62%
-[STEP 6/8] Title selection      ████████████████████ 75%
-[STEP 7/8] Content writing      ████████████████████ 87%
-[STEP 8/8] Revision loop        ████████████████████ 100%
+[STEP 1/9] Topic collection     ███░░░░░░░░░░░░░░░░░░░░░ 11%
+[STEP 2/9] Topic confirmation   ██████░░░░░░░░░░░░░░░░░░ 22%
+[STEP 3/9] Research             █████████░░░░░░░░░░░░░░░ 33%
+[STEP 4/9] Research review      ████████████░░░░░░░░░░░░ 44%
+[STEP 5/9] Options selection    ███████████████░░░░░░░░░ 55%
+[STEP 6/9] Title selection      ██████████████████░░░░░░ 66%
+[STEP 7/9] Content writing      █████████████████████░░░ 77%
+[STEP 8/9] Image generation     ███████████████████████░ 88%
+[STEP 9/9] Revision loop        ████████████████████████ 100%
 ```
 
 ## Step Navigation
@@ -24,4 +25,5 @@
 | 5 | step5-options.md | Tone, structure, image count | → Step 6 |
 | 6 | step6-title.md | Title options & selection | → Step 7 |
 | 7 | step7-write.md | Content writing & file saving | → Step 8 |
-| 8 | step8-revise.md | Final revision loop | ✅ Complete |
+| 8 | step8-image.md | Image generation (MANDATORY) | → Step 9 |
+| 9 | step9-revise.md | Final revision loop | ✅ Complete |

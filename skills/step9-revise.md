@@ -1,16 +1,16 @@
-# STEP 8: Revision Loop
+# STEP 9: Revision Loop
 
 Present the completed work and receive user feedback.
 
 ## Progress Status
 
 ```
-[STEP 8/8] Review/Edit ████████████████████████████ 100%
+[STEP 9/9] Review/Edit ████████████████████████████ 100%
 ```
 
 ---
 
-## 8-1. Completion Notice
+## 9-1. Completion Notice
 
 ```
 ✅ Blog post writing complete!
@@ -46,7 +46,7 @@ Say "done" when you're finished.
 
 ---
 
-## 8-2. Handling Revision Requests
+## 9-2. Handling Revision Requests
 
 ### Supported Revision Types
 
@@ -72,7 +72,7 @@ Say "done" when you're finished.
 
 ---
 
-## 8-3. File Update After Revision
+## 9-3. File Update After Revision
 
 ```python
 from scripts.writer import save_blog_files
@@ -89,7 +89,7 @@ files = save_blog_files(
 
 ---
 
-## 8-4. Unlimited Revision Loop
+## 9-4. Unlimited Revision Loop
 
 - Modify only relevant parts per user request
 - Present completed work again after modification
@@ -111,7 +111,7 @@ Say "done" when you're finished.
 
 ---
 
-## 8-5. Exit Conditions
+## 9-5. Exit Conditions
 
 Workflow ends when one of these occurs:
 - User indicates completion with "done", "finished", "OK", "confirm", etc.
