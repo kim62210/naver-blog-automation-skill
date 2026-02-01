@@ -166,22 +166,17 @@ def count_chars_excluding_html(html_content: str) -> int:
     """
     Count characters excluding HTML tags.
 
+    NOTE: This is a wrapper for backwards compatibility.
+    Use validator.count_content_chars() for accurate counting.
+
     Args:
         html_content: HTML content
 
     Returns:
         Character count (including spaces)
     """
-    # Remove HTML tags
-    text = re.sub(r'<[^>]+>', '', html_content)
-
-    # Remove image placeholders
-    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
-
-    # Normalize consecutive spaces to single space
-    text = re.sub(r'\s+', ' ', text)
-
-    return len(text.strip())
+    from .validator import count_content_chars
+    return count_content_chars(html_content, include_spaces=True)
 
 
 def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:

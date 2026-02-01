@@ -8,10 +8,10 @@ app:
 
 # Writing defaults
 writing:
-  char_count: 1850        # Target character count
-  char_tolerance: 50      # Tolerance (1800~1900 chars)
-  min_chars: 1800         # Minimum character count
-  max_chars: 1900         # Maximum character count
+  char_count: 1900        # Target character count (center of range)
+  char_tolerance: 50      # Tolerance (1850~1950 chars)
+  min_chars: 1850         # Minimum character count
+  max_chars: 1950         # Maximum character count
 
 # Image settings
 images:
@@ -142,10 +142,6 @@ image_modes:
     description: "Gemini API로 자동 생성"
     symbol: "🎨"
     provider: "gemini"
-  svg_create:
-    name: "SVG 생성"
-    description: "svg-canvas-mcp로 직접 생성"
-    symbol: "🔷"
 
 # Watermark settings (used by text_overlay.py)
 watermark:

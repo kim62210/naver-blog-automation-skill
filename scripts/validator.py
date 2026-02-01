@@ -24,66 +24,16 @@ class ValidationResult:
     message: str             # Status message
 
 
-def strip_html_tags(html_content: str) -> str:
-    """
-    Remove all HTML tags.
-
-    Args:
-        html_content: HTML content
-
-    Returns:
-        Text with tags removed
-    """
-    # Remove HTML tags
-    text = re.sub(r'<[^>]+>', '', html_content)
-    return text
-
-
-def remove_non_content(text: str) -> str:
-    """
-    Remove elements excluded from character count.
-
-    Excluded items:
-    - Image placeholders
-    - CSS style code
-
-    Args:
-        text: Original text
-
-    Returns:
-        Cleaned text
-    """
-    # Remove image placeholders
-    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
-
-    # Remove CSS style blocks (if any remain)
-    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
-
-    return text
-
-
-def normalize_whitespace(text: str) -> str:
-    """
-    Normalize whitespace.
-
-    Args:
-        text: Original text
-
-    Returns:
-        Normalized text
-    """
-    # Convert consecutive spaces to single space
-    text = re.sub(r'[ \t]+', ' ', text)
-
-    # Treat line breaks as single space
-    text = re.sub(r'\n+', ' ', text)
-
-    return text.strip()
-
-
 def count_content_chars(html_content: str, include_spaces: bool = True) -> int:
     """
-    Count characters in HTML content.
+    Count characters in HTML content (pure text only).
+
+    Excludes:
+    - HTML tags
+    - CSS style blocks (<style>...</style>)
+    - HTML comments (<!-- ... -->)
+    - Image placeholders ([이미지 N 삽입])
+    - Hashtag lines (#태그1 #태그2 ...)
 
     Args:
         html_content: HTML content
@@ -92,19 +42,57 @@ def count_content_chars(html_content: str, include_spaces: bool = True) -> int:
     Returns:
         Character count
     """
-    # Remove HTML tags
-    text = strip_html_tags(html_content)
+    text = html_content
 
-    # Remove non-content elements
-    text = remove_non_content(text)
+    # Step 1: Remove CSS style blocks FIRST (before tag stripping)
+    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
 
-    # Normalize whitespace
-    text = normalize_whitespace(text)
+    # Step 2: Remove HTML comments
+    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
+
+    # Step 3: Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+
+    # Step 4: Remove image placeholders
+    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
+
+    # Step 5: Remove hashtag lines (e.g., "#태그1 #태그2 #태그3")
+    text = re.sub(r'(?:^|\s)#\S+', '', text)
+
+    # Step 6: Normalize whitespace
+    text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r'\n+', ' ', text)
+    text = text.strip()
 
     if not include_spaces:
         text = re.sub(r'\s+', '', text)
 
     return len(text)
+
+
+def extract_pure_text(html_content: str) -> str:
+    """
+    Extract pure text from HTML for debugging.
+    Returns the text that would be counted.
+
+    Args:
+        html_content: HTML content
+
+    Returns:
+        Pure text string (without HTML, CSS, placeholders, hashtags)
+    """
+    text = html_content
+
+    # Same pipeline as count_content_chars
+    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
+    text = re.sub(r'<[^>]+>', '', text)
+    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
+    text = re.sub(r'(?:^|\s)#\S+', '', text)
+    text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r'\n+', ' ', text)
+
+    return text.strip()
 
 
 def validate_char_count(html_content: str, config: Optional[dict] = None) -> ValidationResult:
@@ -175,7 +163,8 @@ def get_section_breakdown(html_content: str) -> List[Tuple[str, int]]:
         return [("Total", char_count)]
 
     for i, match in enumerate(matches):
-        section_title = strip_html_tags(match.group(1)).strip()
+        # Remove HTML tags from section title
+        section_title = re.sub(r'<[^>]+>', '', match.group(1)).strip()
         start = match.end()
         end = matches[i + 1].start() if i + 1 < len(matches) else len(html_content)
 

@@ -12,10 +12,10 @@ Write the body content according to selected options and save to files.
 
 ## 7-1. Character Count Rules (🚨 CRITICAL!)
 
-### 🚨 MANDATORY: Total 1850 Characters (±100)
-- **Minimum**: 1750 characters
+### 🚨 MANDATORY: Total 1900 Characters (±50)
+- **Minimum**: 1850 characters
 - **Maximum**: 1950 characters
-- **Target**: 1850 characters
+- **Target**: 1900 characters
 - Including spaces
 
 ### Section-by-Section Character Allocation (7-Step Structure)
@@ -29,7 +29,7 @@ Write the body content according to selected options and save to files.
 | 핵심 정보 3 | 280 | 380 | 330 | Third key point |
 | 실용 팁 (Tips) | 200 | 300 | 250 | Practical advice |
 | 마무리 (Closing) | 100 | 160 | 130 | CTA + summary |
-| **TOTAL** | **1340** | **1900** | **1620+** | **Must reach 1750+ total** |
+| **TOTAL** | **1340** | **1900** | **1620+** | **Must reach 1850+ total** |
 
 ⚠️ **IMPORTANT**: Each core section (핵심 정보 1,2,3) MUST be 280+ characters. Short sections will fail validation. If you write less than 1750 characters total, ADD more content to the core information sections.
 
@@ -351,33 +351,6 @@ IMPORTANT: Render the exact Korean text characters as specified above.
 Mode B images are automatically generated via Gemini API.
 After writing the prompt, images are saved to `./images/` folder without manual work.
 
-#### 🔷 Mode C: SVG Image Generation Guide
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {image role description}
-
-🔷 SVG Generation
-
-[Image Description]
-{detailed description of image content}
-
-[SVG Guidance]
-- Canvas size: {width}x{height}
-- Background color: {hex color code}
-- Key elements:
-  1. {element1}: {position}, {size}, {color}
-  2. {element2}: {position}, {size}, {color}
-
-[Color Palette]
-- Main: {hex}
-- Point: {hex}
-- Background: {hex}
-
-[Save Path]
-./images/{filename}.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
 ---
 
 ## 7-5. Tag Generation
@@ -505,16 +478,47 @@ export GOOGLE_API_KEY="your-api-key"
 - **500 images/day** free quota (gemini-2.0-flash-exp)
 - Auto-fallback to imagen-3.0 when quota exceeded
 
-### Text Overlay Dependencies
+---
 
-For SVG to PNG conversion, install one of:
-```bash
-pip install cairosvg  # Recommended
-# or
-sudo apt install librsvg2-bin  # rsvg-convert
-# or
-pip install svglib reportlab  # Fallback
+## 7-6b. 🚨 이미지 생성 필수 실행 (MANDATORY)
+
+> **⚠️ 중요**: 이 단계는 건너뛸 수 없습니다. 블로그 글 작성 후 반드시 이미지 생성을 실행해야 합니다.
+
+### 필수 체크리스트
+
+- [ ] `이미지 가이드.md` 파일 생성 완료
+- [ ] Gemini API 키 설정 확인 (`GOOGLE_API_KEY` 또는 `GEMINI_API_KEY`)
+- [ ] 이미지 생성 파이프라인 실행
+
+### 자동 실행 코드
+
+```python
+from scripts.image_pipeline import ImagePipeline
+
+# 필수: 이미지 가이드 기반 자동 생성
+pipeline = ImagePipeline()
+
+with open(f"{project_path}/이미지 가이드.md", "r", encoding="utf-8") as f:
+    image_guide_content = f.read()
+
+result = await pipeline.process_image_guide(
+    image_guide_content=image_guide_content,
+    output_dir=f"{project_path}/images/",
+    use_text_overlay=True
+)
+
+# 결과 확인
+print(result.summary())
+# 📊 Pipeline result: 5/5 success, 5 with watermark
 ```
+
+### 실패 시 처리
+
+1. API 키 오류 → `.env` 파일 확인 또는 `ensure_venv.py` 재실행
+2. 쿼터 초과 → 자동 fallback 모델 사용 (3-tier system)
+3. 부분 실패 → 실패한 이미지만 재생성
+
+**다음 단계로 진행하기 전에 모든 이미지가 생성되었는지 확인하세요.**
 
 ---
 
