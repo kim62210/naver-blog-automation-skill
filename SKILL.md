@@ -13,7 +13,7 @@ description: |
   Trigger keywords: blog post writing, write a blog post, research and write, economy blog
 ---
 
-# search-blogging Skill v2.0
+# search-blogging Skill v2.1
 
 Automates the entire workflow from trending topic collection on Naver Economy Shortents to blog post writing.
 
@@ -333,6 +333,11 @@ naver-blog-automation/
 ---
 
 ## Version Information
+
+- **v2.1.0** (2026-02-01)
+  - 9-step workflow: Image generation separated as STEP 8
+  - step8-image.md (MANDATORY) + step9-revise.md structure
+  - Documentation sync (CLAUDE.md, PIPELINE-ANALYSIS.md)
 
 - **v2.0.0** (2026-01-27)
   - Skill modularization (separated into 8 step files)
