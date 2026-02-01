@@ -10,6 +10,118 @@ Write the body content according to selected options and save to files.
 
 ---
 
+## 7-1a. 2-Step Writing Workflow (🚨 CRITICAL - READ FIRST!)
+
+### Why This Matters
+
+When you write HTML directly, you tend to count the total string length (including HTML tags) as the character count. This causes the **actual text content to be only 800-1000 characters** when the target is 1850-1950.
+
+**Solution**: Write pure text first → Verify character count → Convert to HTML
+
+### Step 1: Write Plain Text First (순수 텍스트 먼저 작성)
+
+1. Write the entire blog post as **pure text** (no HTML tags, no formatting)
+2. Include `[이미지 N 삽입]` placeholders where images go
+3. Target: **1850-1950 characters** (including spaces)
+4. Count characters after each section to track progress
+
+### Step 2: Verify Character Count (글자수 확인)
+
+Before converting to HTML, verify your plain text meets the target:
+
+```python
+plain_text = """(your plain text content here)"""
+char_count = len(plain_text)
+print(f"Plain text: {char_count} chars")  # Should be 1850-1950
+```
+
+If under 1850: Add more content to core sections
+If over 1950: Trim redundant phrases
+
+### Step 3: Convert to HTML (HTML 변환)
+
+Only after reaching 1850-1950 characters:
+1. Add HTML structure and tags
+2. Apply font sizes (28px title, 24px headings, 19px subheadings, 16px body)
+3. Add line breaks (`<br>`) per readability rules
+4. The character count should remain the same (only text counts)
+
+### ✅ Plain Text 작성 예시
+
+```
+[도입부 - 120자]
+육아휴직이 2026년부터 크게 달라집니다. 급여 인상, 기간 연장까지.
+워킹맘, 워킹대디라면 반드시 알아야 할 핵심 변경사항을 정리했습니다.
+
+[이미지 1 삽입]
+
+[문제 제기 - 180자]
+기존 육아휴직 제도의 가장 큰 문제는 급여였습니다. 통상임금의
+80%만 지급되던 급여로는 생활이 어려워 많은 부모들이 휴직을
+포기해야 했죠. 하지만 2026년부터 상황이 완전히 달라집니다.
+
+[핵심 정보 1 - 400자]
+첫 번째 변화는 급여 인상입니다. 기존 통상임금 80%에서 100%로
+상향됩니다. 상한액도 월 150만원에서 250만원으로 크게 올랐어요.
+이제 육아휴직 중에도 경제적 부담 없이 아이와 시간을 보낼 수
+있게 되었습니다.
+
+특히 첫 3개월은 통상임금의 100%를 그대로 받을 수 있어요.
+4개월째부터는 80%가 적용되지만, 상한액 인상으로 대부분의
+근로자가 혜택을 체감할 수 있습니다.
+
+맞벌이 부부의 경우 부부 동시 사용도 가능해져 한층 유연해졌어요.
+아빠 육아휴직 인센티브도 강화되어 남성 육아휴직 사용률도
+높아질 전망입니다.
+
+[이미지 2 삽입]
+
+[핵심 정보 2 - 400자]
+(두 번째 핵심 내용을 400자 내외로 작성...)
+
+[핵심 정보 3 - 400자]
+(세 번째 핵심 내용을 400자 내외로 작성...)
+
+[이미지 3 삽입]
+
+[실용 팁 - 300자]
+(실용적인 조언을 300자 내외로 작성...)
+
+[마무리 - 130자]
+(마무리 및 CTA를 130자 내외로 작성...)
+```
+
+### Workflow Summary
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  2-Step Writing Workflow                 │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  Step 1: 순수 텍스트 작성                                │
+│  ├── HTML 태그 없이 본문만 작성                          │
+│  ├── [이미지 N 삽입] 플레이스홀더 포함                   │
+│  └── 목표: 1850-1950자                                  │
+│                                                         │
+│          ↓                                              │
+│                                                         │
+│  Step 2: 글자수 검증                                    │
+│  ├── len(plain_text) 확인                               │
+│  ├── 1850 미만 → 핵심 정보 섹션 보강                    │
+│  └── 1950 초과 → 불필요한 수식어 삭제                   │
+│                                                         │
+│          ↓                                              │
+│                                                         │
+│  Step 3: HTML 변환                                      │
+│  ├── 폰트 크기 규칙 적용 (28/24/19/16/11px)             │
+│  ├── 줄바꿈 규칙 적용 (<br>)                            │
+│  └── 최종 본문.html 생성                                │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 7-1. Character Count Rules (🚨 CRITICAL!)
 
 ### 🚨 MANDATORY: Total 1900 Characters (±50)
@@ -22,16 +134,16 @@ Write the body content according to selected options and save to files.
 
 | Section | Min Chars | Max Chars | Target | Description |
 |---------|-----------|-----------|--------|-------------|
-| 도입 (Introduction) | 80 | 120 | 100 | Hook + topic intro |
-| 문제 제기 (Problem) | 120 | 180 | 150 | Why this matters |
-| 핵심 정보 1 | 280 | 380 | 330 | First key point |
-| 핵심 정보 2 | 280 | 380 | 330 | Second key point |
-| 핵심 정보 3 | 280 | 380 | 330 | Third key point |
-| 실용 팁 (Tips) | 200 | 300 | 250 | Practical advice |
-| 마무리 (Closing) | 100 | 160 | 130 | CTA + summary |
-| **TOTAL** | **1340** | **1900** | **1620+** | **Must reach 1850+ total** |
+| 도입 (Introduction) | 100 | 150 | 120 | Hook + topic intro |
+| 문제 제기 (Problem) | 150 | 200 | 180 | Why this matters |
+| 핵심 정보 1 | 350 | 450 | 400 | First key point (detailed!) |
+| 핵심 정보 2 | 350 | 450 | 400 | Second key point (detailed!) |
+| 핵심 정보 3 | 350 | 450 | 400 | Third key point (detailed!) |
+| 실용 팁 (Tips) | 250 | 350 | 300 | Practical advice |
+| 마무리 (Closing) | 100 | 150 | 130 | CTA + summary |
+| **TOTAL** | **1650** | **2200** | **1930** | **Must reach 1850+ total** |
 
-⚠️ **IMPORTANT**: Each core section (핵심 정보 1,2,3) MUST be 280+ characters. Short sections will fail validation. If you write less than 1750 characters total, ADD more content to the core information sections.
+⚠️ **IMPORTANT**: Each core section (핵심 정보 1,2,3) MUST be **350+ characters**. These sections carry the main content weight. Short sections will fail validation. Use the 2-Step Writing Workflow (7-1a) to ensure you reach 1850-1950 characters.
 
 ### Excluded from Count
 - All HTML tags (`<h2>`, `<p>`, `<table>`, `<blockquote>`, etc.)
@@ -210,6 +322,75 @@ html_content = generate_html_content(
 
 **Important**: Do not include image guides in 본문.html.
 All image guides are written separately in the **이미지 가이드.md** file.
+
+### 🚨 Image Prompt Length Requirement (1000자+ per image)
+
+**Each image section MUST be at least 1000 characters total.** This ensures enough detail for high-quality AI image generation.
+
+#### Required Components per Image Section
+
+| Component | Target Length | Purpose |
+|-----------|---------------|---------|
+| **Korean Description** | 100-150자 | What the image represents, key visual elements |
+| **AI Generation Prompt** | 400-500자 | Detailed prompt with text, colors, layout |
+| **Style Guide** | 100-150자 | Colors (HEX), mood, format, ratio |
+| **Watermark Config** | 150-200자 | 6 required fields for watermark |
+| **TOTAL** | **850-1000자+** | Minimum per image section |
+
+#### Example: Complete 1000+ Character Image Section
+
+```markdown
+## [Image 1] 썸네일
+
+🎨 AI Generation (With Text)
+
+[Korean Description]
+ETF 개념을 표현하는 블로그 썸네일. 다양한 자산(주식, 채권, 금)이 하나의 ETF 상자로 모이는 모습.
+투자 초보자도 쉽게 이해할 수 있는 시각적 메타포를 사용하여 분산투자의 핵심을 전달한다.
+
+[AI Generation Prompt]
+```
+Blog thumbnail image, ETF investment concept,
+diverse investment icons (stocks charts showing upward trends, golden bonds certificates,
+shiny gold coins and bars) flowing into one central ETF container box with modern design,
+bold modern sans-serif Korean font text "주식보다 쉬운 ETF" in upper third,
+subtitle "소액으로 분산투자" in clean modern font below,
+navy blue (#1a365d) to sky blue (#63b3ed) gradient background,
+floating investment symbols around the ETF box,
+eye-catching modern design with subtle shadows and depth,
+high contrast readable text with slight glow effect,
+professional Korean financial blog style,
+clean minimalist layout with focus on central message,
+16:9 ratio, 1300x885 pixels
+```
+
+[Style Guide]
+- Color: Navy blue (#1a365d) + Sky blue (#63b3ed) gradient
+- Mood: Professional, trustworthy, modern, approachable
+- Format: Modern thumbnail design with central focus
+- Ratio: 16:9
+
+[Watermark Config]
+- watermark_text: "@money-lab-brian"
+- watermark_position: "bottom-center"
+- watermark_margin_bottom: 60
+- watermark_font_size: 18
+- watermark_font_color: "rgba(255,255,255,0.6)"
+- watermark_font_family: "Pretendard, Nanum Gothic, sans-serif"
+```
+
+#### Checklist for Each Image Section
+
+- [ ] Korean Description: 100자 이상, 이미지가 무엇을 표현하는지 명확히
+- [ ] AI Prompt: 400자 이상, 모든 시각 요소 상세 설명
+- [ ] Exact Korean text in quotes (예: "주식보다 쉬운 ETF")
+- [ ] Position specified for all text elements
+- [ ] Color codes in HEX format (예: #1a365d)
+- [ ] Style keywords (3-4개 mood 키워드)
+- [ ] All 6 watermark config fields included
+- [ ] Total section length: 1000자+
+
+---
 
 ### Image Guide Modes
 
