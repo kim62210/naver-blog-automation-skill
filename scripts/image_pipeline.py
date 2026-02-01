@@ -50,7 +50,7 @@ class PipelineItem:
     watermark_config: Optional[WatermarkConfig] = None
     # Keep text_config for backward compatibility
     text_config: Optional[TextOverlayConfig] = None
-    mode: str = "B"  # A: Reference, B: AI Generation (with text), B-3: AI + Watermark Only, C: SVG
+    mode: str = "B"  # A: Reference, B: AI Generation (with text), B-3: AI + Watermark Only
 
 
 @dataclass
@@ -274,7 +274,6 @@ class ImagePipeline:
         - Mode A: 📷 Reference Image
         - Mode B: 🎨 AI Generation
         - Mode B-2: 🎨 AI Generation (Background Only) + Text Overlay
-        - Mode C: 🔷 SVG Generation
 
         Args:
             content: Image guide markdown content
@@ -337,10 +336,6 @@ class ImagePipeline:
         # Check for Mode A (Reference Image)
         if "📷" in content or "Reference Image" in content or "Downloaded image" in content:
             return self._parse_mode_a(index, role, content)
-
-        # Check for Mode C (SVG Generation)
-        if "🔷" in content or "SVG Generation" in content:
-            return self._parse_mode_c(index, role, content)
 
         return None
 
@@ -457,14 +452,6 @@ class ImagePipeline:
             text_config=text_config,
             mode="B-2",
         )
-
-    def _parse_mode_c(
-        self, index: int, role: str, content: str
-    ) -> Optional[PipelineItem]:
-        """Parse Mode C (SVG Generation) section"""
-        # Mode C uses SVG generation, not Gemini API
-        # Return None as this requires different handling
-        return None
 
     def _extract_text_overlay_config(self, content: str) -> Optional[TextOverlayConfig]:
         """

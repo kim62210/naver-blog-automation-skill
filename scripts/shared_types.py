@@ -217,7 +217,7 @@ class ImageGuideItem:
 
     index: int
     role: str
-    mode: str  # "A" (reference), "B" (AI generation), "B-3" (AI + watermark), "C" (SVG)
+    mode: str  # "A" (reference), "B" (AI generation), "B-3" (AI + watermark)
     korean_description: str = ""
     prompt: str = ""
     style_guide: Dict[str, str] = field(default_factory=dict)
@@ -263,7 +263,7 @@ class PipelineItem:
     filename: str
     watermark_config: Optional[WatermarkConfig] = None
     text_config: Optional[TextStyleConfig] = None  # Deprecated
-    mode: str = "B"  # A: Reference, B: AI Generation, B-3: AI + Watermark, C: SVG
+    mode: str = "B"  # A: Reference, B: AI Generation, B-3: AI + Watermark
 
 
 @dataclass

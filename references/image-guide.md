@@ -23,16 +23,6 @@ The image guide is written in a separate **이미지가이드.md** file, not inc
 - **Content images**: 400~600px
 - **Infographics**: 600~1200px (tall vertical format allowed)
 
-### Recommended SVG Generation Sizes
-
-| Purpose | Size | Description |
-|---------|------|-------------|
-| Thumbnail | 1300×885 | OG image standard |
-| Content (basic) | 693×450 | Basic width fit |
-| Content (extended) | 886×500 | Extended width fit |
-| Infographic | 886×800 | Tall vertical format |
-| Chart | 800×500 | Recommended for charts |
-
 ---
 
 ## 🔤 Naver Blog Font Guide
@@ -53,15 +43,6 @@ The image guide is written in a separate **이미지가이드.md** file, not inc
 | Emphasis | 18~20px | Bold | Key phrases |
 | Caption/Source | 12~14px | Light | Image descriptions, sources |
 
-### SVG Text Guide
-
-```
-Main title: 32~48px, font-weight: 700~900
-Subtitle: 18~24px, font-weight: 500~600
-Body: 14~16px, font-weight: 400
-Caption: 11~13px, font-weight: 300~400
-```
-
 ### Font Combination Examples
 
 ```
@@ -79,15 +60,13 @@ Infographic:
 
 ## Core Principles
 
-1. **Provide one of 3 methods for every image position**
+1. **Provide one of 2 methods for every image position**
    - 🖼️ Mode A: Insert collected reference image directly
-   - 🎨 Mode B: Provide AI generation prompt (Midjourney, DALL-E, etc.)
-   - 🔷 Mode C: SVG image generation guide (using svg-canvas-mcp)
+   - 🎨 Mode B: Provide AI generation prompt (auto-generated via Gemini API)
 
-2. **Recommend SVG for infographics/charts**
-   - Infographics, comparison tables, charts, diagrams → Mode C (SVG) recommended
-   - Photographic, emotional images → Mode B (AI generation) recommended
-   - When collected image is suitable → Mode A
+2. **AI generation is automatic**
+   - Mode B images are automatically generated via Gemini API
+   - Just write the prompts and images will be saved to `./images/` folder
 
 3. **Style consistency**
    - Maintain unified color palette within same article
@@ -191,7 +170,7 @@ Infographic:
 1. AI handles all text rendering directly
 2. Simpler workflow - no complex text overlay configuration
 3. Watermark added consistently at bottom-center
-4. Faster generation (no separate SVG composition step)
+4. Faster generation (simpler workflow)
 
 ### Gemini API Usage
 
@@ -583,13 +562,6 @@ Eye-catching with dramatic color transitions. Use two contrasting colors for dep
 | Sunset | #fa709a → #fee140 | Emotional, Trendy |
 | Deep Ocean | #667eea → #00d2ff | Deep, Trustworthy |
 
-**SVG Application**:
-```
-Use style_gradient tool:
-- type: "linear"
-- stops: [{offset: 0, color: "#667eea"}, {offset: 1, color: "#764ba2"}]
-```
-
 ### 2. Glassmorphism
 
 Sophisticated feel with semi-transparent glass effect. Background blur + border highlight combination.
@@ -646,274 +618,3 @@ Guide eyes with dynamic composition. Break away from static grids.
 - Diagonal dividers
 - Mixed size elements
 
----
-
-## 🔷 Mode C: SVG Image Generation Guide
-
-Use svg-canvas-mcp tools to generate SVG images directly.
-
-### Suitable Image Types
-
-| Type | Suitability | Recommended Tools |
-|------|-------------|-------------------|
-| Infographic | ⭐⭐⭐ | chart_bar, chart_pie, draw_text |
-| Comparison/Chart | ⭐⭐⭐ | chart_bar, chart_line |
-| Process diagram | ⭐⭐⭐ | draw_rect, draw_text, draw_line |
-| Checklist | ⭐⭐ | draw_rect, draw_text |
-| Thumbnail | ⭐⭐ | draw_text, style_gradient |
-| Photography style | ❌ | Use Mode B (AI generation) |
-
-### SVG Guide Basic Template
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {image role description}
-
-🔷 SVG Generation
-
-[Image Description]
-{Detailed description of image content}
-
-[Canvas Settings]
-- Size: {width}x{height}px
-- Background: {hex color} or gradient
-
-[Color Palette]
-- Main: {hex} - {usage}
-- Accent: {hex} - {usage}
-- Text: {hex}
-- Background: {hex}
-
-[Layer Composition]
-1. Background layer
-2. Shape layer
-3. Text layer
-
-[Shape Elements]
-1. {shape}: position({x},{y}), size({w}x{h}), color({hex})
-2. {shape}: ...
-
-[Text Elements]
-1. "{text}": position({x},{y}), size({size}px), color({hex}), align({align})
-2. "{text}": ...
-
-[Save]
-./images/{NN}_{description}.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### SVG Type-Specific Templates
-
-#### 1. Bar Chart
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {title} Bar Chart
-
-🔷 SVG Generation
-
-[Image Description]
-{data description}
-
-[Canvas Settings]
-- Size: 800x500px
-- Background: #FFFFFF
-
-[Chart Data]
-| Item | Value | Color |
-|------|-------|-------|
-| {item1} | {value1} | {hex1} |
-| {item2} | {value2} | {hex2} |
-| ... | ... | ... |
-
-[Chart Style]
-- Bar width: 80px
-- Bar spacing: 40px
-- Label position: Below bars
-- Y-axis max: {max_value}
-
-[Text]
-- Title: "{title}" / 24px bold / top center
-- X-axis labels: Below each bar / 14px
-- Y-axis values: Above bars / 16px bold
-
-[Save]
-./images/{NN}_bar_chart.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### 2. Pie/Donut Chart
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {title} Pie Chart
-
-🔷 SVG Generation
-
-[Image Description]
-{data description}
-
-[Canvas Settings]
-- Size: 600x600px
-- Background: #FFFFFF
-
-[Chart Data]
-| Item | Percentage | Color |
-|------|------------|-------|
-| {item1} | {%1} | {hex1} |
-| {item2} | {%2} | {hex2} |
-| ... | ... | ... |
-
-[Chart Style]
-- Type: pie / donut
-- Radius: 200px
-- Donut thickness: 60px (if donut)
-- Legend position: Right
-
-[Text]
-- Title: "{title}" / 24px bold / top
-- Legend: Item name + percentage / 14px
-
-[Save]
-./images/{NN}_pie_chart.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### 3. Process Diagram (Flowchart)
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {title} {N}-Step Process
-
-🔷 SVG Generation
-
-[Image Description]
-{process description}
-
-[Canvas Settings]
-- Size: 900x300px
-- Background: #FFFFFF or {hex}
-
-[Step Data]
-| Order | Title | Icon/Description |
-|-------|-------|------------------|
-| 1 | {title1} | {desc1} |
-| 2 | {title2} | {desc2} |
-| ... | ... | ... |
-
-[Layout]
-- Direction: Horizontal / Vertical
-- Step spacing: 200px
-- Arrow style: → or ▶
-
-[Step Box Style]
-- Shape: Rounded rectangle (radius: 10px)
-- Size: 150x100px
-- Background: {hex}
-- Border: 2px {hex}
-
-[Text]
-- Step number: Circle badge / 20px bold / {hex}
-- Step title: 14px bold / box center
-- Description: 12px / box bottom
-
-[Save]
-./images/{NN}_process.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### 4. Comparison Table
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image N] {Item A} vs {Item B} Comparison
-
-🔷 SVG Generation
-
-[Image Description]
-{comparison description}
-
-[Canvas Settings]
-- Size: 800x500px
-- Background: #FFFFFF
-
-[Comparison Data]
-| Criteria | {Item A} | {Item B} |
-|----------|----------|----------|
-| {criteria1} | {valueA1} | {valueB1} |
-| {criteria2} | {valueA2} | {valueB2} |
-| ... | ... | ... |
-
-[Table Style]
-- Header background: {hex}
-- Odd row background: #F8F8F8
-- Even row background: #FFFFFF
-- Border: 1px #E0E0E0
-- Cell padding: 15px
-
-[Emphasis Style]
-- Superior item: {hex} background or bold
-- Icons: ✓ / ✗ or ⭐
-
-[Save]
-./images/{NN}_comparison.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### 5. Thumbnail
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Image 1] Thumbnail - {topic}
-
-🔷 SVG Generation
-
-[Image Description]
-{thumbnail concept description}
-
-[Canvas Settings]
-- Size: 1300x885px (Naver OG image standard)
-- Background: Gradient {hex1} → {hex2}
-
-[Layer Composition]
-1. Background gradient
-2. Decorative elements (shapes, patterns)
-3. Icons/Illustrations
-4. Main text
-5. Sub text
-
-[Text Elements]
-- Main: "{key phrase}" / 48px bold / upper center / {hex}
-- Sub: "{additional description}" / 24px / lower center / {hex}
-
-[Decorative Elements]
-- {shape1}: position, size, color, opacity
-- {shape2}: ...
-
-[Save]
-./images/01_thumbnail.svg
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### SVG Generation Notes
-
-1. **Korean fonts**: SVG Korean display depends on system fonts
-2. **Complex graphics**: If too complex, recommend Mode B (AI generation)
-3. **File size**: More elements = larger file size
-4. **Browser compatibility**: Recommend using only basic SVG elements
-
-### svg-canvas-mcp Key Tools
-
-| Tool | Purpose |
-|------|---------|
-| `svg_create` | Create new canvas |
-| `chart_bar` | Bar chart |
-| `chart_pie` / `chart_donut` | Pie chart |
-| `chart_line` | Line graph |
-| `draw_rect` | Rectangle |
-| `draw_circle` | Circle |
-| `draw_text` | Text |
-| `draw_line` | Line |
-| `style_gradient` | Gradient |
-| `style_fill` | Fill color |
-| `export_svg` | Save SVG file |

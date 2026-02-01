@@ -65,7 +65,6 @@ Each step is a separate markdown file in `skills/`:
 - **Mode A**: Download reference images from web
 - **Mode B**: AI generation via Gemini API
 - **Mode B-3**: AI generation + watermark overlay (PIL)
-- **Mode C**: SVG vector graphics
 
 ### 3-Tier Gemini API Fallback
 Triggers on 429/QUOTA_EXCEEDED/SAFETY errors:
@@ -86,7 +85,7 @@ Triggers on 429/QUOTA_EXCEEDED/SAFETY errors:
 ├── 본문.html          # Blog HTML (copy-paste to Naver Blog)
 ├── 이미지 가이드.md   # Image generation prompts
 ├── 참조.md            # Source references
-└── images/            # Generated images + SVGs
+└── images/            # Generated images
 ```
 
 ### Environment Variables

@@ -20,7 +20,7 @@ Present the completed work and receive user feedback.
 ├── 본문.html (HTML file)
 ├── 이미지 가이드.md (Image generation guide)
 ├── 참조.md (Source list)
-└── images/  (Reference images + Generated SVGs)
+└── images/  (Generated images)
 
 📋 How to Paste into Naver Blog
 1. Open 본문.html file in browser (double-click)
@@ -31,7 +31,6 @@ Present the completed work and receive user feedback.
 📊 Writing Info
 - Body character count: XXXX chars (pure body text)
 - Image guides: N
-  - 🔷 SVG generation: N
   - 🎨 AI generation: N
   - 📷 Reference images: N
 - Tags: N
@@ -41,7 +40,6 @@ Let me know if you need any revisions.
 - "Make the tone more friendly"
 - "Expand the 2nd section"
 - "Add more image guides"
-- "Generate SVG directly"
 
 Say "done" when you're finished.
 ```
@@ -60,7 +58,6 @@ Say "done" when you're finished.
 | "Increase/decrease character count" | Adjust to specified count |
 | "Change tags" | Suggest new tags |
 | "Add image guide" | Generate additional image guide |
-| "Generate SVG directly" | Create SVG file via svg-canvas-mcp |
 | "Add a table" | Insert related data table |
 
 ### Revision Process
@@ -75,38 +72,7 @@ Say "done" when you're finished.
 
 ---
 
-## 8-3. Immediate SVG Image Generation
-
-When user requests "Generate SVG directly":
-
-```
-Which image should be generated as SVG?
-
-Image list from 이미지 가이드.md:
-1. Thumbnail (1200x630px)
-2. Interest rate comparison chart (800x450px)
-3. Application process infographic (800x600px)
-
-Select a number or say "all".
-```
-
-### SVG Generation Execution
-
-```python
-# Using svg-canvas-mcp tools
-# Example: Creating bar chart
-
-mcp__svg-canvas__svg_create(width=800, height=450, background="#ffffff")
-mcp__svg-canvas__draw_rect(x=200, y=260, width=120, height=90, fill="#B0B0B0")
-mcp__svg-canvas__draw_rect(x=480, y=140, width=120, height=210, fill="#FFD700")
-mcp__svg-canvas__draw_text(x=260, y=380, text="일반 적금 3%", fontSize=14)
-mcp__svg-canvas__draw_text(x=540, y=380, text="특판 적금 7%", fontSize=14)
-mcp__svg-canvas__svg_save(filePath="./images/02_금리비교차트.svg")
-```
-
----
-
-## 8-4. File Update After Revision
+## 8-3. File Update After Revision
 
 ```python
 from scripts.writer import save_blog_files
@@ -123,7 +89,7 @@ files = save_blog_files(
 
 ---
 
-## 8-5. Unlimited Revision Loop
+## 8-4. Unlimited Revision Loop
 
 - Modify only relevant parts per user request
 - Present completed work again after modification
@@ -145,7 +111,7 @@ Say "done" when you're finished.
 
 ---
 
-## 8-6. Exit Conditions
+## 8-5. Exit Conditions
 
 Workflow ends when one of these occurs:
 - User indicates completion with "done", "finished", "OK", "confirm", etc.
@@ -160,7 +126,7 @@ Workflow ends when one of these occurs:
 
 Usage summary:
 1. 본문.html → Open in browser, copy → paste into blog
-2. 이미지 가이드.md → Generate images with AI or SVG
+2. 이미지 가이드.md → Generate images with AI
 3. Upload images at [이미지 N 삽입] positions
 
 Run /search-blogging again to write your next post.

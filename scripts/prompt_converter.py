@@ -66,7 +66,7 @@ class ImageGuideItem:
 
     index: int
     role: str
-    mode: str  # "A" (reference), "B" (AI generation), "C" (SVG)
+    mode: str  # "A" (reference), "B" (AI generation)
     korean_description: str = ""
     prompt: str = ""
     style_guide: Dict[str, str] = None
@@ -405,8 +405,6 @@ def _parse_image_block(block: str) -> Optional[ImageGuideItem]:
     mode = "B"  # Default: AI generation
     if "📷" in block or "참고 이미지" in block or "다운로드된 이미지" in block:
         mode = "A"
-    elif "🔷" in block or "SVG 생성" in block:
-        mode = "C"
     elif "🎨" in block or "AI 생성" in block or "생성 필요" in block:
         mode = "B"
 

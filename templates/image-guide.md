@@ -45,22 +45,6 @@ eye-catching modern design, 16:9 ratio
 - watermark_font_size: 18
 - watermark_font_color: "rgba(255,255,255,0.6)"
 
-### 🔷 SVG Generation Guide
-
-**Canvas:** 1300x885px (Naver OG image standard)
-**Background:** ${color_main} or gradient
-**Font:**
-- Main: 32~48px Bold (key keywords)
-- Sub: 18~24px Regular (supplementary text)
-
-**Elements:**
-1. Main text: "${title}" - center aligned, white, 48px bold
-2. Sub text: "${subtitle}" - below main, light color, 24px
-3. Icon/graphic: topic-related symbol - left or right placement
-4. Brand element: logo or watermark - bottom corner
-
-**Save Path:** ./images/01_썸네일.svg
-
 ---
 
 ## [Image 2] ${image2_role}
@@ -86,16 +70,6 @@ ${image2_prompt_en}
 - Mood: ${image2_mood}
 - Format: ${image2_format}
 
-### 🔷 SVG Generation Guide
-
-**Canvas:** 693x450px (Naver content basic width)
-**Background:** #ffffff
-
-**Elements:**
-${image2_svg_elements}
-
-**Save Path:** ./images/02_${image2_filename_base}.svg
-
 ---
 
 ## [Image 3] ${image3_role}
@@ -115,16 +89,6 @@ ${image3_prompt_en}
 - Mood: ${image3_mood}
 - Format: ${image3_format}
 
-### 🔷 SVG Generation Guide
-
-**Canvas:** 693x450px (Naver content basic width)
-**Background:** ${color_background}
-
-**Elements:**
-${image3_svg_elements}
-
-**Save Path:** ./images/03_${image3_filename_base}.svg
-
 ---
 
 ## [Image 4] ${image4_role}
@@ -138,16 +102,6 @@ ${image4_description_kr}
 ```
 ${image4_prompt_en}
 ```
-
-### 🔷 SVG Generation Guide
-
-**Canvas:** 693x450px (Naver content basic width)
-**Background:** ${color_background}
-
-**Elements:**
-${image4_svg_elements}
-
-**Save Path:** ./images/04_${image4_filename_base}.svg
 
 ---
 
@@ -163,25 +117,15 @@ ${image5_description_kr}
 ${image5_prompt_en}
 ```
 
-**Save Path:** ./images/05_${image5_filename_base}.svg
-
 ---
 
 ## Image Generation Guide
 
-### AI Image Generation Services
-- **Midjourney**: High-quality artwork, use `/imagine` command
-- **DALL-E 3**: Available in OpenAI ChatGPT
-- **Canva AI**: Text to Image feature
-- **Leonardo AI**: Free plan available
-
-### SVG Generation (Claude + svg-canvas-mcp)
-1. Create canvas with svg_create
-2. Add elements with draw_* tools
-3. Add text with draw_text
-4. Save with svg_save
+### AI Image Generation (Gemini API Auto)
+Images are automatically generated via Gemini API.
+Just write the prompts above and the pipeline will generate images.
 
 ### Image Optimization
 - Recommended blog upload width: 800px
-- File format: JPG (photos), PNG (transparent background), SVG (vector)
+- File format: JPG (photos), PNG (transparent background)
 - File size: 1MB or less recommended

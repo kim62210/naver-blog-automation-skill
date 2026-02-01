@@ -339,23 +339,6 @@ def generate_image_guide(
                 '',
             ])
 
-        if mode in ("svg", "both"):
-            # SVG generation guide
-            md_parts.extend([
-                '### 🔷 SVG Generation Guide',
-                '',
-                f'**Canvas:** {img.get("canvas_width", 800)}x{img.get("canvas_height", 450)}px',
-                f'**Background:** {img.get("background", color_palette.get("background", "#ffffff"))}',
-                '',
-                '**Elements:**',
-            ])
-
-            elements = img.get("svg_elements", [])
-            for i, elem in enumerate(elements, 1):
-                md_parts.append(f'{i}. {elem}')
-
-            md_parts.append('')
-
         md_parts.extend([
             '---',
             '',

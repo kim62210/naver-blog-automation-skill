@@ -59,9 +59,9 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 | File | Description | Purpose |
 |------|-------------|---------|
 | 본문.html | HTML for Naver Blog | Open in browser, copy → paste to blog |
-| 이미지 가이드.md | AI prompts + SVG guide | Image generation reference |
+| 이미지 가이드.md | AI prompts | Image generation reference |
 | 참조.md | Source list | Reference verification |
-| images/ | Reference images + Generated SVGs | Blog image insertion |
+| images/ | Generated images | Blog image insertion |
 
 ### Save Path
 
