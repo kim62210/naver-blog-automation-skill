@@ -875,6 +875,7 @@ class GeminiImageGenerator:
                 - prompt: Image generation prompt
                 - filename: Output filename
                 - text_config: TextOverlayConfig (optional, if None uses regular generation)
+                - watermark_config: WatermarkConfig (optional, default watermark applied if None)
             output_dir: Output directory
             concurrent_limit: Concurrent execution limit
 
@@ -905,12 +906,21 @@ class GeminiImageGenerator:
                 output_dir="./images/"
             )
         """
+        from .prompt_converter import WatermarkConfig as WMConfig
+
         start_time = datetime.now()
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
         results: List[ImageResult] = []
         semaphore = asyncio.Semaphore(concurrent_limit)
+
+        # Default watermark config - always applied unless explicitly disabled
+        default_watermark = WMConfig(
+            watermark_text="@money-lab-brian",
+            watermark_position="bottom-center",
+            watermark_enabled=True,
+        )
 
         async def generate_with_limit(item: Dict[str, Any]) -> ImageResult:
             async with semaphore:
@@ -920,14 +930,11 @@ class GeminiImageGenerator:
                 watermark_config = item.get("watermark_config")
                 save_path = str(output_path / filename)
 
-                if watermark_config:
-                    # NEW WORKFLOW: AI renders text, PIL adds watermark only
-                    result = await self.generate_with_watermark(
-                        prompt=prompt,
-                        output_path=save_path,
-                        watermark_config=watermark_config,
-                    )
-                elif text_config:
+                # Determine effective watermark config
+                # Priority: explicit config > default (always apply watermark)
+                effective_watermark = watermark_config if watermark_config else default_watermark
+
+                if text_config:
                     # LEGACY: Use text overlay pipeline (deprecated)
                     result = await self.generate_with_text_overlay(
                         prompt=prompt,
@@ -935,10 +942,12 @@ class GeminiImageGenerator:
                         text_config=text_config,
                     )
                 else:
-                    # Regular generation
-                    result = await self.generate_image(
+                    # NEW WORKFLOW: AI renders text, PIL adds watermark only
+                    # All images now get watermark by default
+                    result = await self.generate_with_watermark(
                         prompt=prompt,
-                        save_path=save_path,
+                        output_path=save_path,
+                        watermark_config=effective_watermark,
                     )
 
                 # Delay to prevent rate limiting

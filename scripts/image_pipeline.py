@@ -222,14 +222,24 @@ class ImagePipeline:
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Default watermark config - applied to all images
+        default_watermark = WatermarkConfig(
+            watermark_text="@money-lab-brian",
+            watermark_position="bottom-center",
+            watermark_enabled=True,
+        )
+
         # Build batch items
         batch_items = []
         for item in items:
+            # Determine watermark config: explicit config > default (always apply)
+            effective_watermark = item.watermark_config if item.watermark_config else default_watermark
+
             batch_item = {
                 "prompt": item.prompt,
                 "filename": item.filename,
-                # New workflow: use watermark_config for Mode B-3
-                "watermark_config": item.watermark_config if item.mode == "B-3" else None,
+                # Apply watermark to all modes (Mode B, B-3, etc.)
+                "watermark_config": effective_watermark,
                 # Legacy support: use text_config for Mode B-2
                 "text_config": item.text_config if (use_text_overlay and item.mode == "B-2") else None,
             }

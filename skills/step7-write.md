@@ -10,12 +10,28 @@ Write the body content according to selected options and save to files.
 
 ---
 
-## 7-1. Character Count Rules (Important!)
+## 7-1. Character Count Rules (🚨 CRITICAL!)
 
-### Target
-- **Strictly follow 본문.html: Around 1850 characters**
-- **Allowed range: 1800~1900 characters (±50)**
+### 🚨 MANDATORY: Total 1850 Characters (±100)
+- **Minimum**: 1750 characters
+- **Maximum**: 1950 characters
+- **Target**: 1850 characters
 - Including spaces
+
+### Section-by-Section Character Allocation (7-Step Structure)
+
+| Section | Min Chars | Max Chars | Target | Description |
+|---------|-----------|-----------|--------|-------------|
+| 도입 (Introduction) | 80 | 120 | 100 | Hook + topic intro |
+| 문제 제기 (Problem) | 120 | 180 | 150 | Why this matters |
+| 핵심 정보 1 | 280 | 380 | 330 | First key point |
+| 핵심 정보 2 | 280 | 380 | 330 | Second key point |
+| 핵심 정보 3 | 280 | 380 | 330 | Third key point |
+| 실용 팁 (Tips) | 200 | 300 | 250 | Practical advice |
+| 마무리 (Closing) | 100 | 160 | 130 | CTA + summary |
+| **TOTAL** | **1340** | **1900** | **1620+** | **Must reach 1750+ total** |
+
+⚠️ **IMPORTANT**: Each core section (핵심 정보 1,2,3) MUST be 280+ characters. Short sections will fail validation. If you write less than 1750 characters total, ADD more content to the core information sections.
 
 ### Excluded from Count
 - All HTML tags (`<h2>`, `<p>`, `<table>`, `<blockquote>`, etc.)
@@ -42,24 +58,77 @@ result = validate_char_count(html_content)
 
 ---
 
+## 7-1b. Readability Rules (가독성 규칙)
+
+### Line Break Rules (줄바꿈 규칙)
+1. **문장 단위 (1 newline)**: 한 문장 최대 50~60자, 문장 끝에 `<br>` 1개
+2. **문단 단위 (2 newlines)**: 문단은 200자 내외, 문단 사이 빈 줄 1개 (`<br><br>` 또는 `</p>\n\n<p>`)
+
+### Font Size Guide (폰트 크기 가이드)
+| 용도 | HTML | 크기 |
+|------|------|------|
+| 제목 | `<h1>` 또는 `<p style="font-size:28px;font-weight:bold;">` | 28px |
+| 중제목 | `<h2>` 또는 `<p style="font-size:24px;font-weight:bold;">` | 24px |
+| 소제목 | `<h3>` 또는 `<p style="font-size:19px;font-weight:bold;">` | 19px |
+| 본문 | `<p>` | 16px |
+| 각주/출처 | `<span style="font-size:11px;color:#888;">` | 11px |
+
+### ❌ BAD Example (줄바꿈 없음, 긴 문장)
+```html
+<p>육아휴직은 근로자가 자녀를 양육하기 위해 사용하는 휴직 제도입니다. 2026년부터 급여가 인상되며 최대 월 250만원까지 지급됩니다. 신청 조건은 고용보험 가입 180일 이상이며 신청 방법은 고용센터 방문 또는 온라인으로 가능합니다.</p>
+```
+**문제점**: 줄바꿈 없음, 60자 초과 문장, 폰트 크기 1종류
+
+### ✅ GOOD Example (적절한 줄바꿈, 다양한 폰트)
+```html
+<p style="font-size:24px;font-weight:bold;">육아휴직이란?</p>
+
+<p>근로자가 자녀를 양육하기 위해 사용하는 휴직 제도입니다.<br>
+만 8세 이하 자녀가 있는 근로자라면 누구나 신청할 수 있어요.</p>
+
+<p style="font-size:19px;font-weight:bold;">2026년 핵심 변경사항</p>
+
+<p>급여가 인상되어 최대 월 250만원까지 지급됩니다.<br>
+육아휴직 기간도 최대 1년 6개월로 연장되었습니다.<br>
+부부 동시 사용도 가능해져 더욱 유연해졌어요.</p>
+
+<p><span style="font-size:11px;color:#888;">출처: 고용노동부 2025년 발표</span></p>
+```
+**장점**: 문장당 50자 이내 + `<br>`, 문단 200자 내외 + 빈 줄, 5가지 폰트 크기
+
+### Visual Rhythm Checklist
+- [ ] 모든 문장 50~60자 이내?
+- [ ] 문장 끝마다 `<br>` 처리?
+- [ ] 문단 사이 빈 줄(2 newlines) 있음?
+- [ ] 제목(28px), 중제목(24px), 소제목(19px), 본문(16px), 각주(11px) 골고루 사용?
+
+---
+
 ## 7-2. HTML Format Guide
 
 본문.html is written as a **complete HTML file**.
 Open in browser, select all (Cmd+A) → copy (Cmd+C) → paste into Naver Blog (Cmd+V) to preserve formatting.
 
-### HTML Tag Mapping
+### HTML Tag Mapping (폰트 크기 필수 준수!)
 
-| Element | HTML Tag |
-|---------|----------|
-| Main heading | `<h2 style="font-size:24px;font-weight:bold;">` |
-| Subheading | `<h3 style="font-size:18px;font-weight:bold;">` |
-| Minor heading | `<h4 style="font-size:15px;font-weight:bold;">` |
-| Blockquote | `<blockquote style="border-left:4px solid #ccc;padding-left:16px;color:#666;">` |
-| Highlighted quote | `<blockquote style="background:#f0f7ff;padding:16px;border-radius:8px;">` |
-| Extra large text | `<p style="font-size:24px;font-weight:bold;text-align:center;">` |
-| Small text | `<p style="font-size:12px;color:#888;">` |
-| Divider | `<hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">` |
-| Image position | `<p style="color:#999;text-align:center;">[이미지 N 삽입]</p>` |
+| 용도 | HTML Tag | 크기 |
+|------|----------|------|
+| 제목 | `<p style="font-size:28px;font-weight:bold;">` | 28px |
+| 중제목 | `<p style="font-size:24px;font-weight:bold;">` | 24px |
+| 소제목 | `<p style="font-size:19px;font-weight:bold;">` | 19px |
+| 본문 | `<p>` (기본 16px) | 16px |
+| 각주/출처 | `<span style="font-size:11px;color:#888;">` | 11px |
+| 인용문 | `<blockquote style="border-left:4px solid #ccc;padding-left:16px;color:#666;">` | - |
+| 강조 인용 | `<blockquote style="background:#f0f7ff;padding:16px;border-radius:8px;">` | - |
+| 구분선 | `<hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">` | - |
+| 이미지 위치 | `<p style="color:#999;text-align:center;">[이미지 N 삽입]</p>` | - |
+
+### Line Break Rules (줄바꿈 규칙)
+
+| 단위 | 규칙 | 처리 방법 |
+|------|------|-----------|
+| 문장 | 50~60자 최대 | 문장 끝에 `<br>` 1개 |
+| 문단 | 200자 내외 | 문단 사이 빈 줄 (`</p>\n\n<p>` 또는 `<br><br>`) |
 
 ---
 
@@ -84,7 +153,7 @@ html_content = generate_html_content(
 )
 ```
 
-### Manual Writing Reference
+### Manual Writing Reference (폰트 크기 및 줄바꿈 규칙 적용)
 
 ```html
 <!DOCTYPE html>
@@ -92,25 +161,40 @@ html_content = generate_html_content(
 <head>
   <meta charset="UTF-8">
   <style>
-    body { font-family: 'Noto Sans KR', sans-serif; line-height: 1.8; max-width: 700px; margin: 0 auto; padding: 20px; }
-    /* ... styles omitted ... */
+    body { font-family: 'Nanum Gothic', 'Pretendard', sans-serif; line-height: 1.8; max-width: 700px; margin: 0 auto; padding: 20px; font-size: 16px; }
   </style>
 </head>
 <body>
 
-<h1>{title}</h1>
+<!-- 제목: 28px -->
+<p style="font-size:28px;font-weight:bold;">{제목}</p>
 
-<div class="image-placeholder">[이미지 1 삽입 - 썸네일]</div>
+<p style="color:#999;text-align:center;">[이미지 1 삽입 - 썸네일]</p>
 
-<hr>
+<hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">
 
-<h2>{subheading}</h2>
+<!-- 중제목: 24px -->
+<p style="font-size:24px;font-weight:bold;">{중제목}</p>
 
-<blockquote>
-"{quote text}"
+<!-- 본문: 16px, 문장마다 <br>, 문단 사이 빈 줄 -->
+<p>첫 번째 문장은 50자 이내로 작성합니다.<br>
+두 번째 문장도 간결하게 작성합니다.<br>
+세 번째 문장으로 문단을 마무리합니다.</p>
+
+<p>새로운 문단은 빈 줄 후 시작합니다.<br>
+이렇게 가독성을 높일 수 있습니다.</p>
+
+<!-- 소제목: 19px -->
+<p style="font-size:19px;font-weight:bold;">{소제목}</p>
+
+<blockquote style="background:#f0f7ff;padding:16px;border-radius:8px;">
+"{인용문 내용}"
 </blockquote>
 
-<p>{body content}</p>
+<p>{본문 내용}</p>
+
+<!-- 각주: 11px -->
+<p><span style="font-size:11px;color:#888;">출처: {출처명}</span></p>
 
 <!-- images, tables, additional sections... -->
 
@@ -154,9 +238,24 @@ All image guides are written separately in the **이미지 가이드.md** file.
 {detailed description including text content}
 
 [AI Generation Prompt]
-{English prompt with text instructions for AI}
-- Include: bold modern sans-serif Korean font text "제목"
-- Include: subtitle "부제목" in clean modern font
+```
+Create a professional Korean blog thumbnail.
+Background: warm gradient from coral pink (#ff7675) to soft orange (#fdcb6e).
+Layout: 16:9 aspect ratio, 1300x885 pixels.
+
+**TEXT RENDERING (MUST INCLUDE)**:
+- Main title: Bold white Korean text "육아휴직 완벽 가이드"
+  - Position: upper-center (y: 30% from top)
+  - Font: Bold sans-serif, 48px equivalent
+  - Color: White (#FFFFFF) with subtle drop shadow
+- Subtitle: "2026년 핵심 변경사항 총정리"
+  - Position: center (y: 50% from top)
+  - Font: Medium weight, 28px equivalent
+  - Color: White with 90% opacity
+
+Style: Modern, clean, professional Korean blog aesthetic.
+NO placeholder text, render actual Korean characters.
+```
 
 [Style Guide]
 - Colors: {main colors}
@@ -171,6 +270,38 @@ All image guides are written separately in the **이미지 가이드.md** file.
 - watermark_font_size: 18
 - watermark_font_color: "rgba(255,255,255,0.6)"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### 🚨 Text Rendering Checklist (AI 프롬프트 필수 요소)
+- [ ] Main title text specified with **exact Korean characters** (e.g., "육아휴직 완벽 가이드")
+- [ ] Position specified (upper/center/lower + percentage from top)
+- [ ] Font style specified (bold/medium/light, sans-serif)
+- [ ] Color specified (hex code + opacity if needed)
+- [ ] "NO placeholder text, render actual Korean characters" instruction included
+- [ ] Subtitle (if any) with same level of detail
+
+### Example: Complete Thumbnail Prompt
+```
+Create a professional Korean economy blog thumbnail.
+Background: deep blue (#1a365d) to teal (#38b2ac) gradient.
+Layout: 16:9 aspect ratio (1300x885 pixels).
+
+**TEXT RENDERING (CRITICAL)**:
+- Main title: "0세 적금 필수 가이드"
+  - Position: upper third (y: 25% from top), centered horizontally
+  - Font: Extra bold Korean sans-serif (Pretendard or similar), 52px
+  - Color: Bright yellow (#ffd93d) with 2px black outline
+  - Style: Slight 3D shadow effect for depth
+
+- Subtitle: "2026년 고금리 상품 TOP 5"
+  - Position: center (y: 50% from top), centered horizontally
+  - Font: Bold sans-serif, 32px
+  - Color: White (#ffffff)
+
+- Accent: Baby icon or savings jar illustration on right side
+
+Style: Modern fintech aesthetic, trustworthy, eye-catching.
+IMPORTANT: Render actual Korean text characters, NOT placeholders or romanization.
 ```
 
 **Key Points:**
