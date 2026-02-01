@@ -164,11 +164,76 @@ def generate_html_content(
     return '\n'.join(html_parts)
 
 
+def generate_text_rendering_prompt(
+    title: str,
+    subtitle: str = "",
+    color_palette: Optional[Dict[str, str]] = None
+) -> List[str]:
+    """
+    Generate detailed text rendering instructions for Gemini AI prompts.
+
+    This ensures AI renders Korean text directly on the image,
+    instead of leaving it blank or using placeholder text.
+
+    Args:
+        title: Main title text (Korean)
+        subtitle: Subtitle text (Korean, optional)
+        color_palette: Color palette for contrast calculation
+
+    Returns:
+        List of markdown lines with text rendering instructions
+    """
+    if not title:
+        return []
+
+    # Default colors
+    if color_palette is None:
+        color_palette = {}
+
+    # Determine contrasting text color based on background
+    bg_color = color_palette.get("background", "#ffffff")
+    main_color = color_palette.get("main", "#1a365d")
+
+    # Use white text on dark backgrounds, dark text on light backgrounds
+    # Simple heuristic: if main color is dark, use it; otherwise use white
+    text_color = "#FFFFFF"
+    shadow_desc = "subtle drop shadow for depth"
+
+    lines = [
+        '',
+        '**TEXT RENDERING (CRITICAL)**:',
+        f'- Main title: "{title}"',
+        '  - Position: upper-center (y: 25-30% from top)',
+        '  - Font: Extra bold Korean sans-serif (Pretendard or similar), 48-52px',
+        f'  - Color: {text_color} with {shadow_desc}',
+        '  - Style: Clear, readable, high contrast against background',
+    ]
+
+    if subtitle:
+        lines.extend([
+            f'- Subtitle: "{subtitle}"',
+            '  - Position: center (y: 50% from top)',
+            '  - Font: Bold sans-serif, 28-32px',
+            '  - Color: White (#FFFFFF) with 90% opacity',
+        ])
+
+    lines.extend([
+        '',
+        'IMPORTANT: Render the exact Korean text characters as specified above.',
+        '',
+    ])
+
+    return lines
+
+
 def generate_image_guide(
     topic: str,
     images: List[Dict[str, Any]],
     color_palette: Dict[str, str],
-    date: Optional[str] = None
+    date: Optional[str] = None,
+    blog_title: Optional[str] = None,
+    blog_subtitle: Optional[str] = None,
+    key_points: Optional[List[str]] = None
 ) -> str:
     """
     Generate image guide markdown.
@@ -178,6 +243,9 @@ def generate_image_guide(
         images: Image guide list
         color_palette: Color palette
         date: Date
+        blog_title: Blog title for thumbnail text rendering
+        blog_subtitle: Blog subtitle for thumbnail text rendering
+        key_points: Key points for each section image (optional)
 
     Returns:
         Markdown content
@@ -228,10 +296,41 @@ def generate_image_guide(
                 '**Korean Description:**',
                 img.get("description_kr", "Enter image description."),
                 '',
-                '**AI Generation Prompt:**',
-                '```',
-                img.get("prompt_en", "Image generation prompt here"),
-                '```',
+            ])
+
+            # For thumbnail (Image 1), inject text rendering instructions
+            is_thumbnail = (
+                idx == 1 or
+                role.lower() in ("thumbnail", "썸네일", "대표 이미지", "메인 이미지")
+            )
+
+            if is_thumbnail and blog_title:
+                # Generate enhanced prompt with text rendering instructions
+                base_prompt = img.get("prompt_en", "")
+                text_rendering_lines = generate_text_rendering_prompt(
+                    title=blog_title,
+                    subtitle=blog_subtitle or "",
+                    color_palette=color_palette
+                )
+
+                md_parts.extend([
+                    '**AI Generation Prompt (with Text Rendering):**',
+                    '```',
+                    base_prompt,
+                ])
+                # Add text rendering instructions inside the code block
+                md_parts.extend(text_rendering_lines)
+                md_parts.append('```')
+            else:
+                # Standard prompt without text rendering
+                md_parts.extend([
+                    '**AI Generation Prompt:**',
+                    '```',
+                    img.get("prompt_en", "Image generation prompt here"),
+                    '```',
+                ])
+
+            md_parts.extend([
                 '',
                 '**Style:**',
                 f'- Color: {img.get("colors", color_palette.get("main"))}',

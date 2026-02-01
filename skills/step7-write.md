@@ -254,7 +254,7 @@ Layout: 16:9 aspect ratio, 1300x885 pixels.
   - Color: White with 90% opacity
 
 Style: Modern, clean, professional Korean blog aesthetic.
-NO placeholder text, render actual Korean characters.
+Render the exact Korean text characters as specified.
 ```
 
 [Style Guide]
@@ -273,12 +273,51 @@ NO placeholder text, render actual Korean characters.
 ```
 
 ### 🚨 Text Rendering Checklist (AI 프롬프트 필수 요소)
+
+**⚠️ WARNING: Without these elements, Gemini will generate images WITHOUT text!**
+
+| Required Element | Example | Why It Matters |
+|-----------------|---------|----------------|
+| **Exact Korean text** | `"육아휴직 완벽 가이드"` | AI needs literal characters to render |
+| **Position** | `upper-center (y: 25%)` | Prevents text overlap issues |
+| **Font size** | `48-52px equivalent` | Ensures readability |
+| **Color** | `#FFFFFF with drop shadow` | Contrast against background |
+| **Explicit instruction** | `"Render exact Korean text as specified"` | Ensures text accuracy |
+
+**Checklist:**
 - [ ] Main title text specified with **exact Korean characters** (e.g., "육아휴직 완벽 가이드")
 - [ ] Position specified (upper/center/lower + percentage from top)
 - [ ] Font style specified (bold/medium/light, sans-serif)
 - [ ] Color specified (hex code + opacity if needed)
-- [ ] "NO placeholder text, render actual Korean characters" instruction included
+- [ ] Explicit instruction to render exact Korean text included
 - [ ] Subtitle (if any) with same level of detail
+
+### ❌ Common Mistakes vs ✅ Correct Approach
+
+**❌ WRONG (텍스트 누락됨):**
+```
+Blog thumbnail, baby savings concept, warm gradient background, 16:9
+```
+→ Result: Background image only, NO text rendered
+
+**✅ CORRECT (텍스트 포함됨):**
+```
+Create a professional Korean blog thumbnail.
+Background: warm gradient from coral pink to soft orange.
+
+**TEXT RENDERING (CRITICAL)**:
+- Main title: "0세 적금 필수 가이드"
+  - Position: upper-center (y: 25% from top)
+  - Font: Extra bold Korean sans-serif, 52px
+  - Color: White (#FFFFFF) with black outline
+- Subtitle: "2026년 고금리 상품 TOP 5"
+  - Position: center (y: 50% from top)
+  - Font: Bold sans-serif, 32px
+  - Color: White
+
+IMPORTANT: Render the exact Korean text characters as specified.
+```
+→ Result: Complete thumbnail with Korean title rendered
 
 ### Example: Complete Thumbnail Prompt
 ```
@@ -301,7 +340,7 @@ Layout: 16:9 aspect ratio (1300x885 pixels).
 - Accent: Baby icon or savings jar illustration on right side
 
 Style: Modern fintech aesthetic, trustworthy, eye-catching.
-IMPORTANT: Render actual Korean text characters, NOT placeholders or romanization.
+IMPORTANT: Render the exact Korean text characters as specified above.
 ```
 
 **Key Points:**

@@ -666,9 +666,6 @@ class GeminiImageGenerator:
         if background_only:
             from .prompt_converter import strip_text_instructions
             processed_prompt = strip_text_instructions(prompt)
-            # Add explicit "NO TEXT" instruction
-            if "no text" not in processed_prompt.lower():
-                processed_prompt += " NO TEXT, NO LETTERS, NO WORDS."
 
         # Step 2: Generate background image to temp file
         temp_dir = tempfile.mkdtemp()

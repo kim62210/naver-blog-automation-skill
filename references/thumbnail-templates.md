@@ -53,19 +53,19 @@
 | **서브 (25%)** | `#2C3E5A` | 미드 네이비 - 깊이감 |
 | **포인트 (5%)** | `#D4AF37` | 골드 - 프리미엄 강조 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 어두운 네이비 블루 배경에 고급스러운 금융 이미지. 주식 차트 그래프가 우상향하는 모습, 금색 조명이 은은하게 비치는 분위기. 미니멀하고 깔끔한 구성으로 텍스트 공간 확보. 블러 처리된 도시 야경이 배경에 희미하게 보임.
 
 **AI Generation Prompt:**
 ```text
-Dark navy blue financial background, elegant and premium atmosphere, subtle upward trending stock chart graph with golden glow, minimalist composition with ample text space, blurred city skyline at night in the far background, professional investment theme, soft golden ambient lighting, clean and sophisticated, no text, no logos, 4K quality
+Dark navy blue financial background, elegant and premium atmosphere, subtle upward trending stock chart graph with golden glow, minimalist composition with ample text space, blurred city skyline at night in the far background, professional investment theme, soft golden ambient lighting, clean and sophisticated, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, cluttered, busy, low quality
+logos, watermarks, people, faces, cluttered, busy, low quality
 ```
 
 ### [Text Overlay Config]
@@ -129,19 +129,19 @@ text, letters, words, logos, watermarks, people, faces, cluttered, busy, low qua
 | **서브 (25%)** | `#F5F7FA` | 라이트 그레이 - 구분감 |
 | **포인트 (5%)** | `#2563EB` | 블루 - 신뢰 강조 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 밝고 깔끔한 흰색 배경, 부드러운 그림자가 있는 미니멀한 오브젝트들, 파스텔 블루 악센트, 충분한 여백, 심플한 기하학적 형태가 은은하게 배치됨. 자연광이 비치는 듯한 밝고 청량한 느낌.
 
 **AI Generation Prompt:**
 ```text
-Clean white minimalist background, soft natural lighting, subtle geometric shapes in pastel blue, gentle shadows, ample negative space for text, light and airy atmosphere, simple abstract elements, professional and fresh aesthetic, no text, no logos, high key lighting, 4K quality
+Clean white minimalist background, soft natural lighting, subtle geometric shapes in pastel blue, gentle shadows, ample negative space for text, light and airy atmosphere, simple abstract elements, professional and fresh aesthetic, high key lighting, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, dark, cluttered, busy, people, faces
+logos, watermarks, dark, cluttered, busy, people, faces
 ```
 
 ### [Text Overlay Config]
@@ -209,19 +209,19 @@ text, letters, words, logos, watermarks, dark, cluttered, busy, people, faces
 | **그라데이션 끝** | `#0F3460` | 미드나잇 블루 |
 | **포인트** | `#E94560` | 핫 핑크/레드 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 어두운 보라-파랑 그라데이션 배경, 우주적이고 신비로운 분위기, 미세한 빛 입자들이 흩어져 있음, 네온 핑크/마젠타 색상의 은은한 광선 효과, 깊이감 있는 레이어 구성, 중앙에 텍스트 공간 확보.
 
 **AI Generation Prompt:**
 ```text
-Dark purple to blue gradient background, cosmic mysterious atmosphere, scattered light particles, subtle neon pink magenta light rays, deep layered composition, abstract flowing shapes, cinematic lighting, futuristic aesthetic, ample center space for text, no text, no logos, dramatic mood, 4K quality
+Dark purple to blue gradient background, cosmic mysterious atmosphere, scattered light particles, subtle neon pink magenta light rays, deep layered composition, abstract flowing shapes, cinematic lighting, futuristic aesthetic, ample center space for text, dramatic mood, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, bright, overexposed
+logos, watermarks, people, faces, bright, overexposed
 ```
 
 ### [Text Overlay Config]
@@ -284,19 +284,19 @@ text, letters, words, logos, watermarks, people, faces, bright, overexposed
 | **포인트 A** | `#FF3B30` | 레드 - 숫자 강조 |
 | **포인트 B** | `#FFD700` | 골드 - 금액 강조 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 검은색 배경에 금색과 빨간색의 추상적인 빛 효과, 성공과 부를 상징하는 고급스러운 분위기, 미니멀한 구성으로 중앙에 큰 숫자를 배치할 공간 확보, 살짝 빛나는 입자들이 떠다니는 효과.
 
 **AI Generation Prompt:**
 ```text
-Pure black background with abstract golden and red light effects, luxury wealth success atmosphere, subtle floating particles with golden glow, minimalist composition with large center space for big numbers, premium elegant aesthetic, ambient light rays, no text, no logos, cinematic contrast, 4K quality
+Pure black background with abstract golden and red light effects, luxury wealth success atmosphere, subtle floating particles with golden glow, minimalist composition with large center space for big numbers, premium elegant aesthetic, ambient light rays, cinematic contrast, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, numbers, logos, watermarks, people, faces, busy, cluttered
+logos, watermarks, people, faces, busy, cluttered
 ```
 
 ### [Text Overlay Config]
@@ -362,19 +362,19 @@ text, letters, words, numbers, logos, watermarks, people, faces, busy, cluttered
 | **옵션 B** | `#10B981` | 그린 - 오른쪽 옵션 |
 | **구분선** | `#CBD5E1` | 미디움 그레이 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 밝은 회색-흰색 배경, 좌우로 나뉜 듯한 레이아웃 암시, 파란색과 초록색의 추상적 도형이 양쪽에 배치, 깔끔하고 정돈된 인포그래픽 스타일, 중앙에 VS 배치 공간 확보.
 
 **AI Generation Prompt:**
 ```text
-Clean light gray white background, split layout design, abstract geometric shapes in blue on left side and green on right side, infographic style, organized symmetrical composition, subtle grid pattern, professional comparison theme, center space for VS element, no text, no logos, modern corporate aesthetic, 4K quality
+Clean light gray white background, split layout design, abstract geometric shapes in blue on left side and green on right side, infographic style, organized symmetrical composition, subtle grid pattern, professional comparison theme, center space for VS element, modern corporate aesthetic, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, dark, cluttered
+logos, watermarks, people, faces, dark, cluttered
 ```
 
 ### [Text Overlay Config]
@@ -448,19 +448,19 @@ text, letters, words, logos, watermarks, people, faces, dark, cluttered
 | **포인트** | `#2563EB` | 블루 - 단계 표시 |
 | **강조** | `#1D4ED8` | 딥 블루 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 밝은 파란색 계열 배경, 단계를 암시하는 계단 또는 화살표 형태의 추상적 도형, 위에서 아래로 또는 왼쪽에서 오른쪽으로 흐르는 듯한 구성, 교육적이고 친근한 분위기, 숫자를 배치할 수 있는 공간 확보.
 
 **AI Generation Prompt:**
 ```text
-Light blue gradient background, abstract step-by-step visual elements, flowing arrows or staircase shapes suggesting progression, educational friendly atmosphere, clean organized layout, circular numbered step indicators in deep blue, left to right or top to bottom flow, ample space for step numbers, no text, no logos, modern tutorial aesthetic, 4K quality
+Light blue gradient background, abstract step-by-step visual elements, flowing arrows or staircase shapes suggesting progression, educational friendly atmosphere, clean organized layout, circular numbered step indicators in deep blue, left to right or top to bottom flow, ample space for step numbers, modern tutorial aesthetic, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, dark, cluttered, complex
+logos, watermarks, people, faces, dark, cluttered, complex
 ```
 
 ### [Text Overlay Config]
@@ -533,19 +533,19 @@ text, letters, words, logos, watermarks, people, faces, dark, cluttered, complex
 | **경고** | `#EF4444` | 레드 - 위험 강조 |
 | **주의** | `#F59E0B` | 앰버 - 주의 표시 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 어두운 배경에 경고를 암시하는 빨간색과 노란색 추상적 요소, 경고 삼각형이나 느낌표를 암시하는 형태, 긴장감 있는 분위기, 텍스트를 위한 중앙 공간 확보, 그라데이션 테두리 효과.
 
 **AI Generation Prompt:**
 ```text
-Dark dramatic background with red and amber warning elements, abstract caution shapes suggesting alert triangles or exclamation marks, tense urgent atmosphere, subtle danger gradient from dark to red edges, spotlight effect on center for text space, no text, no logos, dramatic lighting, cinematic warning mood, 4K quality
+Dark dramatic background with red and amber warning elements, abstract caution shapes suggesting alert triangles or exclamation marks, tense urgent atmosphere, subtle danger gradient from dark to red edges, spotlight effect on center for text space, dramatic lighting, cinematic warning mood, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, bright, cheerful, happy
+logos, watermarks, people, faces, bright, cheerful, happy
 ```
 
 ### [Text Overlay Config]
@@ -616,19 +616,19 @@ text, letters, words, logos, watermarks, people, faces, bright, cheerful, happy
 | **그라데이션 B** | `#F472B6` | 핑크 |
 | **그라데이션 C** | `#60A5FA` | 스카이 블루 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 부드러운 파스텔 톤의 퍼플-핑크-블루 그라데이션 배경, 글래스모피즘 효과(유리 느낌), 둥근 모서리의 추상적 도형들이 떠다니는 듯한 구성, 밝고 경쾌한 분위기, 네온 글로우 효과.
 
 **AI Generation Prompt:**
 ```text
-Soft pastel gradient background blending purple pink and sky blue, glassmorphism effect with frosted glass elements, floating rounded abstract shapes, bright cheerful trendy atmosphere, subtle neon glow accents, Gen Z aesthetic, holographic iridescent hints, bubbly playful composition, no text, no logos, Instagram card news style, 4K quality
+Soft pastel gradient background blending purple pink and sky blue, glassmorphism effect with frosted glass elements, floating rounded abstract shapes, bright cheerful trendy atmosphere, subtle neon glow accents, Gen Z aesthetic, holographic iridescent hints, bubbly playful composition, Instagram card news style, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, dark, serious, corporate
+logos, watermarks, people, faces, dark, serious, corporate
 ```
 
 ### [Text Overlay Config]
@@ -700,19 +700,19 @@ text, letters, words, logos, watermarks, people, faces, dark, serious, corporate
 | **포인트** | `#22C55E` | 그린 - 체크 표시 |
 | **강조** | `#16A34A` | 딥 그린 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 밝은 민트-그린 계열 배경, 체크 표시나 목록을 암시하는 추상적 도형들, 깔끔하게 정렬된 수평선 요소, 자연스럽고 신선한 느낌, 잎사귀나 성장을 암시하는 미니멀한 요소.
 
 **AI Generation Prompt:**
 ```text
-Light mint green background, abstract checkmark and list elements, clean horizontal aligned shapes, fresh natural atmosphere, subtle leaf or growth motifs, organized grid pattern hints, minimal botanical elements, productivity wellness aesthetic, ample space for checklist overlay, no text, no logos, clean organized design, 4K quality
+Light mint green background, abstract checkmark and list elements, clean horizontal aligned shapes, fresh natural atmosphere, subtle leaf or growth motifs, organized grid pattern hints, minimal botanical elements, productivity wellness aesthetic, ample space for checklist overlay, clean organized design, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, dark, cluttered, complex
+logos, watermarks, people, faces, dark, cluttered, complex
 ```
 
 ### [Text Overlay Config]
@@ -785,19 +785,19 @@ text, letters, words, logos, watermarks, people, faces, dark, cluttered, complex
 | **속보** | `#DC2626` | 레드 - 속보 표시 |
 | **강조** | `#FFFFFF` | 화이트 - 가독성 |
 
-### 🎨 AI Generation (Background Only)
+### 🎨 AI Generation
 
 **Korean Description:**
 검은색 배경에 뉴스 스튜디오를 연상시키는 분위기, 빨간색 악센트 라인, 디지털 그래픽 요소, 긴급 뉴스 느낌의 동적인 조명, 하단에 뉴스 티커 공간을 암시하는 레이아웃.
 
 **AI Generation Prompt:**
 ```text
-Dark black news broadcast style background, red accent lines and geometric shapes, digital news graphics aesthetic, dynamic urgent lighting, news studio atmosphere, subtle screen glare effects, breaking news layout with ticker space at bottom, professional broadcast quality, no text, no logos, cinematic news mood, 4K quality
+Dark black news broadcast style background, red accent lines and geometric shapes, digital news graphics aesthetic, dynamic urgent lighting, news studio atmosphere, subtle screen glare effects, breaking news layout with ticker space at bottom, professional broadcast quality, cinematic news mood, 4K quality
 ```
 
 **Negative Prompt:**
 ```text
-text, letters, words, logos, watermarks, people, faces, bright, cheerful, casual
+logos, watermarks, people, faces, bright, cheerful, casual
 ```
 
 ### [Text Overlay Config]
