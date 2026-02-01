@@ -32,7 +32,7 @@ result = validate_char_count(html_content)
 
 ## Architecture
 
-### 8-Step Modular Workflow
+### 9-Step Modular Workflow
 Each step is a separate markdown file in `skills/`:
 1. **step1-collect** - Crawl Naver Economy Shortents via Chrome DevTools MCP
 2. **step2-confirm** - User confirms topic, expand keywords
@@ -41,7 +41,8 @@ Each step is a separate markdown file in `skills/`:
 5. **step5-options** - Select tone, structure, image count
 6. **step6-title** - Generate and select title
 7. **step7-write** - Write HTML + image guide + references
-8. **step8-revise** - Revision loop
+8. **step8-image** - 🖼️ Image generation (MANDATORY)
+9. **step9-revise** - Revision loop
 
 ### Python Modules (`scripts/`)
 

@@ -21,13 +21,13 @@
 | **설정 관리** | PyYAML | YAML 기반 설정 |
 | **SVG 변환** | cairosvg/rsvg-convert | SVG → PNG 변환 |
 
-### 8단계 워크플로우 요약
+### 9단계 워크플로우 요약
 
 ```
-STEP 1 → STEP 2 → STEP 3 → STEP 4 → STEP 5 → STEP 6 → STEP 7 → STEP 8
-트렌딩   토픽      병렬     리뷰     옵션     제목     본문      수정
-수집     확정     리서치    종합     선택     선택     작성     루프
-12%     25%      37%      50%      62%      75%      87%     100%
+STEP 1 → STEP 2 → STEP 3 → STEP 4 → STEP 5 → STEP 6 → STEP 7 → STEP 8 → STEP 9
+트렌딩   토픽      병렬     리뷰     옵션     제목     본문     이미지    수정
+수집     확정     리서치    종합     선택     선택     작성     생성     루프
+11%     22%      33%      44%      55%      66%      77%      88%     100%
 ```
 
 ---
@@ -87,12 +87,18 @@ flowchart TB
         G7 --> G8[파일 저장]
     end
 
-    subgraph STEP8["STEP 8: 수정 루프"]
-        H1{수정 필요?}
-        H1 -->|Yes| H2[사용자 피드백]
-        H2 --> H3[콘텐츠 수정]
-        H3 --> H1
-        H1 -->|No| H4[완료]
+    subgraph STEP8["STEP 8: 이미지 생성"]
+        H1[이미지 가이드 파싱] --> H2[Gemini API 호출]
+        H2 --> H3[워터마크 추가]
+        H3 --> H4[이미지 저장]
+    end
+
+    subgraph STEP9["STEP 9: 수정 루프"]
+        I1{수정 필요?}
+        I1 -->|Yes| I2[사용자 피드백]
+        I2 --> I3[콘텐츠 수정]
+        I3 --> I1
+        I1 -->|No| I4[완료]
     end
 
     STEP1 --> STEP2
@@ -102,6 +108,7 @@ flowchart TB
     STEP5 --> STEP6
     STEP6 --> STEP7
     STEP7 --> STEP8
+    STEP8 --> STEP9
 
     style STEP1 fill:#e3f2fd
     style STEP2 fill:#e8f5e9
@@ -110,7 +117,8 @@ flowchart TB
     style STEP5 fill:#fce4ec
     style STEP6 fill:#e0f7fa
     style STEP7 fill:#fff8e1
-    style STEP8 fill:#e8eaf6
+    style STEP8 fill:#ffe0b2
+    style STEP9 fill:#e8eaf6
 ```
 
 ---
@@ -398,25 +406,51 @@ files = save_blog_files(
 
 ---
 
-### 3.8 STEP 8: 수정 루프
+### 3.8 STEP 8: 이미지 생성
 
-**위치**: `skills/step8-revise.md`
+**위치**: `skills/step8-image.md`
+
+#### 이미지 생성 흐름
+
+```mermaid
+flowchart TB
+    A[이미지 가이드.md 파싱] --> B[프롬프트 추출]
+    B --> C[Gemini API 호출]
+    C --> D{생성 성공?}
+    D -->|Yes| E[워터마크 추가]
+    D -->|No| F[폴백 모델 시도]
+    F --> C
+    E --> G[images/ 폴더에 저장]
+    G --> H[결과 리포트]
+```
+
+#### 이미지 생성 모드
+
+| 모드 | 설명 | 처리 방식 |
+|------|------|----------|
+| **Mode A** | 참고 이미지 다운로드 | URL에서 직접 다운로드 |
+| **Mode B** | AI 생성 | Gemini API |
+| **Mode B-3** | AI 생성 + 워터마크 | Gemini API + PIL (권장) |
+
+---
+
+### 3.9 STEP 9: 수정 루프
+
+**위치**: `skills/step9-revise.md`
 
 #### 수정 루프 흐름
 
 ```mermaid
 flowchart TB
-    A[본문 작성 완료] --> B{사용자 만족?}
+    A[본문 + 이미지 완료] --> B{사용자 만족?}
     B -->|No| C[피드백 수집]
     C --> D{수정 유형}
     D -->|내용 수정| E[본문 수정]
     D -->|이미지 수정| F[이미지 재생성]
-    D -->|SVG 추가| G[SVG 생성]
-    E --> H[글자수 재검증]
-    F --> H
-    G --> H
-    H --> B
-    B -->|Yes| I[완료]
+    E --> G[글자수 재검증]
+    F --> G
+    G --> B
+    B -->|Yes| H[완료]
 ```
 
 ---
