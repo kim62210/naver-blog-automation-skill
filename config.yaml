@@ -1,9 +1,9 @@
 # Naver Blog Automation Configuration
-# search-blogging skill v2.0.0
+# search-blogging skill v2.1.0
 
 app:
   name: search-blogging
-  version: "2.0.0"
+  version: "2.1.0"
   description: "네이버 경제 숏텐츠 트렌딩 주제 수집부터 블로그 글 작성까지 자동화"
 
 # Writing defaults

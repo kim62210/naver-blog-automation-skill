@@ -147,4 +147,4 @@ Would you like to proceed with materials from other sources?
 ```
 
 ### Auto Character Count Adjustment
-Before completion, self-validate and adjust to 1800~1900 character range (target: 1850 chars)
+Before completion, self-validate and adjust to 1850~1950 character range (target: 1900 chars)

@@ -1,7 +1,7 @@
 # Image Guide Creation
 
 Guide images for blog posts using one of **3 methods**.
-The image guide is written in a separate **이미지가이드.md** file, not included in 본문.md.
+The image guide is written in a separate **이미지 가이드.md** file, not included in 본문.html.
 
 ---
 
@@ -70,7 +70,7 @@ Infographic:
 
 3. **Style consistency**
    - Maintain unified color palette within same article
-   - Specify color palette at top of 이미지가이드.md
+   - Specify color palette at top of 이미지 가이드.md
 
 ---
 
@@ -105,6 +105,9 @@ Infographic:
 
 > **Automation**: Mode B images are automatically generated via Gemini API.
 > Just write the prompt and images will be saved to `./images/` folder without manual generation.
+>
+> **IMPORTANT (Automation format)**: In the actual `이미지 가이드.md`, put the AI prompt inside a fenced code block (``` ... ```).
+> The pipeline extracts the first fenced code block per image section. See `templates/image-guide.md` for a working format.
 
 ### Mode B-1: Basic Format (AI generates everything including text)
 
@@ -184,13 +187,11 @@ generator = GeminiImageGenerator()
 result = await generator.generate_batch(prompts, "./images/")
 ```
 
-### API Limitations
+### Limits & Fallback (Config-driven)
 
-| Item | Limit |
-|------|-------|
-| Requests per minute | 15 (auto delay applied) |
-| Daily limit | 500 images (free tier) |
-| Fallback | gemini-2.0-flash-exp → imagen-3.0 |
+- Rate limiting/delay is configured in `config.yaml` (`gemini.rate_limit.*`) and enforced by the generator.
+- Model fallback order is configured in `config.yaml` (`gemini.models.primary` → `fallback` → `fallback_2`).
+- Exact quotas/availability vary by account and can change.
 
 ---
 
@@ -617,4 +618,3 @@ Guide eyes with dynamic composition. Break away from static grids.
 - Text left + Image right offset
 - Diagonal dividers
 - Mixed size elements
-

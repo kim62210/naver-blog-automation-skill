@@ -2,7 +2,7 @@
 Gemini Image Generation API Integration Module
 
 Automatically generates blog images using Google Gemini API.
-Uses Gemini 2.0 Flash Nano Banana by default, falls back to Imagen 3 when quota exceeded.
+Uses a 3-tier fallback model strategy driven by `config.yaml` (`gemini.models`).
 
 Updated to use the new google-genai SDK.
 Supports text overlay pipeline for better Korean text quality.
@@ -25,11 +25,10 @@ if TYPE_CHECKING:
 
 
 # API configuration constants - 3-tier fallback system
-# 📚 Rate Limit 상세 정보: docs/GEMINI_IMAGE_API_LIMITS.md 참조
-# These defaults can be overridden via config.yaml
-DEFAULT_MODEL = "gemini-2.0-flash-exp-image-generation"  # Nano Banana - free tier
-FALLBACK_MODEL = "gemini-2.5-flash-image"  # Gemini 2.5 Flash Image - limited free
-FALLBACK_MODEL_2 = "gemini-3-pro-image-preview"  # Gemini 3 Pro Image - paid tier
+# These defaults can be overridden via config.yaml (`gemini.models`)
+DEFAULT_MODEL = "gemini-3-pro-image-preview"  # Best quality (may require paid tier)
+FALLBACK_MODEL = "gemini-2.5-flash-image"  # Faster / often available on free tier
+FALLBACK_MODEL_2 = "gemini-2.0-flash-exp-image-generation"  # Most compatible fallback (free tier)
 DEFAULT_SIZE = "1024x1024"
 DEFAULT_TIMEOUT = 60
 DEFAULT_RETRY_COUNT = 3
@@ -109,9 +108,9 @@ class GeminiImageGenerator:
 
         Args:
             api_key: Google API key (loads from environment variable if not provided)
-            primary_model: Primary model (default: gemini-2.0-flash-exp-image-generation)
-            fallback_model: First fallback model (default: imagen-3.0-fast-generate-001)
-            fallback_model_2: Second fallback model (default: imagen-3.0-generate-002)
+            primary_model: Primary model (default: `DEFAULT_MODEL` or config override)
+            fallback_model: First fallback model (default: `FALLBACK_MODEL` or config override)
+            fallback_model_2: Second fallback model (default: `FALLBACK_MODEL_2` or config override)
         """
         self.api_key = api_key or self._load_api_key()
         self.primary_model = primary_model or self._get_config_model("primary") or DEFAULT_MODEL
@@ -192,7 +191,7 @@ class GeminiImageGenerator:
         """
         start_time = datetime.now()
 
-        # Tier 1: Primary model (Nano Banana)
+        # Tier 1: Primary model
         result = await self._generate_with_model(
             prompt=prompt,
             save_path=save_path,
@@ -200,7 +199,7 @@ class GeminiImageGenerator:
             model=self.primary_model,
         )
 
-        # Tier 2: First fallback (Imagen 3 Fast)
+        # Tier 2: First fallback
         if not result.success and use_fallback and self._should_fallback(result.error_message):
             print(f"⚠️ {self.primary_model} failed, retrying with {self.fallback_model}...")
             await asyncio.sleep(_get_rate_limit_delay())
@@ -212,7 +211,7 @@ class GeminiImageGenerator:
                 model=self.fallback_model,
             )
 
-        # Tier 3: Second fallback (Imagen 3 Standard)
+        # Tier 3: Second fallback
         if not result.success and use_fallback and self._should_fallback(result.error_message):
             print(f"⚠️ {self.fallback_model} failed, retrying with {self.fallback_model_2}...")
             await asyncio.sleep(_get_rate_limit_delay())
@@ -255,7 +254,7 @@ class GeminiImageGenerator:
 
         for attempt in range(self.retry_count):
             try:
-                # Generate image with Gemini model (Nano Banana)
+                # Generate image with Gemini model
                 if model.startswith("gemini"):
                     return await self._generate_with_gemini(prompt, save_path, model)
                 else:
@@ -301,7 +300,7 @@ class GeminiImageGenerator:
         save_path: Optional[str],
         model: str,
     ) -> ImageResult:
-        """Generate image with Gemini model (Nano Banana) using new SDK"""
+        """Generate image with Gemini model using the `generate_content` API (google-genai SDK)."""
         try:
             # Build configuration for image generation
             config = None
@@ -399,7 +398,7 @@ class GeminiImageGenerator:
         size: str,
         model: str,
     ) -> ImageResult:
-        """Generate image with Imagen model using new SDK"""
+        """Generate an image using the `generate_images` API (google-genai SDK)."""
         try:
             # Parse size and get aspect ratio
             width, height = self._parse_size(size)

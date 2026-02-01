@@ -97,11 +97,11 @@ Adapt flexibly based on topic and content.
 - Q&A: Question-Answer format
 - Before-After: Before and after comparison
 
-### Character Distribution Example (1800~2000 total)
+### Character Distribution Example (1850~1950 total)
 ```
-Introduction: 10% (180~200 characters)
-Body: 75% (1350~1500 characters)
-Closing: 15% (270~300 characters)
+Introduction: 10% (190~200 characters)
+Body: 75% (1390~1460 characters)
+Closing: 15% (280~290 characters)
 ```
 
 ---

@@ -3,7 +3,7 @@ name: search-blogging
 description: |
   A skill for collecting trending topics from Naver Economy Shortents and automating blog post writing.
   In step 1, collect today's top 10 economy news using Chrome DevTools for user selection.
-  Then collect materials via parallel web search and write a blog post of around 1850 characters.
+  Then collect materials via parallel web search and write a blog post of around 1900 characters (configurable).
 
   When to use:
   (1) When blog post writing is needed
@@ -108,8 +108,8 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 ## Writing Rules
 
 ### Character Count (Important!)
-- **Target: Around 1850 characters**
-- **Allowed range: 1800~1900 characters (±50)**
+- **Target: Around 1900 characters**
+- **Allowed range: 1850~1950 characters (±50)**
 - Count pure body text only (excluding HTML tags, image placeholders)
 
 ### Character Count Validation (Python)
@@ -191,8 +191,10 @@ Global settings are managed in `config.yaml`:
 ```yaml
 # config.yaml
 writing:
-  char_count: 1850
+  char_count: 1900
   char_tolerance: 50
+  min_chars: 1850
+  max_chars: 1950
 
 images:
   default_count: 5
@@ -206,9 +208,9 @@ output:
 # Gemini API 3-tier fallback models
 gemini:
   models:
-    primary: "gemini-2.0-flash-exp-image-generation"
+    primary: "gemini-3-pro-image-preview"
     fallback: "gemini-2.5-flash-image"
-    fallback_2: "gemini-3-pro-image-preview"
+    fallback_2: "gemini-2.0-flash-exp-image-generation"
 ```
 
 ---
@@ -220,7 +222,7 @@ gemini:
 | `scripts/config.py` | Configuration file loader (YAML parsing) |
 | `scripts/utils.py` | Common utilities (date formatting, text cleaning) |
 | `scripts/shared_types.py` | Shared type definitions (dataclasses) |
-| `scripts/validator.py` | Character count validation (1850±50 chars) |
+| `scripts/validator.py` | Character count validation (1900±50 chars) |
 | `scripts/setup.py` | Project directory initialization |
 | `scripts/collector.py` | Reference image collection/download |
 | `scripts/writer.py` | HTML/MD generation (본문.html, 참조.md) |
@@ -281,7 +283,7 @@ Reference these files as needed during skill execution:
 ## Directory Structure
 
 ```
-naver-blog-automation/
+search-blogging/
 ├── SKILL.md                    # This file (entry point)
 ├── config.yaml                 # Global configuration
 ├── requirements.txt            # Python dependencies
@@ -304,7 +306,7 @@ naver-blog-automation/
 │   ├── image-guide.md
 │   └── references.md
 └── scripts/                    # Python automation (11 modules)
-    ├── __init__.py             # Package init (v2.2.0)
+    ├── __init__.py             # Package init
     ├── config.py               # YAML config loader
     ├── shared_types.py         # Shared dataclasses
     ├── utils.py                # Common utilities

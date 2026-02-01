@@ -55,7 +55,7 @@ Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
 │                                                 │
 │  이미지 가이드.md 파싱                           │
 │         ↓                                       │
-│  Gemini API (gemini-3-pro-image-preview)        │
+│  Gemini API (config.yaml gemini.models.primary) │
 │  ├── 배경 이미지 생성                           │
 │  ├── main_text (메인 텍스트) AI 렌더링          │
 │  └── sub_text (부제목) AI 렌더링                │
@@ -63,7 +63,7 @@ Mode B (🎨 AI Generation) images are automatically generated via Gemini API.
 │         ↓                                       │
 │  PIL (Pillow)                                   │
 │  └── watermark (워터마크)만 후처리              │
-│  └── @money-lab-brian                           │
+│  └── config.yaml watermark.*                    │
 │         ↓                                       │
 │  ./images/*.png 저장                            │
 │                                                 │
@@ -94,8 +94,7 @@ with open(f"{project_path}/이미지 가이드.md", "r", encoding="utf-8") as f:
 # Generate all images with watermark
 result = await pipeline.process_image_guide(
     image_guide_content=image_guide_content,
-    output_dir=f"{project_path}/images/",
-    use_text_overlay=True  # Enables watermark for Mode B-3 items
+    output_dir=f"{project_path}/images/"
 )
 
 # Print summary
@@ -171,20 +170,11 @@ export GEMINI_API_KEY="your-api-key"
 
 ---
 
-## 8-5. Generation Limits
+## 8-5. Limits & Fallback
 
-| Limit | Value | Notes |
-|-------|-------|-------|
-| Requests per minute | 15 | Auto-delay applied |
-| Free daily quota | 500 images | gemini-2.0-flash-exp |
-| Fallback model | imagen-3.0 | When quota exceeded |
-
-### 3-Tier Model Fallback
-
-Triggers on 429/QUOTA_EXCEEDED/SAFETY errors:
-1. `gemini-2.0-flash-exp-image-generation` (primary)
-2. `gemini-2.5-flash-image` (fallback)
-3. `gemini-3-pro-image-preview` (fallback 2)
+- Rate limiting/delay is configured in `config.yaml` (`gemini.rate_limit.*`) and enforced by the generator.
+- Model fallback order is configured in `config.yaml` (`gemini.models.primary` → `fallback` → `fallback_2`).
+- Exact quotas/availability vary by account and can change. If you hit limits, lower concurrency or change model order in `config.yaml`.
 
 ---
 

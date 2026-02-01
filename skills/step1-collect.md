@@ -5,7 +5,7 @@ Use Chrome DevTools MCP to collect today's popular topics from Naver Economy Sho
 ## Progress Status
 
 ```
-[STEP 1/8] Topic collection ████░░░░░░░░░░░░░░░░░░░░░░░░ 12%
+[STEP 1/9] Topic collection ███░░░░░░░░░░░░░░░░░░░░░░░░░ 11%
 ```
 
 ---

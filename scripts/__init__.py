@@ -15,7 +15,7 @@
 - image_pipeline: 통합 이미지 생성 파이프라인
 """
 
-__version__ = "2.3.0"
+__version__ = "2.1.0"
 __all__ = [
     # Types (import from shared_types)
     "shared_types",

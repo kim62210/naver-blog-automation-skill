@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**search-blogging** is a Claude Code skill that automates the workflow from collecting trending economy topics on Naver Shortents to writing Korean blog posts (~1850 characters) with AI-generated images.
+**search-blogging** is a Claude Code skill that automates the workflow from collecting trending economy topics on Naver Shortents to writing Korean blog posts (~1900 characters) with AI-generated images.
 
 ## Commands
 
@@ -49,7 +49,7 @@ Each step is a separate markdown file in `skills/`:
 **Core Infrastructure:**
 - `shared_types.py` - Dataclasses: `ImageResult`, `ValidationResult`, `WatermarkConfig`, `PipelineConfig`, etc.
 - `config.py` - YAML loader with env overrides and validation
-- `validator.py` - Character count validation (target: 1850 ±50)
+- `validator.py` - Character count validation (target: 1900 ±50)
 
 **Image Generation Pipeline:**
 - `gemini_image.py` - Gemini API with 3-tier model fallback (rate limit: 10 req/min)
@@ -68,15 +68,15 @@ Each step is a separate markdown file in `skills/`:
 - **Mode B-3**: AI generation + watermark overlay (PIL)
 
 ### 3-Tier Gemini API Fallback
-Triggers on 429/QUOTA_EXCEEDED/SAFETY errors:
-1. `gemini-2.0-flash-exp-image-generation` (primary)
-2. `gemini-2.5-flash-image` (fallback)
-3. `gemini-3-pro-image-preview` (fallback 2)
+Model order is defined in `config.yaml` (`gemini.models`):
+1. `primary`
+2. `fallback`
+3. `fallback_2`
 
 ## Key Patterns
 
 ### Character Count Validation
-- Target: **1850 characters** (±50 tolerance: 1800-1900)
+- Target: **1900 characters** (±50 tolerance: 1850-1950)
 - Counts pure text only (excludes HTML tags, `[이미지 N 삽입]` placeholders, CSS)
 - Configured in `config.yaml`: `writing.char_count`, `writing.char_tolerance`
 

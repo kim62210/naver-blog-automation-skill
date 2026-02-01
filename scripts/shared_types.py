@@ -1,5 +1,5 @@
 """
-Shared type definitions for the naver-blog-automation project.
+Shared type definitions for the search-blogging project.
 
 Centralizes common dataclasses to avoid duplication across modules.
 All modules should import types from here instead of defining their own.
@@ -147,9 +147,9 @@ class ValidationResult:
 
     is_valid: bool
     char_count: int = 0
-    target: int = 1850
-    min_chars: int = 1800
-    max_chars: int = 1900
+    target: int = 1900
+    min_chars: int = 1850
+    max_chars: int = 1950
     status: str = "ok"  # "ok", "under", "over"
     difference: int = 0
     message: str = ""

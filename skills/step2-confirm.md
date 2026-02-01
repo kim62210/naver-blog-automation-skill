@@ -5,7 +5,7 @@ Confirm the selected topic and expand related keywords.
 ## Progress Status
 
 ```
-[STEP 2/8] Topic confirmation ████████░░░░░░░░░░░░░░░░░░░░ 25%
+[STEP 2/9] Topic confirmation ██████░░░░░░░░░░░░░░░░░░░░░░ 22%
 ```
 
 ---
@@ -71,7 +71,7 @@ project_path = create_project_structure(
     topic="{topic}",
     base_dir="./경제 블로그"
 )
-# Result: ./경제 블로그/2026-01-27/topic-name/
+# Result: ./경제 블로그/YYYY-MM-DD/topic-name/
 #         ├── images/
 #         └── .metadata.json
 ```

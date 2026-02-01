@@ -14,13 +14,13 @@ import yaml
 DEFAULT_CONFIG = {
     "app": {
         "name": "search-blogging",
-        "version": "2.0.0",
+        "version": "2.1.0",
     },
     "writing": {
-        "char_count": 1850,
+        "char_count": 1900,
         "char_tolerance": 50,
-        "min_chars": 1800,
-        "max_chars": 1900,
+        "min_chars": 1850,
+        "max_chars": 1950,
     },
     "images": {
         "default_count": 5,
@@ -171,8 +171,8 @@ def get_config_value(config: Dict, *keys: str, default: Any = None) -> Any:
         Configuration value or default
 
     Example:
-        >>> get_config_value(config, "writing", "char_count", default=1850)
-        1850
+        >>> get_config_value(config, "writing", "char_count", default=1900)
+        1900
     """
     current = config
 
@@ -198,9 +198,9 @@ def validate_config(config: Dict[str, Any]) -> list:
     errors = []
 
     # Validate character count range
-    min_chars = get_config_value(config, "writing", "min_chars", default=1800)
-    max_chars = get_config_value(config, "writing", "max_chars", default=1900)
-    char_count = get_config_value(config, "writing", "char_count", default=1850)
+    min_chars = get_config_value(config, "writing", "min_chars", default=1850)
+    max_chars = get_config_value(config, "writing", "max_chars", default=1950)
+    char_count = get_config_value(config, "writing", "char_count", default=1900)
 
     if not (min_chars <= char_count <= max_chars):
         errors.append(f"char_count({char_count}) is outside range ({min_chars}~{max_chars}).")

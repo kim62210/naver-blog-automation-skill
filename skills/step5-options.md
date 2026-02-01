@@ -5,7 +5,7 @@ Ask the user 3 questions in sequence.
 ## Progress Status
 
 ```
-[STEP 5/8] Options ████████████████████░░░░░░░░ 62%
+[STEP 5/9] Options ███████████████░░░░░░░░░░░░░ 55%
 ```
 
 ---
@@ -42,7 +42,9 @@ Please select the article structure:
 3️⃣ **Flexible Structure** - AI adapts structure to topic (storytelling/Q&A etc.)
 ```
 
-### Character Distribution by Structure (Target: 1850 chars)
+### Character Distribution by Structure (Default target: 1900 chars)
+
+> The exact target/range is controlled by `config.yaml` (`writing.char_count`, `writing.min_chars`, `writing.max_chars`).
 
 #### 7-Step Structure
 | Section | Characters |

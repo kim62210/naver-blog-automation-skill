@@ -1,6 +1,6 @@
 # search-blogging 파이프라인 분석 리포트
 
-> **Version**: 2.0.0
+> **Version**: 2.1.0
 > **Generated**: 2026-02-01
 > **Author**: Claude Code Analysis
 
@@ -9,7 +9,7 @@
 ## 1. Executive Summary
 
 ### 프로젝트 개요
-**search-blogging**은 네이버 경제 숏텐츠에서 트렌딩 토픽을 수집하여 약 1850자(±50) 분량의 한국어 블로그 포스트를 자동 생성하고, AI 이미지까지 함께 생성하는 Claude Code 스킬입니다.
+**search-blogging**은 네이버 경제 숏텐츠에서 트렌딩 토픽을 수집하여 약 1900자(±50, 1850~1950) 분량의 한국어 블로그 포스트를 자동 생성하고, AI 이미지까지 함께 생성하는 Claude Code 스킬입니다.
 
 ### 핵심 기술 스택
 | 계층 | 기술 | 용도 |
@@ -78,13 +78,11 @@ flowchart TB
 
     subgraph STEP7["STEP 7: 본문 작성"]
         G1[HTML 콘텐츠 생성] --> G2[글자수 검증]
-        G2 --> G3{1800-1900자?}
+        G2 --> G3{1850-1950자?}
         G3 -->|Yes| G4[이미지 가이드 생성]
         G3 -->|No| G1
         G4 --> G5[참조.md 생성]
-        G5 --> G6[Gemini API 이미지 생성]
-        G6 --> G7[워터마크 추가]
-        G7 --> G8[파일 저장]
+        G5 --> G8[파일 저장]
     end
 
     subgraph STEP8["STEP 8: 이미지 생성"]
@@ -180,25 +178,25 @@ flowchart TB
    create_project_structure(topic, base_dir, date)
    ```
 
-   **출력 구조**:
-   ```
-   ./경제 블로그/2026-02-01/topic-name/
-   ├── images/
-   └── .metadata.json
-   ```
+	   **출력 구조**:
+	   ```
+	   ./경제 블로그/YYYY-MM-DD/topic-name/
+	   ├── images/
+	   └── .metadata.json
+	   ```
 
 4. **메타데이터 초기화**
    ```json
-   {
-     "topic": "선택된 토픽",
-     "created_at": "2026-02-01T00:00:00",
-     "status": "initialized",
-     "config": {
-       "char_count": 1850,
-       "image_count": 5,
-       "tag_count": 8
-     }
-   }
+	   {
+	     "topic": "선택된 토픽",
+	     "created_at": "YYYY-MM-DDT00:00:00",
+	     "status": "initialized",
+	     "config": {
+	       "char_count": 1900,
+	       "image_count": 5,
+	       "tag_count": 8
+	     }
+	   }
    ```
 
 ---
@@ -348,8 +346,8 @@ result: CollectionResult = collect_images(images, output_dir)
 ┌─────────────────────────────────────┐
 │        글자수 검증 규칙              │
 ├─────────────────────────────────────┤
-│ 목표: 1850자                        │
-│ 허용 범위: 1800 ~ 1900자            │
+│ 목표: 1900자                        │
+│ 허용 범위: 1850 ~ 1950자            │
 │ 공백 포함: ✅                        │
 ├─────────────────────────────────────┤
 │ 제외 항목:                          │
@@ -654,14 +652,14 @@ sequenceDiagram
         Pipeline->>Pipeline: _parse_image_guide()
         Pipeline->>Pipeline: PipelineItem 생성
 
-        alt Mode B-3 (AI + Watermark)
+        alt Watermark enabled (config.yaml watermark.enabled)
             Pipeline->>Gemini: generate_image()
             Note over Gemini: 프롬프트에 텍스트 포함<br/>"bold Korean text '제목'"
             Gemini-->>Pipeline: 이미지 바이트
             Pipeline->>PIL: add_watermark_to_image()
-            Note over PIL: @money-lab-brian<br/>bottom-center
+            Note over PIL: config.yaml watermark.*
             PIL-->>Pipeline: 워터마크 적용
-        else Mode B (AI Only)
+        else Watermark disabled
             Pipeline->>Gemini: generate_image()
             Gemini-->>Pipeline: 이미지 바이트
         end
@@ -676,29 +674,26 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    subgraph Tier1["🥇 Tier 1: Primary Model"]
-        M1[gemini-2.0-flash-exp-image-generation]
-        M1_DESC[무료 티어 / 15 req/min]
+    subgraph Tier1["🥇 Tier 1: gemini.models.primary"]
+        M1[gemini-3-pro-image-preview]
     end
 
-    subgraph Tier2["🥈 Tier 2: Fallback 1"]
+    subgraph Tier2["🥈 Tier 2: gemini.models.fallback"]
         M2[gemini-2.5-flash-image]
-        M2_DESC[제한적 무료]
     end
 
-    subgraph Tier3["🥉 Tier 3: Fallback 2"]
-        M3[gemini-3-pro-image-preview]
-        M3_DESC[유료 티어]
+    subgraph Tier3["🥉 Tier 3: gemini.models.fallback_2"]
+        M3[gemini-2.0-flash-exp-image-generation]
     end
 
     Start[이미지 생성 요청] --> M1
     M1 -->|성공| Success[이미지 저장]
-    M1 -->|429/QUOTA_EXCEEDED| Wait1[6초 대기]
+    M1 -->|429/QUOTA_EXCEEDED| Wait1[대기 (config)]
     M1 -->|SAFETY/RECITATION| Wait1
     Wait1 --> M2
 
     M2 -->|성공| Success
-    M2 -->|429/QUOTA_EXCEEDED| Wait2[6초 대기]
+    M2 -->|429/QUOTA_EXCEEDED| Wait2[대기 (config)]
     M2 -->|SAFETY/RECITATION| Wait2
     Wait2 --> M3
 
@@ -714,7 +709,7 @@ flowchart TB
 
 | 에러 유형 | 코드/메시지 | 폴백 동작 |
 |----------|------------|----------|
-| Rate Limit | `429`, `ResourceExhausted` | 6초 대기 후 다음 모델 |
+| Rate Limit | `429`, `ResourceExhausted` | 설정된 지연 후 다음 모델 |
 | Quota 초과 | `QUOTA_EXCEEDED` | 즉시 다음 모델 |
 | 콘텐츠 차단 | `SAFETY`, `blocked` | 즉시 다음 모델 |
 | 필터링 | `RECITATION`, `filtered` | 즉시 다음 모델 |
@@ -829,9 +824,9 @@ class BatchResult:
 class ValidationResult:
     is_valid: bool
     char_count: int = 0
-    target: int = 1850
-    min_chars: int = 1800
-    max_chars: int = 1900
+    target: int = 1900
+    min_chars: int = 1850
+    max_chars: int = 1950
     status: str = "ok"  # "ok", "under", "over"
     difference: int = 0
     message: str = ""
@@ -865,14 +860,14 @@ async def _generate_with_model(self, ...):
 # 앱 정보
 app:
   name: search-blogging
-  version: "2.0.0"
+  version: "2.1.0"
 
 # 글쓰기 설정
 writing:
-  char_count: 1850        # 목표 글자수
+  char_count: 1900        # 목표 글자수
   char_tolerance: 50      # 허용 오차
-  min_chars: 1800
-  max_chars: 1900
+  min_chars: 1850
+  max_chars: 1950
 
 # 이미지 설정
 images:
@@ -885,9 +880,9 @@ images:
 gemini:
   enabled: true
   models:
-    primary: "gemini-2.0-flash-exp-image-generation"
+    primary: "gemini-3-pro-image-preview"
     fallback: "gemini-2.5-flash-image"
-    fallback_2: "gemini-3-pro-image-preview"
+    fallback_2: "gemini-2.0-flash-exp-image-generation"
   rate_limit:
     requests_per_minute: 10
     delay_between_requests: 6.0
@@ -959,11 +954,11 @@ def reload_config() -> Dict[str, Any]:
 
 ### Gemini API 모델
 
-| 모델 ID | 역할 | 특징 |
-|---------|------|------|
-| `gemini-2.0-flash-exp-image-generation` | Primary | 무료, 15 req/min |
-| `gemini-2.5-flash-image` | Fallback 1 | 제한적 무료 |
-| `gemini-3-pro-image-preview` | Fallback 2 | 유료 티어 |
+| config.yaml key | 모델 ID |
+|----------------|--------|
+| `gemini.models.primary` | `gemini-3-pro-image-preview` |
+| `gemini.models.fallback` | `gemini-2.5-flash-image` |
+| `gemini.models.fallback_2` | `gemini-2.0-flash-exp-image-generation` |
 
 ---
 
@@ -1071,19 +1066,17 @@ classDiagram
 
 ### Rate Limits
 
-| 리소스 | 제한 | 대응 |
-|--------|------|------|
-| Gemini API | 15 req/min | 6초 간격 요청 |
-| Gemini API (일일) | 500 images/day | 폴백 모델 사용 |
-| 병렬 생성 | 2 concurrent | semaphore 제한 |
+- Rate limiting/delay is configured in `config.yaml` (`gemini.rate_limit.*`) and enforced by the generator.
+- Model fallback order is configured in `config.yaml` (`gemini.models.primary` → `fallback` → `fallback_2`).
+- Pipeline concurrency is controlled by `process_image_guide(..., concurrent_limit=...)`.
 
 ### 글자수 제약
 
 | 항목 | 값 |
 |------|-----|
-| 목표 | 1850자 |
-| 최소 | 1800자 |
-| 최대 | 1900자 |
+| 목표 | 1900자 |
+| 최소 | 1850자 |
+| 최대 | 1950자 |
 | 허용 오차 | ±50자 |
 
 ### 이미지 크기 표준 (네이버 블로그)

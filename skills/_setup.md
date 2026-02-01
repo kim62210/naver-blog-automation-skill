@@ -35,7 +35,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 pip install google-genai pillow
 ```
 
-### For SVG to PNG Conversion (Text Overlay)
+### Optional (Legacy): SVG to PNG Conversion (Text Overlay)
 ```bash
 # Option 1: Recommended
 pip install cairosvg
@@ -47,25 +47,20 @@ sudo apt install librsvg2-bin
 pip install svglib reportlab
 ```
 
-## API Limits
+## Limits & Model Order (Config-driven)
 
-| Model | RPM | Daily Quota | Cost |
-|-------|-----|-------------|------|
-| gemini-2.0-flash-exp | 10 | 100-500 | Free |
-| gemini-2.5-flash-image | 15 | 500 | Free/Paid |
-| gemini-3-pro-image | - | - | $0.134/img |
+- Rate limiting/delay is configured in `config.yaml` (`gemini.rate_limit.*`) and enforced by the generator.
+- Model order is configured in `config.yaml` (`gemini.models.primary` → `fallback` → `fallback_2`).
+- Exact quotas/availability/cost vary by account and can change.
 
 ## Quick Start
 
 ```python
-from scripts.gemini_image import GeminiImageGenerator
-from scripts.image_pipeline import ImagePipeline
+from scripts.image_pipeline import process_image_guide_file_sync
 
-# Single image
-gen = GeminiImageGenerator()
-result = await gen.generate_image("prompt", "output.png")
-
-# Batch from image guide
-pipeline = ImagePipeline()
-result = await pipeline.process_image_guide(content, "./images/")
+result = process_image_guide_file_sync(
+    guide_path="./이미지 가이드.md",
+    output_dir="./images/"
+)
+print(result.summary())
 ```

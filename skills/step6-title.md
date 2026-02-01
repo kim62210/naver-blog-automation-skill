@@ -5,7 +5,7 @@ Present 3 title candidates and let user select.
 ## Progress Status
 
 ```
-[STEP 6/8] Title selection ████████████████████████░░░░ 75%
+[STEP 6/9] Title selection ██████████████████░░░░░░░░░░ 66%
 ```
 
 ---
@@ -65,7 +65,7 @@ Please select. Or say "regenerate" for new candidates.
 ```yaml
 title_elements:
   keyword: "{main keyword}"
-  year: "2026년"
+  year: "{current_year}년"
   benefit: "{key benefit/information}"
   number: "{number}" # optional
   question: "{question}" # optional

@@ -19,7 +19,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from .config import get_config, get_config_value
 from .gemini_image import GeminiImageGenerator, ImageResult, BatchResult
+from .image_guide_parser import extract_first_prompt, split_image_sections
 from .prompt_converter import (
     TextOverlayConfig,
     WatermarkConfig,
@@ -116,6 +118,18 @@ class ImagePipeline:
         self.generator = GeminiImageGenerator(api_key=api_key)
         self.overlay_processor = TextOverlayProcessor()
 
+    def _get_default_watermark_config(self) -> WatermarkConfig:
+        config = get_config()
+        return WatermarkConfig(
+            watermark_text=get_config_value(config, "watermark", "text", default="@money-lab-brian"),
+            watermark_position=get_config_value(config, "watermark", "position", default="bottom-center"),
+            watermark_margin_bottom=int(get_config_value(config, "watermark", "margin_bottom", default=60)),
+            watermark_font_size=int(get_config_value(config, "watermark", "font_size", default=18)),
+            watermark_font_color=get_config_value(config, "watermark", "font_color", default="rgba(255,255,255,0.6)"),
+            watermark_font_family=get_config_value(config, "watermark", "font_family", default="Pretendard, Nanum Gothic, sans-serif"),
+            watermark_enabled=bool(get_config_value(config, "watermark", "enabled", default=True)),
+        )
+
     async def generate_with_text_overlay(
         self,
         prompt: str,
@@ -176,7 +190,7 @@ class ImagePipeline:
         """
         # Use default watermark config if not provided
         if watermark_config is None:
-            watermark_config = WatermarkConfig()
+            watermark_config = self._get_default_watermark_config()
 
         return await self.generator.generate_with_watermark(
             prompt=prompt,
@@ -223,11 +237,7 @@ class ImagePipeline:
         output_path.mkdir(parents=True, exist_ok=True)
 
         # Default watermark config - applied to all images
-        default_watermark = WatermarkConfig(
-            watermark_text="@money-lab-brian",
-            watermark_position="bottom-center",
-            watermark_enabled=True,
-        )
+        default_watermark = self._get_default_watermark_config()
 
         # Build batch items
         batch_items = []
@@ -281,26 +291,10 @@ class ImagePipeline:
         Returns:
             List of PipelineItem
         """
-        items = []
+        items: List[PipelineItem] = []
 
-        # Split by image sections
-        # Support both English "Image" and Korean "이미지" patterns
-        # Also support various header formats: "## [Image N]", "━━━ [이미지 N]", etc.
-        image_pattern = r"(?:##\s*\[(?:Image|이미지)\s*(\d+)\]|━+\s*\[(?:Image|이미지)\s*(\d+)\])\s*(.+?)(?=(?:##\s*\[(?:Image|이미지)|━+\s*\[(?:Image|이미지))|\Z)"
-        matches = re.findall(image_pattern, content, re.DOTALL | re.IGNORECASE)
-
-        for match in matches:
-            # Handle both "## [Image N]" format (group 1) and "━━━ [이미지 N]" format (group 2)
-            index = int(match[0] or match[1])
-            section_content = match[2]
-
-            # Extract role (first line after the header)
-            first_line = section_content.strip().split("\n")[0] if section_content.strip() else ""
-            role_match = re.search(r"^\s*(.+?)\s*$", first_line)
-            role = role_match.group(1) if role_match else f"Image {index}"
-
-            # Determine mode and extract relevant data
-            item = self._parse_image_section(index, role, section_content)
+        for section in split_image_sections(content):
+            item = self._parse_image_section(section.index, section.role, section.body)
             if item:
                 items.append(item)
 
@@ -321,7 +315,7 @@ class ImagePipeline:
             PipelineItem or None if parsing fails
         """
         # Check for Mode B-3 (AI renders text + Watermark Only) - NEW FORMAT
-        if "[Watermark Config]" in content or "Watermark Config" in content.lower():
+        if "[Watermark Config]" in content or "watermark config" in content.lower():
             return self._parse_mode_b3(index, role, content)
 
         # Check for Mode B-2 (DEPRECATED: Background Only + Text Overlay)
@@ -351,24 +345,10 @@ class ImagePipeline:
         self, index: int, role: str, content: str
     ) -> Optional[PipelineItem]:
         """Parse Mode B (AI Generation) section"""
-        # Extract prompt from code block
-        prompt_match = re.search(
-            r"AI Generation Prompt[:\s]*\n```\n?(.*?)\n?```",
-            content,
-            re.DOTALL | re.IGNORECASE
-        )
-        if not prompt_match:
-            # Try alternative format
-            prompt_match = re.search(
-                r"\*\*AI Generation Prompt[:\s]*\*\*\s*\n```\n?(.*?)\n?```",
-                content,
-                re.DOTALL | re.IGNORECASE
-            )
-
-        if not prompt_match:
+        # Extract prompt (first fenced code block)
+        prompt = extract_first_prompt(content)
+        if not prompt:
             return None
-
-        prompt = prompt_match.group(1).strip()
 
         # Generate filename
         filename = self._generate_filename(index, role)
@@ -393,15 +373,9 @@ class ImagePipeline:
         - PIL only adds watermark to the final image
         """
         # Extract prompt (includes text instructions for AI)
-        prompt_match = re.search(
-            r"(?:AI Generation Prompt)[:\s]*\n```\n?(.*?)\n?```",
-            content,
-            re.DOTALL | re.IGNORECASE
-        )
-        if not prompt_match:
+        prompt = extract_first_prompt(content)
+        if not prompt:
             return None
-
-        prompt = prompt_match.group(1).strip()
 
         # Extract watermark config
         watermark_config = extract_watermark_config(content)
@@ -428,15 +402,9 @@ class ImagePipeline:
         New code should use Mode B-3 (AI renders text + Watermark Only).
         """
         # Extract background-only prompt
-        prompt_match = re.search(
-            r"(?:AI Generation Prompt|Background Only)[:\s]*\n```\n?(.*?)\n?```",
-            content,
-            re.DOTALL | re.IGNORECASE
-        )
-        if not prompt_match:
+        prompt = extract_first_prompt(content)
+        if not prompt:
             return None
-
-        prompt = prompt_match.group(1).strip()
 
         # Extract text overlay config (old format)
         text_config = self._extract_text_overlay_config(content)

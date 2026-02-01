@@ -86,6 +86,20 @@ def generate_html_content(
     if config is None:
         config = get_config()
 
+    # Typography settings (from config.yaml)
+    font_family = get_config_value(
+        config, "typography", "font_family",
+        default="Nanum Gothic, Pretendard, sans-serif"
+    )
+    line_height = get_config_value(config, "typography", "line_height", default=1.8)
+    blog_sizes = get_config_value(config, "typography", "blog_sizes", default={}) or {}
+
+    title_size = int(blog_sizes.get("title", 28))
+    title_medium_size = int(blog_sizes.get("title_medium", 24))
+    title_small_size = int(blog_sizes.get("title_small", 19))
+    body_size = int(blog_sizes.get("body", 16))
+    footnote_size = int(blog_sizes.get("footnote", 11))
+
     # HTML template start
     html_parts = [
         '<!DOCTYPE html>',
@@ -93,11 +107,11 @@ def generate_html_content(
         '<head>',
         '  <meta charset="UTF-8">',
         '  <style>',
-        '    body { font-family: "Noto Sans KR", sans-serif; line-height: 1.8; max-width: 700px; margin: 0 auto; padding: 20px; }',
-        '    h1 { font-size: 28px; font-weight: bold; margin-bottom: 20px; }',
-        '    h2 { font-size: 24px; font-weight: bold; margin: 32px 0 16px; }',
-        '    h3 { font-size: 18px; font-weight: bold; margin: 24px 0 12px; }',
-        '    p { font-size: 16px; margin: 12px 0; }',
+        f'    body {{ font-family: {font_family}; line-height: {line_height}; max-width: 700px; margin: 0 auto; padding: 20px; }}',
+        f'    h1 {{ font-size: {title_size}px; font-weight: bold; margin-bottom: 20px; }}',
+        f'    h2 {{ font-size: {title_medium_size}px; font-weight: bold; margin: 32px 0 16px; }}',
+        f'    h3 {{ font-size: {title_small_size}px; font-weight: bold; margin: 24px 0 12px; }}',
+        f'    p {{ font-size: {body_size}px; margin: 12px 0; }}',
         '    blockquote { border-left: 4px solid #4A90D9; padding-left: 16px; color: #555; margin: 16px 0; }',
         '    .highlight-quote { background: #f0f7ff; padding: 16px; border-radius: 8px; border-left: none; }',
         '    hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }',
@@ -106,7 +120,7 @@ def generate_html_content(
         '    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }',
         '    th { background: #f5f5f5; font-weight: bold; }',
         '    .cta { font-size: 24px; font-weight: bold; text-align: center; margin: 32px 0; color: #4A90D9; }',
-        '    .small { font-size: 12px; color: #888; }',
+        f'    .small {{ font-size: {footnote_size}px; color: #888; }}',
         '    .image-placeholder { color: #999; text-align: center; padding: 40px; background: #f9f9f9; margin: 16px 0; }',
         '    .tags { color: #4A90D9; margin-top: 32px; }',
         '  </style>',
@@ -314,7 +328,7 @@ def generate_image_guide(
                 )
 
                 md_parts.extend([
-                    '**AI Generation Prompt (with Text Rendering):**',
+                    '**AI Generation Prompt:**',
                     '```',
                     base_prompt,
                 ])

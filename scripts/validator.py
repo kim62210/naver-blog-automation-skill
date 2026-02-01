@@ -109,9 +109,9 @@ def validate_char_count(html_content: str, config: Optional[dict] = None) -> Val
     if config is None:
         config = get_config()
 
-    target = get_config_value(config, "writing", "char_count", default=1850)
-    min_chars = get_config_value(config, "writing", "min_chars", default=1800)
-    max_chars = get_config_value(config, "writing", "max_chars", default=1900)
+    target = get_config_value(config, "writing", "char_count", default=1900)
+    min_chars = get_config_value(config, "writing", "min_chars", default=1850)
+    max_chars = get_config_value(config, "writing", "max_chars", default=1950)
 
     char_count = count_content_chars(html_content)
     difference = char_count - target

@@ -31,8 +31,10 @@ Before converting to HTML, verify your plain text meets the target:
 
 ```python
 plain_text = """(your plain text content here)"""
-char_count = len(plain_text)
-print(f"Plain text: {char_count} chars")  # Should be 1850-1950
+from scripts.validator import count_content_chars
+
+char_count = count_content_chars(plain_text)
+print(f"Plain text (counted text only): {char_count} chars")  # Should be 1850-1950
 ```
 
 If under 1850: Add more content to core sections
@@ -134,16 +136,15 @@ Only after reaching 1850-1950 characters:
 
 | Section | Min Chars | Max Chars | Target | Description |
 |---------|-----------|-----------|--------|-------------|
-| 도입 (Introduction) | 100 | 150 | 120 | Hook + topic intro |
-| 문제 제기 (Problem) | 150 | 200 | 180 | Why this matters |
-| 핵심 정보 1 | 350 | 450 | 400 | First key point (detailed!) |
-| 핵심 정보 2 | 350 | 450 | 400 | Second key point (detailed!) |
-| 핵심 정보 3 | 350 | 450 | 400 | Third key point (detailed!) |
-| 실용 팁 (Tips) | 250 | 350 | 300 | Practical advice |
-| 마무리 (Closing) | 100 | 150 | 130 | CTA + summary |
-| **TOTAL** | **1650** | **2200** | **1930** | **Must reach 1850+ total** |
+| 도입 (Introduction) | 120 | 160 | 140 | Hook + topic intro |
+| 문제 제기 (Problem) | 170 | 230 | 200 | Why this matters |
+| 핵심 정보 1 | 340 | 400 | 370 | First key point (detailed!) |
+| 핵심 정보 2 | 340 | 400 | 370 | Second key point (detailed!) |
+| 핵심 정보 3 | 340 | 400 | 370 | Third key point (detailed!) |
+| 실용 팁 (Tips) | 270 | 330 | 300 | Practical advice |
+| 마무리 (Closing) | 130 | 170 | 150 | CTA + summary |
 
-⚠️ **IMPORTANT**: Each core section (핵심 정보 1,2,3) MUST be **350+ characters**. These sections carry the main content weight. Short sections will fail validation. Use the 2-Step Writing Workflow (7-1a) to ensure you reach 1850-1950 characters.
+⚠️ **IMPORTANT**: If you’re under the minimum, expand 핵심 정보 1~3 first. If you’re over the maximum, trim redundancy there first.
 
 ### Excluded from Count
 - All HTML tags (`<h2>`, `<p>`, `<table>`, `<blockquote>`, etc.)

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .config import get_config, get_config_value
+from .image_guide_parser import extract_first_prompt, split_image_sections
 
 
 @dataclass
@@ -465,6 +466,27 @@ def extract_gemini_prompts(
     Returns:
         List of GeminiPrompt (AI generation mode only)
     """
+    # New format (v2): Markdown sections with fenced code blocks (``` ... ```)
+    sections = split_image_sections(image_guide_content)
+    if sections:
+        prompts: List[GeminiPrompt] = []
+        for section in sections:
+            prompt = extract_first_prompt(section.body)
+            if not prompt:
+                continue
+
+            filename = f"{section.index:02d}_{sanitize_filename(section.role)}.png"
+            prompts.append(
+                GeminiPrompt(
+                    prompt=prompt,
+                    filename=filename,
+                    aspect_ratio="16:9",
+                    style_hints="",
+                )
+            )
+        return prompts
+
+    # Legacy format (v1): "━" blocks with [한글 설명]/[AI 생성 프롬프트]/[스타일 가이드]
     items = parse_image_guide_markdown(image_guide_content)
     prompts = []
 
