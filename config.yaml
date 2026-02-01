@@ -113,18 +113,23 @@ structures:
 gemini:
   enabled: true
   models:
-    primary: "gemini-2.0-flash-exp"    # Image generation supported model
-    fallback: "imagen-3.0-generate-002" # Fallback model
+    # 3-tier fallback system for image generation
+    # See docs/GEMINI_IMAGE_API_LIMITS.md for rate limit details
+    primary: "gemini-2.0-flash-exp-image-generation"    # Nano Banana - free tier available
+    fallback: "gemini-2.5-flash-image"                  # Gemini 2.5 Flash Image - limited free
+    fallback_2: "gemini-3-pro-image-preview"            # Gemini 3 Pro Image - paid tier
   default_size: "1024x1024"
   timeout: 60
   retry_count: 3
   rate_limit:
-    requests_per_minute: 15
-    delay_between_requests: 4.0  # seconds
+    requests_per_minute: 10       # Conservative limit (actual: 15)
+    delay_between_requests: 6.0   # Safe interval: 60s/10 requests = 6s
   fallback_on:
     - "429"           # Rate limit exceeded
     - "QUOTA_EXCEEDED"
     - "ResourceExhausted"
+    - "SAFETY"        # Content blocked
+    - "RECITATION"    # Content filtered
 
 # Image guide modes
 image_modes:
@@ -141,6 +146,16 @@ image_modes:
     name: "SVG 생성"
     description: "svg-canvas-mcp로 직접 생성"
     symbol: "🔷"
+
+# Watermark settings (used by text_overlay.py)
+watermark:
+  enabled: true
+  text: "@money-lab-brian"
+  position: "bottom-center"       # bottom-center, bottom-left, bottom-right
+  margin_bottom: 60               # pixels from bottom
+  font_size: 18
+  font_color: "rgba(255,255,255,0.6)"
+  font_family: "Pretendard, Nanum Gothic, sans-serif"
 
 # Naver blog image size standards
 image_sizes:

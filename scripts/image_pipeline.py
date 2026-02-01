@@ -275,15 +275,19 @@ class ImagePipeline:
         items = []
 
         # Split by image sections
-        image_pattern = r"##\s*\[Image\s*(\d+)\]\s*(.+?)(?=##\s*\[Image|\Z)"
+        # Support both English "Image" and Korean "이미지" patterns
+        # Also support various header formats: "## [Image N]", "━━━ [이미지 N]", etc.
+        image_pattern = r"(?:##\s*\[(?:Image|이미지)\s*(\d+)\]|━+\s*\[(?:Image|이미지)\s*(\d+)\])\s*(.+?)(?=(?:##\s*\[(?:Image|이미지)|━+\s*\[(?:Image|이미지))|\Z)"
         matches = re.findall(image_pattern, content, re.DOTALL | re.IGNORECASE)
 
         for match in matches:
-            index = int(match[0])
-            section_content = match[1]
+            # Handle both "## [Image N]" format (group 1) and "━━━ [이미지 N]" format (group 2)
+            index = int(match[0] or match[1])
+            section_content = match[2]
 
             # Extract role (first line after the header)
-            role_match = re.search(r"^\s*(.+?)\s*$", section_content.split("\n")[0])
+            first_line = section_content.strip().split("\n")[0] if section_content.strip() else ""
+            role_match = re.search(r"^\s*(.+?)\s*$", first_line)
             role = role_match.group(1) if role_match else f"Image {index}"
 
             # Determine mode and extract relevant data

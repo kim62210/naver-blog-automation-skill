@@ -150,6 +150,38 @@ print(result.message)  # ✅ Valid / ⚠️ Over / ⚠️ Under
 
 ---
 
+## Environment Variables
+
+Required environment variables for AI image generation:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GOOGLE_API_KEY` | Yes* | Google API key for Gemini image generation |
+| `GEMINI_API_KEY` | Yes* | Alternative name for Google API key |
+
+*Either `GOOGLE_API_KEY` or `GEMINI_API_KEY` must be set for image generation.
+
+### Setup
+
+```bash
+# Option 1: Export in terminal
+export GOOGLE_API_KEY="your-api-key-here"
+
+# Option 2: Add to shell profile (~/.zshrc or ~/.bashrc)
+echo 'export GOOGLE_API_KEY="your-api-key-here"' >> ~/.zshrc
+
+# Option 3: Create .env file (not committed to git)
+echo 'GOOGLE_API_KEY=your-api-key-here' > .env
+```
+
+### Get API Key
+
+1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
+2. Create a new API key
+3. Enable Gemini API access
+
+---
+
 ## Configuration File
 
 Global settings are managed in `config.yaml`:
@@ -168,6 +200,13 @@ tags:
 
 output:
   base_dir: "./경제 블로그"
+
+# Gemini API 3-tier fallback models
+gemini:
+  models:
+    primary: "gemini-2.0-flash-exp-image-generation"
+    fallback: "gemini-2.5-flash-image"
+    fallback_2: "gemini-3-pro-image-preview"
 ```
 
 ---
@@ -176,12 +215,17 @@ output:
 
 | Script | Function |
 |--------|----------|
-| `scripts/config.py` | Configuration file loader |
-| `scripts/utils.py` | Common utilities |
-| `scripts/validator.py` | Character count validation |
+| `scripts/config.py` | Configuration file loader (YAML parsing) |
+| `scripts/utils.py` | Common utilities (date formatting, text cleaning) |
+| `scripts/shared_types.py` | Shared type definitions (dataclasses) |
+| `scripts/validator.py` | Character count validation (1850±50 chars) |
 | `scripts/setup.py` | Project directory initialization |
-| `scripts/collector.py` | Image collection |
-| `scripts/writer.py` | HTML/MD generation |
+| `scripts/collector.py` | Reference image collection/download |
+| `scripts/writer.py` | HTML/MD generation (본문.html, 참조.md) |
+| `scripts/prompt_converter.py` | AI prompt conversion and text overlay config |
+| `scripts/gemini_image.py` | Gemini API integration (3-tier fallback) |
+| `scripts/text_overlay.py` | PIL-based watermark and text overlay |
+| `scripts/image_pipeline.py` | Integrated image generation pipeline |
 
 ### Usage Examples
 
@@ -197,6 +241,14 @@ result = collect_images(images, project_path)
 # File saving
 from scripts.writer import save_blog_files
 files = save_blog_files(project_path, html, image_guide, references)
+
+# AI image generation with watermark
+from scripts.image_pipeline import ImagePipeline
+pipeline = ImagePipeline()
+result = await pipeline.generate_with_watermark(
+    prompt="Blog thumbnail, finance concept...",
+    output_path="./images/01_thumbnail.png"
+)
 ```
 
 ---
@@ -230,6 +282,7 @@ Reference these files as needed during skill execution:
 naver-blog-automation/
 ├── SKILL.md                    # This file (entry point)
 ├── config.yaml                 # Global configuration
+├── requirements.txt            # Python dependencies
 ├── skills/                     # Modularized skills (8 files)
 │   ├── step1-collect.md       # Trending topic collection
 │   ├── step2-confirm.md       # Topic confirmation
@@ -247,14 +300,19 @@ naver-blog-automation/
 │   ├── blog-post.html
 │   ├── image-guide.md
 │   └── references.md
-└── scripts/                    # Python automation
-    ├── __init__.py
-    ├── config.py
-    ├── utils.py
-    ├── validator.py
-    ├── setup.py
-    ├── collector.py
-    └── writer.py
+└── scripts/                    # Python automation (11 modules)
+    ├── __init__.py             # Package init (v2.2.0)
+    ├── config.py               # YAML config loader
+    ├── shared_types.py         # Shared dataclasses
+    ├── utils.py                # Common utilities
+    ├── validator.py            # Character count validation
+    ├── setup.py                # Project structure setup
+    ├── collector.py            # Reference image download
+    ├── writer.py               # HTML/MD file generation
+    ├── prompt_converter.py     # AI prompt processing
+    ├── gemini_image.py         # Gemini API integration
+    ├── text_overlay.py         # PIL watermark/text overlay
+    └── image_pipeline.py       # Integrated generation pipeline
 ```
 
 ---

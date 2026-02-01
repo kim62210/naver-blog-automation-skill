@@ -407,10 +407,15 @@ def save_blog_files(
     files["html"] = html_path
 
     # Validate character count
+    validation_result = None
     if validate:
-        result = validate_char_count(html_content)
-        if not result.is_valid:
-            print(result.message)
+        validation_result = validate_char_count(html_content)
+        if not validation_result.is_valid:
+            print(f"⚠️ Character count validation warning:")
+            print(f"   {validation_result.message}")
+            print(f"   Current: {validation_result.char_count} chars, "
+                  f"Target: {validation_result.target} chars ({validation_result.min_chars}-{validation_result.max_chars})")
+            # Note: We still save the file but log the warning prominently
 
     # Save 이미지 가이드.md
     guide_path = project_path / "이미지 가이드.md"

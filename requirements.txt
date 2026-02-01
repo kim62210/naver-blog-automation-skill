@@ -1,3 +1,18 @@
-PyYAML
-google-genai
-pillow
+# Naver Blog Automation Skill - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core dependencies
+pyyaml>=6.0                  # Configuration file parsing
+google-genai>=0.4.0          # Gemini API (new SDK)
+pillow>=10.0.0               # Image processing, watermarks
+
+# Optional: SVG to PNG conversion (for Mode C images)
+# Uncomment if you need SVG → PNG conversion
+# cairosvg>=2.7.0            # Primary SVG renderer (requires Cairo)
+# svglib>=1.5.0              # Fallback SVG renderer
+# reportlab>=4.0.0           # PDF/SVG rendering (required by svglib)
+
+# Development dependencies (optional)
+# pytest>=7.0.0              # Testing
+# black>=23.0.0              # Code formatting
+# mypy>=1.0.0                # Type checking

@@ -87,9 +87,17 @@ def download_image(
 
             return True
 
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+    except urllib.error.HTTPError as e:
+        print(f"⚠️ HTTP error downloading {url[:50]}...: {e.code} {e.reason}")
+        return False
+    except urllib.error.URLError as e:
+        print(f"⚠️ URL error downloading {url[:50]}...: {e.reason}")
+        return False
+    except TimeoutError:
+        print(f"⚠️ Timeout downloading {url[:50]}...")
         return False
     except Exception as e:
+        print(f"⚠️ Error downloading {url[:50]}...: {type(e).__name__}: {e}")
         return False
 
 
@@ -141,16 +149,21 @@ def collect_images(
             filename=filename,
         )
 
-        # Attempt download
-        success = download_image(url, save_path, timeout=timeout)
+        # Attempt download with detailed error capture
+        try:
+            success = download_image(url, save_path, timeout=timeout)
 
-        if success:
-            image_info.downloaded = True
-            image_info.local_path = save_path
-            result.success += 1
-        else:
+            if success:
+                image_info.downloaded = True
+                image_info.local_path = save_path
+                result.success += 1
+            else:
+                image_info.downloaded = False
+                image_info.error = f"Download failed (file too small or network error)"
+                result.failed += 1
+        except Exception as e:
             image_info.downloaded = False
-            image_info.error = "Download failed"
+            image_info.error = f"{type(e).__name__}: {str(e)}"
             result.failed += 1
 
         result.images.append(image_info)

@@ -26,13 +26,23 @@ if TYPE_CHECKING:
 
 # API configuration constants - 3-tier fallback system
 # 📚 Rate Limit 상세 정보: docs/GEMINI_IMAGE_API_LIMITS.md 참조
-DEFAULT_MODEL = "gemini-2.0-flash-exp-image-generation"  # Nano Banana - 무료 티어 가능
-FALLBACK_MODEL = "gemini-2.5-flash-image"  # Gemini 2.5 Flash Image - 무료 제한적
-FALLBACK_MODEL_2 = "gemini-3-pro-image-preview"  # Gemini 3 Pro Image - 결제 필수
+# These defaults can be overridden via config.yaml
+DEFAULT_MODEL = "gemini-2.0-flash-exp-image-generation"  # Nano Banana - free tier
+FALLBACK_MODEL = "gemini-2.5-flash-image"  # Gemini 2.5 Flash Image - limited free
+FALLBACK_MODEL_2 = "gemini-3-pro-image-preview"  # Gemini 3 Pro Image - paid tier
 DEFAULT_SIZE = "1024x1024"
 DEFAULT_TIMEOUT = 60
 DEFAULT_RETRY_COUNT = 3
-RATE_LIMIT_DELAY = 6.0  # 안전 간격: 60초/10요청 = 6초
+DEFAULT_RATE_LIMIT_DELAY = 6.0  # Safe interval: 60s/10 requests = 6s
+
+
+def _get_rate_limit_delay() -> float:
+    """Get rate limit delay from config, falling back to default."""
+    try:
+        config = get_config()
+        return float(get_config_value(config, "gemini", "rate_limit", "delay_between_requests") or DEFAULT_RATE_LIMIT_DELAY)
+    except Exception:
+        return DEFAULT_RATE_LIMIT_DELAY
 
 
 @dataclass
@@ -193,7 +203,7 @@ class GeminiImageGenerator:
         # Tier 2: First fallback (Imagen 3 Fast)
         if not result.success and use_fallback and self._should_fallback(result.error_message):
             print(f"⚠️ {self.primary_model} failed, retrying with {self.fallback_model}...")
-            await asyncio.sleep(RATE_LIMIT_DELAY)
+            await asyncio.sleep(_get_rate_limit_delay())
 
             result = await self._generate_with_model(
                 prompt=prompt,
@@ -205,7 +215,7 @@ class GeminiImageGenerator:
         # Tier 3: Second fallback (Imagen 3 Standard)
         if not result.success and use_fallback and self._should_fallback(result.error_message):
             print(f"⚠️ {self.fallback_model} failed, retrying with {self.fallback_model_2}...")
-            await asyncio.sleep(RATE_LIMIT_DELAY)
+            await asyncio.sleep(_get_rate_limit_delay())
 
             result = await self._generate_with_model(
                 prompt=prompt,
@@ -240,6 +250,9 @@ class GeminiImageGenerator:
         """Generate image with specific model"""
         self._init_client()
 
+        # Collect all errors for better debugging
+        errors: List[str] = []
+
         for attempt in range(self.retry_count):
             try:
                 # Generate image with Gemini model (Nano Banana)
@@ -249,12 +262,15 @@ class GeminiImageGenerator:
                     return await self._generate_with_imagen(prompt, save_path, size, model)
 
             except Exception as e:
-                error_msg = str(e)
+                error_msg = f"Attempt {attempt + 1}: {type(e).__name__}: {str(e)}"
+                errors.append(error_msg)
+                print(f"⚠️ {model} generation failed - {error_msg}")
 
                 # Wait and retry on rate limit error
-                if "429" in error_msg or "ResourceExhausted" in error_msg:
+                if "429" in str(e) or "ResourceExhausted" in str(e):
                     if attempt < self.retry_count - 1:
-                        wait_time = RATE_LIMIT_DELAY * (attempt + 1)
+                        delay = _get_rate_limit_delay()
+                        wait_time = delay * (attempt + 1)
                         print(f"⏳ Rate limit, waiting {wait_time:.1f}s before retry...")
                         await asyncio.sleep(wait_time)
                         continue
@@ -264,18 +280,19 @@ class GeminiImageGenerator:
                     await asyncio.sleep(1)
                     continue
 
+                # Return with all collected errors
                 return ImageResult(
                     success=False,
                     prompt=prompt,
                     model_used=model,
-                    error_message=error_msg,
+                    error_message=" | ".join(errors),
                 )
 
         return ImageResult(
             success=False,
             prompt=prompt,
             model_used=model,
-            error_message="Maximum retry count exceeded",
+            error_message=f"Maximum retry count exceeded. Errors: {' | '.join(errors)}",
         )
 
     async def _generate_with_gemini(
@@ -572,7 +589,7 @@ class GeminiImageGenerator:
                 result = await self.generate_image(prompt=prompt, save_path=save_path)
 
                 # Delay to prevent rate limiting
-                await asyncio.sleep(RATE_LIMIT_DELAY)
+                await asyncio.sleep(_get_rate_limit_delay())
 
                 return result
 
@@ -925,7 +942,7 @@ class GeminiImageGenerator:
                     )
 
                 # Delay to prevent rate limiting
-                await asyncio.sleep(RATE_LIMIT_DELAY)
+                await asyncio.sleep(_get_rate_limit_delay())
 
                 return result
 
