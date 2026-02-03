@@ -13,7 +13,7 @@ description: |
   Trigger keywords: blog post writing, write a blog post, research and write, economy blog
 ---
 
-# search-blogging Skill v2.2
+# search-blogging Skill v2.3
 
 Automates the entire workflow from trending topic collection on Naver Economy Shortents to blog post writing.
 
@@ -67,12 +67,12 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 ### Save Path
 
 ```
-./경제 블로그/YYYY-MM-DD/topic-name/
-├── 원본.txt
-├── 본문.html
-├── 이미지 가이드.md
-├── 참조.md
-└── images/
+./경제 블로그/YYYY-MM-DD/{topic-slug}/
+├── 원본.txt          # Plain text draft (STEP 7, immutable after STEP 8)
+├── 본문.html          # Blog HTML (copy-paste to Naver Blog)
+├── 이미지 가이드.md   # Image generation prompts (## [Image N] format)
+├── 참조.md            # Source references (4-column tables)
+└── images/            # Generated images ({NN}_{역할}.png)
 ```
 
 ---
@@ -89,7 +89,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 | **STEP 6** | Title selection | [skills/step6-title.md](skills/step6-title.md) |
 | **STEP 7** | Draft writing & validation (`원본.txt`) | [skills/step7-write.md](skills/step7-write.md) |
 | **STEP 8** | Writing refactoring (txt → HTML/MD) | [skills/step8-refactor.md](skills/step8-refactor.md) |
-| **STEP 9** | 🖼️ **Image generation (MANDATORY)** | [skills/step9-image.md](skills/step9-image.md) |
+| **STEP 9** | **Image generation (MANDATORY)** | [skills/step9-image.md](skills/step9-image.md) |
 | **STEP 10** | Revision loop | [skills/step10-revise.md](skills/step10-revise.md) |
 
 ### Progress Display
@@ -103,7 +103,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 [STEP 6/10] Title ███████████████░░░░░░░░░░░░ 60%
 [STEP 7/10] Draft ████████████████████░░░░░░░░ 70%
 [STEP 8/10] Refactor ███████████████████████░░░░ 80%
-[STEP 9/10] 🖼️ Image ██████████████████████████░░ 90%
+[STEP 9/10] Image ██████████████████████████░░ 90%
 [STEP 10/10] Review/Edit ████████████████████████████ 100%
 ```
 
@@ -217,12 +217,13 @@ tags:
 output:
   base_dir: "./경제 블로그"
 
-# Gemini API 3-tier fallback models
+# Gemini API settings - FORCE gemini-3-pro-image-preview
 gemini:
+  force_primary_only: true  # When true, disables fallback (ALWAYS use primary)
   models:
-    primary: "gemini-3-pro-image-preview"
-    fallback: "gemini-2.5-flash-image"
-    fallback_2: "gemini-2.0-flash-exp-image-generation"
+    primary: "gemini-3-pro-image-preview"   # ALWAYS USE THIS MODEL
+    fallback: "gemini-3-pro-image-preview"  # Same as primary (fallback disabled)
+    fallback_2: "gemini-3-pro-image-preview" # Same as primary (fallback disabled)
 ```
 
 ---
@@ -239,8 +240,9 @@ gemini:
 | `scripts/collector.py` | Reference image collection/download |
 | `scripts/writer.py` | Draft + HTML/MD generation (원본.txt, 본문.html, 이미지 가이드.md, 참조.md) |
 | `scripts/prompt_converter.py` | AI prompt conversion and text overlay config |
-| `scripts/gemini_image.py` | Gemini API integration (3-tier fallback) |
-| `scripts/text_overlay.py` | PIL-based watermark and text overlay |
+| `scripts/gemini_image.py` | Gemini API integration (single model, force_primary_only) |
+| `scripts/image_guide_parser.py` | Image guide parsing and prompt extraction |
+| `scripts/text_overlay.py` | PIL-based watermark overlay (@money-lab-brian) |
 | `scripts/image_pipeline.py` | Integrated image generation pipeline |
 
 ### Usage Examples
@@ -308,7 +310,7 @@ search-blogging/
 │   ├── step6-title.md         # Title selection
 │   ├── step7-write.md         # Draft writing (원본.txt)
 │   ├── step8-refactor.md      # Writing refactoring (txt → HTML/MD)
-│   ├── step9-image.md         # 🖼️ Image generation (MANDATORY)
+│   ├── step9-image.md         # Image generation (MANDATORY)
 │   └── step10-revise.md       # Revision loop
 ├── references/                 # Reference materials
 │   ├── tone-guide.md
@@ -328,8 +330,9 @@ search-blogging/
     ├── collector.py            # Reference image download
     ├── writer.py               # HTML/MD file generation
     ├── prompt_converter.py     # AI prompt processing
-    ├── gemini_image.py         # Gemini API integration
-    ├── text_overlay.py         # PIL watermark/text overlay
+    ├── gemini_image.py         # Gemini API (gemini-3-pro-image-preview only)
+    ├── image_guide_parser.py   # Image guide parsing
+    ├── text_overlay.py         # PIL watermark overlay
     └── image_pipeline.py       # Integrated generation pipeline
 ```
 
@@ -348,6 +351,12 @@ search-blogging/
 ---
 
 ## Version Information
+
+- **v2.3.0** (2026-02-03)
+  - Gemini API 단일 모델 강제 (force_primary_only, 3-tier fallback 폐기)
+  - STEP 8 문서 명세 강화 (HTML 구조/CSS/태그변환/글자수검증 상세화)
+  - STEP 9 문서 명세 강화 (이미지 유형별 가이드, 모드 자동 판별, 파일명 규칙)
+  - image_guide_parser.py 모듈 문서화 반영
 
 - **v2.2.0** (2026-02-01)
   - Inserted STEP 8: Writing refactoring (원본.txt → HTML/MD)

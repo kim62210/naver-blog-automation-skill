@@ -14,12 +14,17 @@ Workflow:
 
 import base64
 import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-from PIL import Image
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+from PIL import Image, ImageDraw, ImageFont
 import tempfile
+
+if TYPE_CHECKING:
+    from .prompt_converter import WatermarkConfig
+    from .prompt_converter import TextOverlayConfig as PromptTextOverlayConfig
 
 
 @dataclass
@@ -272,26 +277,10 @@ class TextOverlayProcessor:
         Convert SVG to PNG using available tools.
 
         Tries multiple methods in order:
-        1. cairosvg (Python library)
-        2. rsvg-convert (command line)
-        3. inkscape (command line)
+        1. rsvg-convert (command line)
+        2. inkscape (command line)
         """
-        # Method 1: cairosvg
-        try:
-            import cairosvg
-            cairosvg.svg2png(
-                url=svg_path,
-                write_to=output_path,
-                output_width=width,
-                output_height=height
-            )
-            return True
-        except ImportError:
-            pass
-        except Exception:
-            pass
-
-        # Method 2: rsvg-convert
+        # Method 1: rsvg-convert
         try:
             result = subprocess.run(
                 [
@@ -311,7 +300,7 @@ class TextOverlayProcessor:
         except Exception:
             pass
 
-        # Method 3: inkscape
+        # Method 2: inkscape
         try:
             result = subprocess.run(
                 [
@@ -328,19 +317,6 @@ class TextOverlayProcessor:
             if result.returncode == 0:
                 return True
         except FileNotFoundError:
-            pass
-        except Exception:
-            pass
-
-        # Method 4: Pillow with svglib (fallback)
-        try:
-            from svglib.svglib import svg2rlg
-            from reportlab.graphics import renderPM
-
-            drawing = svg2rlg(svg_path)
-            renderPM.drawToFile(drawing, output_path, fmt="PNG")
-            return True
-        except ImportError:
             pass
         except Exception:
             pass
@@ -429,7 +405,7 @@ def create_thumbnail_with_text(
 
 def add_text_to_existing_image(
     image_path: str,
-    text_config: 'TextOverlayConfig',
+    text_config: 'PromptTextOverlayConfig',
     output_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
@@ -446,8 +422,6 @@ def add_text_to_existing_image(
     Returns:
         Dict with 'success', 'output_path', 'error'
     """
-    from .prompt_converter import TextOverlayConfig as PromptTextConfig
-
     # Get image dimensions
     with Image.open(image_path) as img:
         width, height = img.size
@@ -552,64 +526,126 @@ def add_watermark_to_image(
             output_path="./images/01_thumbnail_final.png"
         )
     """
-    from .prompt_converter import WatermarkConfig as PromptWatermarkConfig
+    def _parse_rgba(color: str) -> Tuple[int, int, int, int]:
+        if not color:
+            return (255, 255, 255, 153)
 
-    # Check if watermark is enabled
-    if not watermark_config.watermark_enabled:
-        # Just copy the file if watermark is disabled
-        if output_path and output_path != image_path:
-            import shutil
-            shutil.copy2(image_path, output_path)
-        return {
-            "success": True,
-            "output_path": output_path or image_path,
-            "error": None
-        }
+        color = color.strip()
 
-    # Get image dimensions
-    with Image.open(image_path) as img:
-        width, height = img.size
+        hex_match = re.fullmatch(r"#([0-9a-fA-F]{6})([0-9a-fA-F]{2})?", color)
+        if hex_match:
+            rgb = hex_match.group(1)
+            alpha = hex_match.group(2)
+            r = int(rgb[0:2], 16)
+            g = int(rgb[2:4], 16)
+            b = int(rgb[4:6], 16)
+            a = int(alpha, 16) if alpha else 255
+            return (r, g, b, a)
 
-    # Calculate watermark position
-    center_x = width // 2
-    watermark_y = height - watermark_config.watermark_margin_bottom
-
-    # Adjust x position based on watermark_position
-    if watermark_config.watermark_position == "bottom-left":
-        watermark_x = width // 6
-        text_anchor = "start"
-    elif watermark_config.watermark_position == "bottom-right":
-        watermark_x = width * 5 // 6
-        text_anchor = "end"
-    else:  # bottom-center (default)
-        watermark_x = center_x
-        text_anchor = "middle"
-
-    # Create watermark text element
-    text_elements = [
-        TextElement(
-            text=watermark_config.watermark_text,
-            x=watermark_x,
-            y=watermark_y,
-            font_size=watermark_config.watermark_font_size,
-            font_family=watermark_config.watermark_font_family,
-            fill=watermark_config.watermark_font_color,
-            text_anchor=text_anchor,
-            shadow=False,  # No shadow for watermark
-            background_box=False,
+        rgba_match = re.fullmatch(
+            r"rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9]*\.?[0-9]+)\s*\)",
+            color,
+            flags=re.IGNORECASE,
         )
-    ]
+        if rgba_match:
+            r = max(0, min(255, int(rgba_match.group(1))))
+            g = max(0, min(255, int(rgba_match.group(2))))
+            b = max(0, min(255, int(rgba_match.group(3))))
+            alpha_f = float(rgba_match.group(4))
+            a = max(0, min(255, int(round(alpha_f * 255))))
+            return (r, g, b, a)
 
-    # Process
-    final_output = output_path or image_path
-    config = TextOverlayConfig(
-        background_image_path=image_path,
-        output_path=final_output,
-        text_elements=text_elements,
-    )
+        rgb_match = re.fullmatch(
+            r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)",
+            color,
+            flags=re.IGNORECASE,
+        )
+        if rgb_match:
+            r = max(0, min(255, int(rgb_match.group(1))))
+            g = max(0, min(255, int(rgb_match.group(2))))
+            b = max(0, min(255, int(rgb_match.group(3))))
+            return (r, g, b, 255)
 
-    processor = TextOverlayProcessor()
-    return processor.process(config)
+        return (255, 255, 255, 153)
+
+    def _load_font(font_size: int):
+        candidates = [
+            "/System/Library/Fonts/Supplemental/Arial.ttf",
+            "/Library/Fonts/Arial Unicode.ttf",
+            "/System/Library/Fonts/AppleSDGothicNeo.ttc",
+            "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
+        ]
+
+        for path in candidates:
+            try:
+                if Path(path).exists():
+                    return ImageFont.truetype(path, font_size)
+            except Exception:
+                continue
+
+        return ImageFont.load_default()
+
+    try:
+        # Check if watermark is enabled
+        if not watermark_config.watermark_enabled:
+            if output_path and output_path != image_path:
+                import shutil
+                shutil.copy2(image_path, output_path)
+            return {
+                "success": True,
+                "output_path": output_path or image_path,
+                "error": None,
+            }
+
+        final_output = output_path or image_path
+        Path(final_output).parent.mkdir(parents=True, exist_ok=True)
+
+        with Image.open(image_path) as img:
+            base = img.convert("RGBA")
+
+        width, height = base.size
+        margin_bottom = int(watermark_config.watermark_margin_bottom)
+
+        if watermark_config.watermark_position == "bottom-left":
+            watermark_x = width // 6
+            anchor = "start"
+        elif watermark_config.watermark_position == "bottom-right":
+            watermark_x = width * 5 // 6
+            anchor = "end"
+        else:
+            watermark_x = width // 2
+            anchor = "middle"
+
+        watermark_y = height - margin_bottom
+        text = watermark_config.watermark_text or ""
+        if not text:
+            base.save(final_output)
+            return {"success": True, "output_path": final_output, "error": None}
+
+        font_size = int(watermark_config.watermark_font_size)
+        font = _load_font(font_size)
+        fill = _parse_rgba(watermark_config.watermark_font_color)
+
+        overlay = Image.new("RGBA", base.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+        bbox = draw.textbbox((0, 0), text, font=font)
+
+        if anchor == "middle":
+            x = watermark_x - (bbox[0] + bbox[2]) / 2
+        elif anchor == "end":
+            x = watermark_x - bbox[2]
+        else:
+            x = watermark_x - bbox[0]
+
+        y = watermark_y - bbox[3]
+        draw.text((int(round(x)), int(round(y))), text, font=font, fill=fill)
+
+        out = Image.alpha_composite(base, overlay)
+        out.save(final_output)
+
+        return {"success": True, "output_path": final_output, "error": None}
+    except Exception as e:
+        return {"success": False, "output_path": None, "error": str(e)}
 
 
 def add_watermark_only(

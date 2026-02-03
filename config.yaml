@@ -112,12 +112,14 @@ structures:
 # Gemini API settings
 gemini:
   enabled: true
+  # FORCE gemini-3-pro-image-preview: fallback disabled
+  # All models set to the same to ensure only gemini-3-pro-image-preview is used
+  force_primary_only: true  # When true, disables fallback entirely
   models:
-    # 3-tier fallback system for image generation
-    # See docs/GEMINI_IMAGE_API_LIMITS.md for rate limit details
-    primary: "gemini-3-pro-image-preview"               # Gemini 3 Pro Image - best quality
-    fallback: "gemini-2.5-flash-image"                  # Gemini 2.5 Flash Image - limited free
-    fallback_2: "gemini-2.0-flash-exp-image-generation" # Nano Banana - free tier fallback
+    # Single model enforced - no fallback
+    primary: "gemini-3-pro-image-preview"               # Gemini 3 Pro Image - ALWAYS USE THIS
+    fallback: "gemini-3-pro-image-preview"              # Same as primary (fallback disabled)
+    fallback_2: "gemini-3-pro-image-preview"            # Same as primary (fallback disabled)
   default_size: "1024x1024"
   timeout: 60
   retry_count: 3

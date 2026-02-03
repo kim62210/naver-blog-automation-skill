@@ -247,7 +247,8 @@ def generate_image_guide(
     date: Optional[str] = None,
     blog_title: Optional[str] = None,
     blog_subtitle: Optional[str] = None,
-    key_points: Optional[List[str]] = None
+    key_points: Optional[List[str]] = None,
+    config: Optional[Dict] = None
 ) -> str:
     """
     Generate image guide markdown.
@@ -260,10 +261,23 @@ def generate_image_guide(
         blog_title: Blog title for thumbnail text rendering
         blog_subtitle: Blog subtitle for thumbnail text rendering
         key_points: Key points for each section image (optional)
+        config: Configuration dictionary (auto-loaded if not provided)
 
     Returns:
         Markdown content
     """
+    if config is None:
+        config = get_config()
+
+    # Load watermark defaults from config
+    wm = get_config_value(config, "watermark", default={}) or {}
+    wm_text = wm.get("text", "@money-lab-brian")
+    wm_position = wm.get("position", "bottom-center")
+    wm_margin = wm.get("margin_bottom", 60)
+    wm_font_size = wm.get("font_size", 18)
+    wm_font_color = wm.get("font_color", "rgba(255,255,255,0.6)")
+    wm_font_family = wm.get("font_family", "Pretendard, Nanum Gothic, sans-serif")
+
     if date is None:
         date = get_today_date()
 
@@ -305,9 +319,9 @@ def generate_image_guide(
         if mode in ("ai_generate", "both"):
             # AI image generation prompt
             md_parts.extend([
-                '### 🎨 AI Generation Prompt',
+                '### AI Generation (With Text)',
                 '',
-                '**Korean Description:**',
+                '## [Korean Description]',
                 img.get("description_kr", "Enter image description."),
                 '',
             ])
@@ -328,7 +342,7 @@ def generate_image_guide(
                 )
 
                 md_parts.extend([
-                    '**AI Generation Prompt:**',
+                    '## [AI Generation Prompt]',
                     '```',
                     base_prompt,
                 ])
@@ -338,7 +352,7 @@ def generate_image_guide(
             else:
                 # Standard prompt without text rendering
                 md_parts.extend([
-                    '**AI Generation Prompt:**',
+                    '## [AI Generation Prompt]',
                     '```',
                     img.get("prompt_en", "Image generation prompt here"),
                     '```',
@@ -346,10 +360,19 @@ def generate_image_guide(
 
             md_parts.extend([
                 '',
-                '**Style:**',
+                '## [Style Guide]',
                 f'- Color: {img.get("colors", color_palette.get("main"))}',
                 f'- Mood: {img.get("mood", "Professional")}',
                 f'- Format: {img.get("format", "Infographic")}',
+                '- Ratio: 1:1 (1024x1024)',
+                '',
+                '[Watermark Config]',
+                f'- watermark_text: "{wm_text}"',
+                f'- watermark_position: "{wm_position}"',
+                f'- watermark_margin_bottom: {wm_margin}',
+                f'- watermark_font_size: {wm_font_size}',
+                f'- watermark_font_color: "{wm_font_color}"',
+                f'- watermark_font_family: "{wm_font_family}"',
                 '',
             ])
 

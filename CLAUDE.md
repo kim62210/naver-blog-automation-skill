@@ -47,7 +47,7 @@ Each step is a separate markdown file in `skills/`:
 6. **step6-title** - Generate and select title
 7. **step7-write** - Draft writing + validation (`원본.txt`)
 8. **step8-refactor** - Writing refactoring (txt → HTML/MD generation)
-9. **step9-image** - 🖼️ Image generation (MANDATORY)
+9. **step9-image** - Image generation (MANDATORY)
 10. **step10-revise** - Revision loop
 
 ### Python Modules (`scripts/`)
@@ -58,42 +58,44 @@ Each step is a separate markdown file in `skills/`:
 - `validator.py` - Character count validation (draft + HTML, target: 1900 ±50)
 
 **Image Generation Pipeline:**
-- `gemini_image.py` - Gemini API with 3-tier model fallback (rate limit: 10 req/min)
-- `image_pipeline.py` - Orchestrates generation, coordinates watermarking
-- `text_overlay.py` - PIL-based watermark overlay
-- `prompt_converter.py` - Parses image guide, converts Korean → English prompts
-- `collector.py` - Downloads reference images
+- `image_pipeline.py` - Orchestrates generation, coordinates watermarking. Entry point: `ImagePipeline.process_image_guide()`
+- `gemini_image.py` - Gemini API integration. Model: `gemini-3-pro-image-preview` (fallback disabled, `force_primary_only: true`)
+- `image_guide_parser.py` - Parses `이미지 가이드.md` sections, extracts prompts via first fenced code block
+- `prompt_converter.py` - Converts Korean → English prompts, extracts `WatermarkConfig` from guide sections
+- `text_overlay.py` - PIL-based watermark overlay (`@money-lab-brian`, bottom-center)
+- `collector.py` - Downloads reference images (Mode A)
 
 **Content Generation:**
 - `writer.py` - Generates 본문.html, 이미지 가이드.md, 참조.md
 - `setup.py` - Creates project directory structure
 
 ### Image Generation Modes
-- **Mode A**: Download reference images from web
-- **Mode B**: AI generation via Gemini API
-- **Mode B-3**: AI generation + watermark overlay (PIL)
+- **Mode A**: Download reference images from web (파이프라인 스킵)
+- **Mode B**: AI generation via Gemini API (기본 워터마크 적용)
+- **Mode B-3**: AI generation + explicit watermark config (권장). Auto-detected when `[Watermark Config]` section exists in image guide
 
-### 3-Tier Gemini API Fallback
-Model order is defined in `config.yaml` (`gemini.models`):
-1. `primary`
-2. `fallback`
-3. `fallback_2`
+### Gemini API Configuration
+- **Model**: `gemini-3-pro-image-preview` only (`config.yaml` → `gemini.force_primary_only: true`)
+- **Size**: 1024x1024 (1:1) (`config.yaml` → `gemini.default_size`)
+- **Rate limit**: 10 req/min, 6s interval (`config.yaml` → `gemini.rate_limit.*`)
+- All three model slots (`primary`, `fallback`, `fallback_2`) are set to the same model to enforce single-model usage
 
 ## Key Patterns
 
 ### Character Count Validation
 - Target: **1900 characters** (±50 tolerance: 1850-1950)
-- Counts pure text only (excludes HTML tags, `[이미지 N 삽입]` placeholders, CSS)
+- Counts pure text only (excludes HTML tags, `[이미지 N 삽입]` placeholders, CSS, hashtags)
 - Configured in `config.yaml`: `writing.char_count`, `writing.char_tolerance`
+- `validate_draft_char_count()` additionally strips `[[memo]]` blocks and render tags like `[중제목]`
 
 ### Output Structure
 ```
-./경제 블로그/YYYY-MM-DD/topic-name/
-├── 원본.txt          # Plain text draft (STEP 7)
+./경제 블로그/YYYY-MM-DD/{topic-slug}/
+├── 원본.txt          # Plain text draft (STEP 7, immutable after STEP 8)
 ├── 본문.html          # Blog HTML (copy-paste to Naver Blog)
-├── 이미지 가이드.md   # Image generation prompts
-├── 참조.md            # Source references
-└── images/            # Generated images
+├── 이미지 가이드.md   # Image generation prompts (## [Image N] format)
+├── 참조.md            # Source references (4-column tables)
+└── images/            # Generated images ({NN}_{역할}.png, 20-char role truncation)
 ```
 
 ### Environment Variables
@@ -103,15 +105,20 @@ Model order is defined in `config.yaml` (`gemini.models`):
 - `BLOG_OUTPUT_DIR` - Override output directory
 
 ### Watermark Configuration
-- Text: "@money-lab-brian"
-- Position: bottom-center
-- Applied via PIL (`text_overlay.py`)
+- Text: `@money-lab-brian`
+- Position: bottom-center, 60px margin, 18px font
+- Applied via PIL (`text_overlay.add_watermark_to_image()`)
+- Default values from `config.yaml` → `watermark.*`, overridable per-image via `[Watermark Config]` in image guide
 
 ## Configuration
 
 `config.yaml` contains all global settings:
 - `writing.char_count/char_tolerance` - Character count validation
-- `images.default_count` - Default image count per post
-- `gemini.models` - 3-tier fallback model configuration
+- `images.default_count` - Default image count per post (5), min 3, max 10
+- `gemini.models.primary` - Gemini model (`gemini-3-pro-image-preview`)
+- `gemini.force_primary_only` - Disable fallback (`true`)
+- `gemini.default_size` - Image size (`1024x1024`)
 - `watermark.*` - Watermark text, position, styling
 - `output.base_dir` - Output directory path
+- `tags.count/max_count` - Tag count (8 default, 10 max)
+- `typography.blog_sizes.*` - Blog font sizes (h1:28, h2:24, h3:19, p:16, footnote:11)

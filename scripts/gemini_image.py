@@ -27,8 +27,8 @@ if TYPE_CHECKING:
 # API configuration constants - 3-tier fallback system
 # These defaults can be overridden via config.yaml (`gemini.models`)
 DEFAULT_MODEL = "gemini-3-pro-image-preview"  # Best quality (may require paid tier)
-FALLBACK_MODEL = "gemini-2.5-flash-image"  # Faster / often available on free tier
-FALLBACK_MODEL_2 = "gemini-2.0-flash-exp-image-generation"  # Most compatible fallback (free tier)
+FALLBACK_MODEL = "gemini-3-pro-image-preview"
+FALLBACK_MODEL_2 = "gemini-3-pro-image-preview"
 DEFAULT_SIZE = "1024x1024"
 DEFAULT_TIMEOUT = 60
 DEFAULT_RETRY_COUNT = 3
@@ -102,6 +102,7 @@ class GeminiImageGenerator:
         primary_model: Optional[str] = None,
         fallback_model: Optional[str] = None,
         fallback_model_2: Optional[str] = None,
+        force_primary_only: Optional[bool] = None,
     ):
         """
         Initialize GeminiImageGenerator
@@ -111,6 +112,7 @@ class GeminiImageGenerator:
             primary_model: Primary model (default: `DEFAULT_MODEL` or config override)
             fallback_model: First fallback model (default: `FALLBACK_MODEL` or config override)
             fallback_model_2: Second fallback model (default: `FALLBACK_MODEL_2` or config override)
+            force_primary_only: If True, disables fallback and only uses primary model
         """
         self.api_key = api_key or self._load_api_key()
         self.primary_model = primary_model or self._get_config_model("primary") or DEFAULT_MODEL
@@ -118,6 +120,9 @@ class GeminiImageGenerator:
         self.fallback_model_2 = fallback_model_2 or self._get_config_model("fallback_2") or FALLBACK_MODEL_2
         self.timeout = self._get_config_timeout() or DEFAULT_TIMEOUT
         self.retry_count = self._get_config_retry_count() or DEFAULT_RETRY_COUNT
+
+        # Force primary model only (disable fallback)
+        self.force_primary_only = force_primary_only if force_primary_only is not None else self._get_force_primary_only()
 
         # Client initialization (lazy loading)
         self._client = None
@@ -149,6 +154,13 @@ class GeminiImageGenerator:
         config = get_config()
         return get_config_value(config, "gemini", "retry_count")
 
+    def _get_force_primary_only(self) -> bool:
+        """Get force_primary_only setting from config.yaml (default: True)"""
+        config = get_config()
+        value = get_config_value(config, "gemini", "force_primary_only")
+        # Default to True to enforce gemini-3-pro-image-preview
+        return value if value is not None else True
+
     def _init_client(self):
         """Initialize Google GenAI client (new SDK)"""
         if self._client is not None:
@@ -178,20 +190,28 @@ class GeminiImageGenerator:
         use_fallback: bool = True,
     ) -> ImageResult:
         """
-        Generate a single image with 3-tier fallback.
+        Generate a single image with optional fallback.
 
         Args:
             prompt: Image generation prompt (English recommended)
             save_path: Save path (generates temp file if not provided)
             size: Image size (default: 1024x1024)
             use_fallback: Whether to use fallback models on failure
+                          (ignored if force_primary_only is True)
 
         Returns:
             ImageResult: Generation result
         """
         start_time = datetime.now()
 
-        # Tier 1: Primary model
+        # Check if fallback is disabled (force primary model only)
+        # When force_primary_only is True, only gemini-3-pro-image-preview is used
+        effective_use_fallback = use_fallback and not self.force_primary_only
+
+        if self.force_primary_only:
+            print(f"🔒 Force primary model only: {self.primary_model}")
+
+        # Tier 1: Primary model (gemini-3-pro-image-preview)
         result = await self._generate_with_model(
             prompt=prompt,
             save_path=save_path,
@@ -199,8 +219,8 @@ class GeminiImageGenerator:
             model=self.primary_model,
         )
 
-        # Tier 2: First fallback
-        if not result.success and use_fallback and self._should_fallback(result.error_message):
+        # Tier 2: First fallback (only if force_primary_only is False)
+        if not result.success and effective_use_fallback and self._should_fallback(result.error_message):
             print(f"⚠️ {self.primary_model} failed, retrying with {self.fallback_model}...")
             await asyncio.sleep(_get_rate_limit_delay())
 
@@ -211,8 +231,8 @@ class GeminiImageGenerator:
                 model=self.fallback_model,
             )
 
-        # Tier 3: Second fallback
-        if not result.success and use_fallback and self._should_fallback(result.error_message):
+        # Tier 3: Second fallback (only if force_primary_only is False)
+        if not result.success and effective_use_fallback and self._should_fallback(result.error_message):
             print(f"⚠️ {self.fallback_model} failed, retrying with {self.fallback_model_2}...")
             await asyncio.sleep(_get_rate_limit_delay())
 
