@@ -137,7 +137,8 @@ Infographic:
 > This approach leverages improved AI text rendering capabilities.
 >
 > **Font Style Guidance for AI Prompts:**
-> - Always specify "bold modern sans-serif Korean font" in prompts
+> - Always specify `"bold Korean sans-serif font similar to Gmarket Sans Bold or SB Aggro Bold style"` in prompts
+> - font_family 지정: `"Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif"`
 > - Request clean, high-contrast text for readability
 > - AI handles: main_text (title), sub_text (subtitle)
 > - PIL handles: watermark only
@@ -199,21 +200,30 @@ result = await generator.generate_batch(prompts, "./images/")
 
 ### 1. Thumbnail Image
 
-#### Recommended: AI Text Rendering + Watermark
+#### Recommended: AI Text Rendering + Watermark (thumbnail_layout.svg 기준)
 ```
 [AI Generation Prompt]
 Blog thumbnail image, {topic keywords} concept,
 {core object} as main element,
-bold modern sans-serif Korean font text "{제목 텍스트}" in upper third,
-subtitle "{부제목}" in modern clean font in center,
+bold Korean sans-serif font (Gmarket Sans Bold / SB Aggro Bold style) text "{제목 텍스트}",
+text area positioned in bottom 50% of image occupying 52% width and 39% height,
+main title in upper text row (22% of image height) with large impactful font,
+subtitle "{부제목}" in lower text row (17% of image height) with clean readable font (Pretendard Bold style),
+45px border frame around entire image in theme color,
+left and right 17% areas for background image extension,
+central 56% area as main content zone,
 {color} gradient background,
-eye-catching modern design, high contrast text, 16:9 ratio
+eye-catching modern design, high contrast text,
+watermark "@money-lab-brian" at bottom center of frame,
+1:1 ratio, 1024x1024 pixels,
+render exact Korean text characters as specified
 
 [Style Guide]
 - Color: {main color} + {accent color} gradient
 - Mood: Eye-catching and click-inducing
-- Format: Modern thumbnail design
-- Ratio: 16:9
+- Format: Modern thumbnail design (thumbnail_layout.svg 비례 기준)
+- Ratio: 1:1 (1024x1024)
+- Font: Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif
 
 [Watermark Config]
 - watermark_text: "@money-lab-brian"
@@ -236,16 +246,25 @@ eye-catching modern design, high contrast text, 16:9 ratio
 [AI Generation Prompt]
 Blog thumbnail image, baby savings account concept,
 cute piggy bank and baby hands as main elements,
-bold modern sans-serif Korean font text "0세 적금 필수!" in upper third,
-subtitle "연 12% 고금리" in clean modern font in center,
+bold Korean sans-serif font (Gmarket Sans Bold / SB Aggro Bold style) text "0세 적금 필수!",
+text area positioned in bottom 50% of image occupying 52% width and 39% height,
+main title in upper text row (22% of image height) with large impactful font,
+subtitle "연 12% 고금리" in lower text row (17% of image height) with clean readable font (Pretendard Bold style),
+45px border frame around entire image in warm yellow,
+left and right 17% areas for background image extension,
+central 56% area as main content zone,
 warm yellow to soft orange gradient background,
-eye-catching modern design, high contrast readable text, 16:9 ratio
+eye-catching modern design, high contrast readable text,
+watermark "@money-lab-brian" at bottom center of frame,
+1:1 ratio, 1024x1024 pixels,
+render exact Korean text characters as specified
 
 [Style Guide]
 - Color: Warm yellow + Soft orange gradient
 - Mood: Warm, friendly, trustworthy
-- Format: Modern thumbnail design
-- Ratio: 16:9
+- Format: Modern thumbnail design (thumbnail_layout.svg 비례 기준)
+- Ratio: 1:1 (1024x1024)
+- Font: Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif
 
 [Watermark Config]
 - watermark_text: "@money-lab-brian"

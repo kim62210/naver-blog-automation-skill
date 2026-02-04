@@ -119,12 +119,35 @@ AI now renders text directly in the image. PIL only adds watermark:
 
 ### 썸네일 (Image 1)
 
-- 이미지의 **70-80% 영역**에 텍스트 배치
 - **메인 텍스트**: 블로그 제목 (굵은 한글 폰트, 고대비)
 - **서브 텍스트**: 부제목 (선택 사항)
 - **배경**: 그라데이션/테마 비주얼
 - 프롬프트에 반드시 포함: `"render exact Korean text characters as specified"`
 - 비율: **1:1 (1024x1024)**
+
+#### 썸네일 레이아웃 사양 (`thumbnail_layout.svg` 기준)
+
+| 영역 | 치수 | 비율 (전체 대비) | 설명 |
+|------|------|-----------------|------|
+| 전체 캔버스 | 966×542 px | 100% | 1.78:1 (≈16:9) |
+| 외곽 프레임 | 45px | 4.7% | 사방 여백 (파스텔 컬러 또는 테마 컬러) |
+| 좌/우 이미지 확장 영역 | 167px 폭 | 17.3% | 배경 이미지가 확장되는 영역 |
+| 중앙 콘텐츠 영역 | 542×452 px | 56.1%×83.4% | 핵심 시각 요소 배치 영역 |
+| 텍스트 영역 | 502×210 px | 52%×38.7% | 하단 50%에 위치 |
+| Main Text 행 | 502×120 px | - | 블로그 제목 (큰 폰트) |
+| Sub Text 행 | 502×90 px | - | 부제목/키워드 (작은 폰트) |
+| 워터마크 | 190×22 px | - | 하단 외곽 프레임 중앙 |
+
+#### 썸네일 권장 폰트
+
+| 우선순위 | 폰트명 | 용도 | 특징 |
+|---------|--------|------|------|
+| 1순위 | **G마켓 산스 Bold** | Main Text (제목) | 임팩트 있는 두꺼운 고딕, 무료 상업용 |
+| 2순위 | **Pretendard Bold** | Main/Sub Text | 깔끔한 산세리프, 범용성 높음 |
+| 3순위 | **어그로체 Bold (SB어그로)** | Main Text (강조형) | 강렬하고 힘 있는 서체, 시선 집중 |
+
+- AI 프롬프트에 폰트 스타일 지시: `"bold Korean sans-serif font similar to Gmarket Sans Bold or SB Aggro Bold style"`
+- font_family 지정: `"Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif"`
 
 ### 본문 이미지 (Image 2+)
 
@@ -200,7 +223,7 @@ pipeline = ImagePipeline()
 
 # Generate single thumbnail with AI-rendered text + watermark
 result = await pipeline.generate_with_watermark(
-    prompt="Blog thumbnail, bold Korean text '0세 적금 필수!' occupying 70-80% of image area, subtitle '연 12% 고금리' below main title, warm gradient background, 1:1 ratio, 1024x1024, render exact Korean text characters as specified",
+    prompt="Blog thumbnail, bold Korean sans-serif font (Gmarket Sans Bold / SB Aggro Bold style) text '0세 적금 필수!', text area positioned in bottom 50% of image occupying 52% width and 39% height, main title in upper text row (22% of image height) with large impactful font, subtitle '연 12% 고금리' in lower text row (17% of image height) with clean readable font (Pretendard Bold style), 45px border frame around entire image, left and right 17% areas for background image extension, central 56% area as main content zone, warm gradient background, watermark '@money-lab-brian' at bottom center of frame, 1:1 ratio, 1024x1024, render exact Korean text characters as specified",
     output_path=f"{project_path}/images/01_썸네일.png",
     watermark_config=WatermarkConfig(
         watermark_text="@money-lab-brian",

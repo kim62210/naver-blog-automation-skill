@@ -28,24 +28,29 @@ ${topic} 주제를 시각적으로 표현하며, 메인 제목과 부제목을 �
 ```
 Blog thumbnail image, ${topic} concept,
 ${thumbnail_visual_elements},
-bold modern sans-serif Korean font text "${title}" in upper third,
-text should be highly readable with strong contrast against background,
-subtitle "${subtitle}" in clean modern font below main title,
+bold Korean sans-serif font (Gmarket Sans Bold / SB Aggro Bold style) text "${title}",
+text area positioned in bottom 50% of image occupying 52% width and 39% height,
+main title in upper text row (22% of image height) with large impactful font,
+subtitle "${subtitle}" in lower text row (17% of image height) with clean readable font (Pretendard Bold style),
+45px border frame around entire image in ${color_main},
+left and right 17% areas for background image extension,
+central 56% area as main content zone,
 ${color_main} to ${color_accent} gradient background,
 ${thumbnail_decorative_elements},
 eye-catching modern design with subtle depth and shadows,
 high contrast readable text with slight glow or outline effect,
 professional Korean financial/economy blog style,
-clean minimalist layout with focus on central message,
-16:9 ratio, 1300x885 pixels,
+watermark "@money-lab-brian" at bottom center of frame,
+1:1 ratio, 1024x1024 pixels,
 render exact Korean text characters as specified
 ```
 
 [Style Guide]
 - Color: ${color_main} (${color_main_name}) + ${color_accent} gradient
 - Mood: Professional, trustworthy, modern, eye-catching
-- Format: Modern thumbnail design with centered text focus
-- Ratio: 16:9
+- Format: Modern thumbnail design (thumbnail_layout.svg 비례 기준)
+- Ratio: 1:1 (1024x1024)
+- Font: Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif
 
 [Watermark Config]
 - watermark_text: "@money-lab-brian"
@@ -231,7 +236,9 @@ The pipeline parses this file and generates images with the specified prompts.
 - [ ] All Korean text in quotes with exact characters
 - [ ] Color codes in HEX format (e.g., #1a365d)
 - [ ] Position specified for text elements
-- [ ] 16:9 ratio for thumbnail, appropriate ratios for others
+- [ ] 1:1 (1024x1024) ratio for thumbnail, appropriate ratios for others
+- [ ] Thumbnail prompt includes layout specs (thumbnail_layout.svg 비례)
+- [ ] Thumbnail prompt includes font style (Gmarket Sans Bold / SB Aggro Bold)
 - [ ] All 6 watermark config fields included per image
 - [ ] Each section reaches 1000+ characters total
 

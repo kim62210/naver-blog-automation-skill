@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="620" viewBox="-40 -45 1046 630" overflow="visible">
+  <defs>
+    <!-- 해시 패턴 (이미지 확장 영역용) -->
+    <pattern id="hashPattern" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#c0c0c0" stroke-width="1.2"/>
+    </pattern>
+    <!-- 치수 화살표 마커 -->
+    <marker id="aL" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto">
+      <path d="M8,0 L0,4 L8,8" fill="none" stroke="#e05050" stroke-width="1.2"/>
+    </marker>
+    <marker id="aR" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8" fill="none" stroke="#e05050" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <!-- 전체 흰색 배경 -->
+  <rect width="966" height="542" fill="#ffffff"/>
+
+  <!-- ========== 45px 외곽 파스텔 레드 프레임 ========== -->
+  <rect x="0" y="0" width="966" height="45" fill="#f2d4d4"/>
+  <rect x="0" y="497" width="966" height="45" fill="#f2d4d4"/>
+  <rect x="0" y="45" width="45" height="452" fill="#f2d4d4"/>
+  <rect x="921" y="45" width="45" height="452" fill="#f2d4d4"/>
+
+  <!-- 최외곽 테두리 -->
+  <rect x="1" y="1" width="964" height="540" fill="none" stroke="#333333" stroke-width="2"/>
+  <!-- 내부 콘텐츠 경계 (점선) -->
+  <rect x="45" y="45" width="876" height="452" fill="none" stroke="#bbbbbb" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- ========== 좌측 이미지 확장 영역 (해시 패턴) ========== -->
+  <rect x="45" y="45" width="167" height="452" fill="url(#hashPattern)"/>
+  <rect x="45" y="45" width="167" height="452" fill="rgba(255,255,255,0.55)"/>
+  <text x="128" y="265" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#888888" font-weight="bold">이미지</text>
+  <text x="128" y="280" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#888888" font-weight="bold">확장 영역</text>
+
+  <!-- ========== 우측 이미지 확장 영역 (해시 패턴) ========== -->
+  <rect x="754" y="45" width="167" height="452" fill="url(#hashPattern)"/>
+  <rect x="754" y="45" width="167" height="452" fill="rgba(255,255,255,0.55)"/>
+  <text x="837" y="265" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#888888" font-weight="bold">이미지</text>
+  <text x="837" y="280" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#888888" font-weight="bold">확장 영역</text>
+
+  <!-- 좌측 점선 경계 -->
+  <line x1="212" y1="45" x2="212" y2="497" stroke="#888888" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <!-- 우측 점선 경계 -->
+  <line x1="754" y1="45" x2="754" y2="497" stroke="#888888" stroke-width="1.5" stroke-dasharray="6,5"/>
+
+  <!-- ========== 가운데 콘텐츠 영역 (542×452) ========== -->
+  <rect x="212" y="45" width="542" height="452" fill="#ffffff"/>
+  <text x="483" y="200" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="16" fill="#aaaaaa">콘텐츠 영역</text>
+
+  <!-- ========== 텍스트 영역 (우측 끝까지, 2행 분할) ========== -->
+  <rect x="232" y="270" width="502" height="210" rx="4" ry="4" fill="rgba(0,120,215,0.06)" stroke="#0078d7" stroke-width="1.5"/>
+  <!-- 상하 분할선 -->
+  <line x1="232" y1="390" x2="734" y2="390" stroke="#0078d7" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+  <!-- 상단: Main Text (큰 폰트) -->
+  <text x="483" y="340" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="28" fill="#0078d7" font-weight="bold">Main Text</text>
+  <!-- 하단: Sub Text (작은 폰트) -->
+  <text x="483" y="440" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="18" fill="#0078d7">Sub Text</text>
+
+  <!-- ========== 하단 외곽 정중앙 워터마크 영역 ========== -->
+  <rect x="388" y="508" width="190" height="22" rx="3" ry="3" fill="rgba(255,255,255,0.5)" stroke="#cccccc" stroke-width="0.8"/>
+  <text x="483" y="519" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="22" fill="#000000" font-weight="bold">@money-lab-brian</text>
+
+  <!-- ================================================================== -->
+  <!--                         치수 지시선                                  -->
+  <!-- ================================================================== -->
+
+  <!-- [1] 전체 가로 너비 966px (상단 바깥) -->
+  <line x1="1" y1="-18" x2="965" y2="-18" stroke="#e05050" stroke-width="1" marker-start="url(#aL)" marker-end="url(#aR)"/>
+  <text x="483" y="-6" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#e05050" font-weight="bold">966px</text>
+
+  <!-- [2] 전체 세로 높이 542px (좌측 바깥) -->
+  <line x1="-18" y1="1" x2="-18" y2="541" stroke="#e05050" stroke-width="1" marker-start="url(#aL)" marker-end="url(#aR)"/>
+  <text x="-18" y="271" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90, -18, 271)"
+        font-family="Arial, sans-serif" font-size="11" fill="#e05050" font-weight="bold">542px</text>
+
+  <!-- [3] 중앙 영역 가로 542px (하단 지시선) -->
+  <line x1="212" y1="555" x2="754" y2="555" stroke="#e05050" stroke-width="1" marker-start="url(#aL)" marker-end="url(#aR)"/>
+  <text x="483" y="570" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="10" fill="#e05050" font-weight="bold">542px (중앙)</text>
+
+  <!-- [4] 좌측 전체 212px (하단 지시선) -->
+  <line x1="1" y1="555" x2="212" y2="555" stroke="#e05050" stroke-width="1" marker-start="url(#aL)" marker-end="url(#aR)"/>
+  <text x="106" y="570" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="9" fill="#e05050">212px</text>
+
+  <!-- [5] 우측 전체 212px (하단 지시선) -->
+  <line x1="754" y1="555" x2="965" y2="555" stroke="#e05050" stroke-width="1" marker-start="url(#aL)" marker-end="url(#aR)"/>
+  <text x="860" y="570" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="9" fill="#e05050">212px</text>
+
+  <!-- [6] 외곽 프레임 45px (좌측 상단 지시) -->
+  <line x1="0" y1="-35" x2="45" y2="-35" stroke="#e05050" stroke-width="1" marker-start="url(#aL)" marker-end="url(#aR)"/>
+  <text x="72" y="-32" text-anchor="start" dominant-baseline="middle"
+        font-family="Arial, sans-serif" font-size="9" fill="#e05050">45px (외곽)</text>
+
+  <!-- [7] 세로 542px (우측 바깥) -->
+  <line x1="978" y1="1" x2="978" y2="541" stroke="#e05050" stroke-width="1" marker-start="url(#aL)" marker-end="url(#aR)"/>
+  <text x="978" y="271" text-anchor="middle" dominant-baseline="middle" transform="rotate(90, 978, 271)"
+        font-family="Arial, sans-serif" font-size="11" fill="#e05050" font-weight="bold">542px</text>
+</svg>
