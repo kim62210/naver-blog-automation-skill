@@ -87,7 +87,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 | **STEP 4** | Research summary and review | [skills/step4-review.md](skills/step4-review.md) |
 | **STEP 5** | Writing options selection | [skills/step5-options.md](skills/step5-options.md) |
 | **STEP 6** | Title selection | [skills/step6-title.md](skills/step6-title.md) |
-| **STEP 7** | Draft writing & validation (`원본.txt`) | [skills/step7-write.md](skills/step7-write.md) |
+| **STEP 7** | Draft writing & validation (`원본.txt`) + 문체 가이드 적용 | [skills/step7-write.md](skills/step7-write.md) |
 | **STEP 8** | Writing refactoring (txt → HTML/MD) | [skills/step8-refactor.md](skills/step8-refactor.md) |
 | **STEP 9** | **Image generation (MANDATORY)** | [skills/step9-image.md](skills/step9-image.md) |
 | **STEP 10** | Revision loop | [skills/step10-revise.md](skills/step10-revise.md) |
@@ -281,6 +281,7 @@ Reference these files as needed during skill execution:
 | `references/structure-templates.md` | Article structure templates | STEP 5-2 |
 | `references/image-guide.md` | Image guide creation | STEP 5-3, STEP 8 |
 | `references/thumbnail-templates.md` | 10가지 썸네일 템플릿 (색상팔레트, AI프롬프트, 텍스트오버레이) | STEP 5-3, STEP 8 (썸네일 생성시) |
+| `네이버_블로그_문체_가이드.md` | 네이버 인기 경제 블로그 문체 분석 (톤, 문장 구조, 도입/마무리 패턴) | STEP 7 (필수), STEP 8 (확인) |
 
 ---
 

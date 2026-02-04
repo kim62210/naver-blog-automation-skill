@@ -113,3 +113,5 @@ Starting body content writing.
 ## Next Step
 
 Title selection complete → **[STEP 7: Draft Writing & Validation](step7-write.md)**
+
+> 📖 **STEP 7 필수 참조**: 본문 작성 시 [네이버 블로그 문체 가이드](../네이버_블로그_문체_가이드.md)의 톤/문장 구조/도입-마무리 패턴을 반드시 적용하세요.
