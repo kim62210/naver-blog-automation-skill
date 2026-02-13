@@ -13,7 +13,7 @@ description: |
   Trigger keywords: blog post writing, write a blog post, research and write, economy blog
 ---
 
-# search-blogging Skill v2.3
+# search-blogging Skill v3.0
 
 Automates the entire workflow from trending topic collection on Naver Economy Shortents to blog post writing.
 
@@ -58,7 +58,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 
 | File | Description | Purpose |
 |------|-------------|---------|
-| 본문.html | HTML for Naver Blog | Open in browser, copy → paste to blog |
+| 본문.html | HTML for Naver Blog | Open in browser, copy -> paste to blog |
 | 원본.txt | Plain text draft | Source of truth for writing/refactoring |
 | 이미지 가이드.md | AI prompts | Image generation reference |
 | 참조.md | Source list | Reference verification |
@@ -68,7 +68,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 
 ```
 ./경제 블로그/YYYY-MM-DD/{topic-slug}/
-├── 원본.txt          # Plain text draft (STEP 7, immutable after STEP 8)
+├── 원본.txt          # Plain text draft (STEP 3, immutable after STEP 4)
 ├── 본문.html          # Blog HTML (copy-paste to Naver Blog)
 ├── 이미지 가이드.md   # Image generation prompts (## [Image N] format)
 ├── 참조.md            # Source references (4-column tables)
@@ -77,34 +77,26 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 
 ---
 
-## Workflow (10 Steps)
+## Workflow (6 Steps)
 
-| Step | Description | Detailed Guide |
-|------|-------------|----------------|
-| **STEP 1** | Trending topic collection and selection | [skills/step1-collect.md](skills/step1-collect.md) |
-| **STEP 2** | Topic confirmation and keyword expansion | [skills/step2-confirm.md](skills/step2-confirm.md) |
-| **STEP 3** | Parallel research (6 agents) | [skills/step3-research.md](skills/step3-research.md) |
-| **STEP 4** | Research summary and review | [skills/step4-review.md](skills/step4-review.md) |
-| **STEP 5** | Writing options selection | [skills/step5-options.md](skills/step5-options.md) |
-| **STEP 6** | Title selection | [skills/step6-title.md](skills/step6-title.md) |
-| **STEP 7** | Draft writing & validation (`원본.txt`) + 문체 가이드 적용 | [skills/step7-write.md](skills/step7-write.md) |
-| **STEP 8** | Writing refactoring (txt → HTML/MD) | [skills/step8-refactor.md](skills/step8-refactor.md) |
-| **STEP 9** | **Image generation (MANDATORY)** | [skills/step9-image.md](skills/step9-image.md) |
-| **STEP 10** | Revision loop | [skills/step10-revise.md](skills/step10-revise.md) |
+| Step | Description | User Interaction | Detailed Guide |
+|------|-------------|------------------|----------------|
+| **STEP 1** | Topic selection + tone/structure/image options | 1 AskUserQuestion (4 questions) | [step1-topic-and-options.md](skills/step1-topic-and-options.md) |
+| **STEP 2** | Parallel research (3 agents) | Auto (ask only if < 10 sources) | [step2-research.md](skills/step2-research.md) |
+| **STEP 3** | Title selection + draft writing (원본.txt) | 1 AskUserQuestion (title) | [step3-title-and-draft.md](skills/step3-title-and-draft.md) |
+| **STEP 4** | Writing refactoring (txt -> HTML/MD) | Auto | [step4-refactor.md](skills/step4-refactor.md) |
+| **STEP 5** | **Image generation (MANDATORY)** | Auto (API-driven) | [step5-image.md](skills/step5-image.md) |
+| **STEP 6** | Revision loop | User-driven | [step6-revise.md](skills/step6-revise.md) |
 
 ### Progress Display
 
 ```
-[STEP 1/10] Topic collection ██░░░░░░░░░░░░░░░░░░░░░░░░░ 10%
-[STEP 2/10] Topic confirmation █████░░░░░░░░░░░░░░░░░░░░░░ 20%
-[STEP 3/10] Research ████████░░░░░░░░░░░░░░░░░░░ 30%
-[STEP 4/10] Review ██████████░░░░░░░░░░░░░░░░ 40%
-[STEP 5/10] Options ████████████░░░░░░░░░░░░░░ 50%
-[STEP 6/10] Title ███████████████░░░░░░░░░░░░ 60%
-[STEP 7/10] Draft ████████████████████░░░░░░░░ 70%
-[STEP 8/10] Refactor ███████████████████████░░░░ 80%
-[STEP 9/10] Image ██████████████████████████░░ 90%
-[STEP 10/10] Review/Edit ████████████████████████████ 100%
+[STEP 1/6] Topic + Options   ████░░░░░░░░░░░░░░░░░░░░░░░ 15%
+[STEP 2/6] Research           ████████░░░░░░░░░░░░░░░░░░░ 30%
+[STEP 3/6] Title + Draft      ████████████████░░░░░░░░░░░ 55%
+[STEP 4/6] Refactoring        ████████████████████░░░░░░░ 70%
+[STEP 5/6] Image generation   ██████████████████████████░░ 90%
+[STEP 6/6] Revision loop      ████████████████████████████ 100%
 ```
 
 ---
@@ -113,7 +105,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 
 ### Character Count (Important!)
 - **Target: Around 1900 characters**
-- **Allowed range: 1850~1950 characters (±50)**
+- **Allowed range: 1850~1950 characters (+-50)**
 - Count pure body text only (excluding HTML tags, image placeholders)
 
 ### Character Count Validation (Python)
@@ -131,7 +123,7 @@ print(draft_result.message)
 # HTML (본문.html)
 result = validate_char_count(html_content)
 print(f"Character count: {result.char_count}")
-print(result.message)  # ✅ Valid / ⚠️ Over / ⚠️ Under
+print(result.message)
 ```
 
 ---
@@ -150,8 +142,8 @@ print(result.message)  # ✅ Valid / ⚠️ Over / ⚠️ Under
 
 | Option | Structure | Use Case |
 |--------|-----------|----------|
-| 7-step | Intro→Problem→Core1,2,3→Tips→Closing | Informational content |
-| 5-step | Intro→Core→Details→Tips→Closing | Concise delivery |
+| 7-step | Intro > Problem > Core1,2,3 > Tips > Closing | Informational content |
+| 5-step | Intro > Core > Details > Tips > Closing | Concise delivery |
 | Flexible | AI adapts to topic | Storytelling, Q&A |
 
 ### Images
@@ -166,8 +158,6 @@ print(result.message)  # ✅ Valid / ⚠️ Over / ⚠️ Under
 
 ## Environment Variables
 
-Required environment variables for AI image generation:
-
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `GOOGLE_API_KEY` | Yes* | Google API key for Gemini image generation |
@@ -175,38 +165,16 @@ Required environment variables for AI image generation:
 
 *Either `GOOGLE_API_KEY` or `GEMINI_API_KEY` must be set for image generation.
 
-### Setup
-
-```bash
-# Option 1: Export in terminal
-export GOOGLE_API_KEY="your-api-key-here"
-
-# Option 2: Add to shell profile (~/.zshrc or ~/.bashrc)
-echo 'export GOOGLE_API_KEY="your-api-key-here"' >> ~/.zshrc
-
-# Option 3: Create .env file (not committed to git)
-echo 'GOOGLE_API_KEY=your-api-key-here' > .env
-```
-
-### Get API Key
-
-1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
-2. Create a new API key
-3. Enable Gemini API access
-
 ---
 
 ## Configuration File
 
-Global settings are managed in `config.yaml`:
+Global settings in `config.yaml`:
 
 ```yaml
-# config.yaml
 writing:
   char_count: 1900
   char_tolerance: 50
-  min_chars: 1850
-  max_chars: 1950
 
 images:
   default_count: 5
@@ -217,13 +185,9 @@ tags:
 output:
   base_dir: "./경제 블로그"
 
-# Gemini API settings - FORCE gemini-3-pro-image-preview
 gemini:
-  force_primary_only: true  # When true, disables fallback (ALWAYS use primary)
   models:
-    primary: "gemini-3-pro-image-preview"   # ALWAYS USE THIS MODEL
-    fallback: "gemini-3-pro-image-preview"  # Same as primary (fallback disabled)
-    fallback_2: "gemini-3-pro-image-preview" # Same as primary (fallback disabled)
+    primary: "gemini-3-pro-image-preview"
 ```
 
 ---
@@ -235,53 +199,27 @@ gemini:
 | `scripts/config.py` | Configuration file loader (YAML parsing) |
 | `scripts/utils.py` | Common utilities (date formatting, text cleaning) |
 | `scripts/shared_types.py` | Shared type definitions (dataclasses) |
-| `scripts/validator.py` | Character count validation (1900±50 chars) |
+| `scripts/validator.py` | Character count validation (1900+-50 chars) |
 | `scripts/setup.py` | Project directory initialization |
 | `scripts/collector.py` | Reference image collection/download |
-| `scripts/writer.py` | Draft + HTML/MD generation (원본.txt, 본문.html, 이미지 가이드.md, 참조.md) |
-| `scripts/prompt_converter.py` | AI prompt conversion and text overlay config |
-| `scripts/gemini_image.py` | Gemini API integration (single model, force_primary_only) |
+| `scripts/writer.py` | Draft + HTML/MD generation |
+| `scripts/prompt_converter.py` | AI prompt conversion and watermark config |
+| `scripts/gemini_image.py` | Gemini API integration (single model) |
 | `scripts/image_guide_parser.py` | Image guide parsing and prompt extraction |
 | `scripts/text_overlay.py` | PIL-based watermark overlay (@money-lab-brian) |
 | `scripts/image_pipeline.py` | Integrated image generation pipeline |
-
-### Usage Examples
-
-```python
-# Project initialization
-from scripts.setup import create_project_structure
-project_path = create_project_structure("육아휴직 가이드")
-
-# Image collection
-from scripts.collector import collect_images
-result = collect_images(images, project_path)
-
-# File saving
-from scripts.writer import save_blog_files
-files = save_blog_files(project_path, html, image_guide, references)
-
-# AI image generation with watermark
-from scripts.image_pipeline import ImagePipeline
-pipeline = ImagePipeline()
-result = await pipeline.generate_with_watermark(
-    prompt="Blog thumbnail, finance concept...",
-    output_path="./images/01_thumbnail.png"
-)
-```
 
 ---
 
 ## Reference Files
 
-Reference these files as needed during skill execution:
-
 | File | Purpose | When to Reference |
 |------|---------|-------------------|
-| `references/tone-guide.md` | Detailed tone & manner guide | STEP 5-1 |
-| `references/structure-templates.md` | Article structure templates | STEP 5-2 |
-| `references/image-guide.md` | Image guide creation | STEP 5-3, STEP 8 |
-| `references/thumbnail-templates.md` | 10가지 썸네일 템플릿 (색상팔레트, AI프롬프트, 텍스트오버레이) | STEP 5-3, STEP 8 (썸네일 생성시) |
-| `네이버_블로그_문체_가이드.md` | 네이버 인기 경제 블로그 문체 분석 (톤, 문장 구조, 도입/마무리 패턴) | STEP 7 (필수), STEP 8 (확인) |
+| `references/tone-guide.md` | Detailed tone & manner guide | STEP 1 |
+| `references/structure-templates.md` | Article structure templates | STEP 1 |
+| `references/image-guide.md` | Image guide creation | STEP 1, STEP 4 |
+| `references/thumbnail-templates.md` | Thumbnail templates (palettes, AI prompts) | STEP 4 |
+| `네이버_블로그_문체_가이드.md` | Writing style analysis (tone, sentence structure, patterns) | STEP 3 (mandatory), STEP 4 |
 
 ---
 
@@ -300,41 +238,19 @@ Reference these files as needed during skill execution:
 ```
 search-blogging/
 ├── SKILL.md                    # This file (entry point)
+├── CLAUDE.md                   # Architecture guide for Claude
 ├── config.yaml                 # Global configuration
 ├── requirements.txt            # Python dependencies
-├── skills/                     # Modularized skills (10 files)
-│   ├── step1-collect.md       # Trending topic collection
-│   ├── step2-confirm.md       # Topic confirmation
-│   ├── step3-research.md      # Research (parallel)
-│   ├── step4-review.md        # Review
-│   ├── step5-options.md       # Options selection
-│   ├── step6-title.md         # Title selection
-│   ├── step7-write.md         # Draft writing (원본.txt)
-│   ├── step8-refactor.md      # Writing refactoring (txt → HTML/MD)
-│   ├── step9-image.md         # Image generation (MANDATORY)
-│   └── step10-revise.md       # Revision loop
+├── skills/                     # Modularized skills (6 files)
+│   ├── step1-topic-and-options.md  # Topic + options selection
+│   ├── step2-research.md          # Research (3 parallel agents)
+│   ├── step3-title-and-draft.md   # Title + draft writing
+│   ├── step4-refactor.md          # Writing refactoring (txt -> HTML/MD)
+│   ├── step5-image.md             # Image generation (MANDATORY)
+│   └── step6-revise.md            # Revision loop
 ├── references/                 # Reference materials
-│   ├── tone-guide.md
-│   ├── structure-templates.md
-│   └── image-guide.md
 ├── templates/                  # Output templates
-│   ├── blog-post.html
-│   ├── image-guide.md
-│   └── references.md
-└── scripts/                    # Python automation (11 modules)
-    ├── __init__.py             # Package init
-    ├── config.py               # YAML config loader
-    ├── shared_types.py         # Shared dataclasses
-    ├── utils.py                # Common utilities
-    ├── validator.py            # Character count validation
-    ├── setup.py                # Project structure setup
-    ├── collector.py            # Reference image download
-    ├── writer.py               # HTML/MD file generation
-    ├── prompt_converter.py     # AI prompt processing
-    ├── gemini_image.py         # Gemini API (gemini-3-pro-image-preview only)
-    ├── image_guide_parser.py   # Image guide parsing
-    ├── text_overlay.py         # PIL watermark overlay
-    └── image_pipeline.py       # Integrated generation pipeline
+└── scripts/                    # Python automation (12 modules)
 ```
 
 ---
@@ -353,24 +269,22 @@ search-blogging/
 
 ## Version Information
 
+- **v3.0.0** (2026-02-14)
+  - Workflow optimization: 10 steps -> 6 steps (~40% time reduction)
+  - User interactions reduced: 5+ -> 2 (topic+options, title selection)
+  - Research agents reduced: 6 -> 3 (image-only search removed)
+  - Config cleanup: removed unused palettes, image sizes, fallback config
+  - Python cleanup: removed fallback system, deprecated methods, sync wrappers
+  - Step file spec trimming: template references instead of inline examples
+
 - **v2.3.0** (2026-02-03)
-  - Gemini API 단일 모델 강제 (force_primary_only, 3-tier fallback 폐기)
-  - STEP 8 문서 명세 강화 (HTML 구조/CSS/태그변환/글자수검증 상세화)
-  - STEP 9 문서 명세 강화 (이미지 유형별 가이드, 모드 자동 판별, 파일명 규칙)
-  - image_guide_parser.py 모듈 문서화 반영
+  - Gemini API single model enforcement (force_primary_only)
+  - STEP 8/9 documentation enhancement
 
 - **v2.2.0** (2026-02-01)
-  - Inserted STEP 8: Writing refactoring (원본.txt → HTML/MD)
-  - STEP 7 now saves `원본.txt` and validates draft character count
-  - Image generation moved to STEP 9, revision loop moved to STEP 10
-
-- **v2.1.0** (2026-02-01)
-  - 9-step workflow
-  - Image generation separated as STEP 8
-  - Documentation sync (CLAUDE.md, PIPELINE-ANALYSIS.md)
+  - Inserted STEP 8: Writing refactoring
+  - Image generation moved to STEP 9
 
 - **v2.0.0** (2026-01-27)
-  - Skill modularization (separated into 8 step files)
+  - Skill modularization (8 step files)
   - Python automation scripts added
-  - YAML configuration file introduced
-  - Template system implemented

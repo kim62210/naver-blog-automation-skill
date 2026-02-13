@@ -1,21 +1,21 @@
-# STEP 10: Revision Loop
+# STEP 6: Revision Loop
 
 Present the completed work and receive user feedback.
 
 ## Progress Status
 
 ```
-[STEP 10/10] Review/Edit ████████████████████████████ 100%
+[STEP 6/6] Review/Edit ████████████████████████████ 100%
 ```
 
 ---
 
-## 10-1. Completion Notice
+## 6-1. Completion Notice
 
 ```
-✅ Blog post writing complete!
+Blog post writing complete!
 
-📁 Save Location
+Save Location
 ./경제 블로그/YYYY-MM-DD/topic-name/
 ├── 원본.txt (Plain text draft)
 ├── 본문.html (HTML file)
@@ -23,17 +23,19 @@ Present the completed work and receive user feedback.
 ├── 참조.md (Source list)
 └── images/  (Generated images)
 
-📋 How to Paste into Naver Blog
-1. Open 본문.html file in browser (double-click)
-2. Cmd+A (select all) → Cmd+C (copy)
-3. Cmd+V (paste) in Naver Blog editor
-4. Upload actual images at [이미지 N 삽입] positions
+How to Publish to Naver Blog
+Option A (Auto): /naver-auto-post
+  -> Automatically publishes with images, tags, and settings
 
-📊 Writing Info
+Option B (Manual):
+  1. Open 본문.html file in browser (double-click)
+  2. Cmd+A (select all) -> Cmd+C (copy)
+  3. Cmd+V (paste) in Naver Blog editor
+  4. Upload actual images at [이미지 N 삽입] positions
+
+Writing Info
 - Body character count: XXXX chars (pure body text)
 - Image guides: N
-  - 🎨 AI generation: N
-  - 📷 Reference images: N
 - Tags: N
 
 Let me know if you need any revisions.
@@ -47,7 +49,7 @@ Say "done" when you're finished.
 
 ---
 
-## 10-2. Handling Revision Requests
+## 6-2. Handling Revision Requests
 
 ### Supported Revision Types
 
@@ -73,12 +75,11 @@ Say "done" when you're finished.
 
 ---
 
-## 10-3. File Update After Revision
+## 6-3. File Update After Revision
 
 ```python
 from scripts.writer import save_blog_files
 
-# Save files again with modified content
 files = save_blog_files(
     project_path=project_path,
     html_content=updated_html_content,
@@ -90,44 +91,30 @@ files = save_blog_files(
 
 ---
 
-## 10-4. Unlimited Revision Loop
+## 6-4. Unlimited Revision Loop
 
 - Modify only relevant parts per user request
 - Present completed work again after modification
 - **Unlimited repeats allowed**
 
-```
-Revision complete!
-
-📝 Changes Made
-- {summary of changes}
-
-📊 Current Info
-- Body character count: XXXX chars
-- Image guides: N
-
-Let me know if you need more revisions.
-Say "done" when you're finished.
-```
-
 ---
 
-## 10-5. Exit Conditions
+## 6-5. Exit Conditions
 
-Workflow ends when one of these occurs:
+Workflow ends when:
 - User indicates completion with "done", "finished", "OK", "confirm", etc.
 - Or conversation ends without additional revision requests
 
 ### Exit Message
 
 ```
-✨ Blog post writing is complete!
+Blog post writing is complete!
 
-📁 Final save location: ./경제 블로그/YYYY-MM-DD/topic-name/
+Final save location: ./경제 블로그/YYYY-MM-DD/topic-name/
 
 Usage summary:
-1. 본문.html → Open in browser, copy → paste into blog
-2. 이미지 가이드.md → Generate images with AI
+1. /naver-auto-post -> Auto-publish to Naver Blog (recommended)
+2. Or manually: 본문.html -> Open in browser, copy -> paste into blog
 3. Upload images at [이미지 N 삽입] positions
 
 Run /search-blogging again to write your next post.
@@ -139,12 +126,12 @@ Run /search-blogging again to write your next post.
 
 ### When Search Fails
 ```
-⚠️ An error occurred while searching {source name}.
+An error occurred while searching {source name}.
 Would you like to proceed with materials from other sources?
 
-1️⃣ Proceed with currently collected materials
-2️⃣ Retry search
-3️⃣ Cancel operation
+1. Proceed with currently collected materials
+2. Retry search
+3. Cancel operation
 ```
 
 ### Auto Character Count Adjustment

@@ -1,9 +1,9 @@
 # Naver Blog Automation Configuration
-# search-blogging skill v2.2.0
+# search-blogging skill v3.0.0
 
 app:
   name: search-blogging
-  version: "2.2.0"
+  version: "3.0.0"
   description: "네이버 경제 숏텐츠 트렌딩 주제 수집부터 블로그 글 작성까지 자동화"
 
 # Writing defaults
@@ -38,7 +38,7 @@ output:
 search:
   trending_url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
   max_topics: 10          # Maximum topics to collect
-  parallel_agents: 6      # Number of parallel search agents
+  parallel_agents: 3      # Number of parallel search agents (reduced from 6)
   results_per_source: 5   # Results per source
 
 # Tone & manner presets
@@ -47,28 +47,17 @@ tones:
     name: "전문적"
     description: "객관적이고 신뢰감 있는 어조"
     style: "합니다/습니다"
-    suitable_for:
-      - "금융"
-      - "건강"
-      - "법률"
-      - "기술"
+    suitable_for: ["금융", "건강", "법률", "기술"]
   friendly:
     name: "친근한"
     description: "대화하듯 편안한 어조"
     style: "비격식체"
-    suitable_for:
-      - "육아"
-      - "리뷰"
-      - "취미"
-      - "일상"
+    suitable_for: ["육아", "리뷰", "취미", "일상"]
   neutral:
     name: "중립적"
     description: "정보 전달 중심의 균형 잡힌 어조"
     style: "혼합"
-    suitable_for:
-      - "비교"
-      - "가이드"
-      - "뉴스"
+    suitable_for: ["비교", "가이드", "뉴스"]
 
 # Article structure presets
 structures:
@@ -112,211 +101,36 @@ structures:
 # Gemini API settings
 gemini:
   enabled: true
-  # FORCE gemini-3-pro-image-preview: fallback disabled
-  # All models set to the same to ensure only gemini-3-pro-image-preview is used
-  force_primary_only: true  # When true, disables fallback entirely
   models:
-    # Single model enforced - no fallback
-    primary: "gemini-3-pro-image-preview"               # Gemini 3 Pro Image - ALWAYS USE THIS
-    fallback: "gemini-3-pro-image-preview"              # Same as primary (fallback disabled)
-    fallback_2: "gemini-3-pro-image-preview"            # Same as primary (fallback disabled)
+    primary: "gemini-3-pro-image-preview"
   default_size: "1024x1024"
   timeout: 60
   retry_count: 3
   rate_limit:
     requests_per_minute: 10       # Conservative limit (actual: 15)
     delay_between_requests: 6.0   # Safe interval: 60s/10 requests = 6s
-  fallback_on:
-    - "429"           # Rate limit exceeded
-    - "QUOTA_EXCEEDED"
-    - "ResourceExhausted"
-    - "SAFETY"        # Content blocked
-    - "RECITATION"    # Content filtered
-
-# Image guide modes
-image_modes:
-  reference:
-    name: "참고 이미지"
-    description: "다운로드된 참고 이미지 사용"
-    symbol: "📷"
-  ai_generate:
-    name: "AI 생성"
-    description: "Gemini API로 자동 생성"
-    symbol: "🎨"
-    provider: "gemini"
 
 # Watermark settings (used by text_overlay.py)
 watermark:
   enabled: true
   text: "@money-lab-brian"
-  position: "bottom-center"       # bottom-center, bottom-left, bottom-right
-  margin_bottom: 60               # pixels from bottom
+  position: "bottom-center"
+  margin_bottom: 60
   font_size: 18
   font_color: "rgba(255,255,255,0.6)"
   font_family: "Pretendard, Nanum Gothic, sans-serif"
 
-# Naver blog image size standards
-image_sizes:
-  thumbnail:
-    width: 1300
-    height: 885
-    ratio: "1.47:1"
-    description: "OG image, search result thumbnail"
-  content_basic:
-    width: 693
-    height: 450
-    description: "Content basic width"
-  content_wide:
-    width: 886
-    height: 500
-    description: "Content expanded width"
-  square:
-    width: 700
-    height: 700
-    ratio: "1:1"
-    description: "Square (Instagram style)"
-  wide_title:
-    width: 1920
-    height: 400
-    description: "Wide title"
-  chart:
-    width: 800
-    height: 500
-    description: "For charts/graphs"
-  infographic:
-    width: 886
-    height: 800
-    description: "Vertical infographic"
-
-# Typography settings (블로그 글 기준)
+# Typography settings (blog post standards)
 typography:
   font_family: "Nanum Gothic, Pretendard, sans-serif"
   base_size: 16
   line_height: 1.8
-  # 블로그 글 폰트 크기 (고정값)
   blog_sizes:
-    title: 28           # 제목 (h1)
-    title_medium: 24    # 중제목 (h2)
-    title_small: 19     # 소제목 (h3)
-    body: 16            # 본문 (p)
-    footnote: 11        # 각주/출처
-  # 이미지/썸네일용 폰트 크기 (범위)
-  sizes:
-    title_large:
-      min: 28
-      max: 38
-      weight: "700-900"
-      use: "Thumbnail, main title"
-    title_medium:
-      min: 22
-      max: 26
-      weight: "600-700"
-      use: "Subtitle, section divider"
-    body:
-      min: 15
-      max: 17
-      weight: "400"
-      use: "Body text"
-    emphasis:
-      min: 18
-      max: 20
-      weight: "600-700"
-      use: "Emphasis text"
-    caption:
-      min: 12
-      max: 14
-      weight: "300-400"
-      use: "Caption, source"
-  svg_defaults:
-    main_title: 48
-    sub_title: 24
-    body: 16
-    caption: 12
-
-# Readability settings (가독성 규칙)
-readability:
-  sentence:
-    max_length: 60      # 한 문장 최대 60자
-    newlines: 1         # 문장 끝에 <br> 1개
-  paragraph:
-    target_length: 200  # 문단 당 200자 내외
-    newlines: 2         # 문단 사이 빈 줄 (2 newlines)
-
-# 2025-2026 trend palettes
-trend_palettes:
-  bold_gradient:
-    name: "볼드 그라데이션"
-    colors: ["#667eea", "#764ba2"]
-    type: "linear"
-    description: "Purple bold transition"
-    mood: "Mysterious, premium"
-  sunset_gradient:
-    name: "선셋 그라데이션"
-    colors: ["#f093fb", "#f5576c"]
-    type: "linear"
-    description: "Orange-pink warm transition"
-    mood: "Warm, energetic"
-  ocean_gradient:
-    name: "오션 그라데이션"
-    colors: ["#4facfe", "#00f2fe"]
-    type: "linear"
-    description: "Blue-mint cool transition"
-    mood: "Cool, refreshing"
-  sunset_warm:
-    name: "선셋 웜"
-    colors: ["#fa709a", "#fee140"]
-    type: "linear"
-    description: "Pink-yellow emotional transition"
-    mood: "Emotional, trendy"
-  deep_ocean:
-    name: "딥오션"
-    colors: ["#667eea", "#00d2ff"]
-    type: "linear"
-    description: "Purple-blue deep transition"
-    mood: "Deep, trustworthy"
-  glassmorphism:
-    name: "글라스모피즘"
-    colors: ["rgba(255,255,255,0.25)", "#f0f4f8"]
-    css:
-      background: "rgba(255, 255, 255, 0.25)"
-      backdrop_filter: "blur(10px)"
-      border: "1px solid rgba(255, 255, 255, 0.18)"
-      border_radius: "16px"
-    description: "Semi-transparent glass effect"
-    mood: "Sophisticated, modern"
-  warm_analog:
-    name: "아날로그 감성"
-    colors: ["#f7d794", "#e77f67", "#cf6a87"]
-    description: "Warm retro aesthetic"
-    mood: "Warm, vintage"
-  modern_minimal:
-    name: "모던 미니멀"
-    colors: ["#2d3436", "#636e72", "#b2bec3"]
-    description: "Clean gray tones"
-    mood: "Clean, professional"
-
-# Color palettes (by topic)
-color_palettes:
-  finance:
-    name: "금융/경제"
-    main: ["#1a365d", "#d69e2e"]      # Navy, Gold
-    accent: ["#38b2ac", "#ffffff"]     # Mint, White
-  parenting:
-    name: "육아/교육"
-    main: ["#fbb6ce", "#90cdf4"]      # Pastel pink, Sky blue
-    accent: ["#faf089", "#9ae6b4"]     # Light yellow, Mint
-  health:
-    name: "건강/의료"
-    main: ["#48bb78", "#ffffff"]      # Green, White
-    accent: ["#4299e1", "#9ae6b4"]     # Blue, Mint
-  tech:
-    name: "기술/IT"
-    main: ["#4c51bf", "#667eea"]      # Indigo, Purple
-    accent: ["#38b2ac", "#f0fff4"]     # Mint, Light green
-  lifestyle:
-    name: "라이프스타일"
-    main: ["#ed8936", "#faf089"]      # Orange, Yellow
-    accent: ["#fc8181", "#fed7d7"]     # Coral, Light pink
+    title: 28           # h1
+    title_medium: 24    # h2
+    title_small: 19     # h3
+    body: 16            # p
+    footnote: 11        # footnote/source
 
 # Progress status emoji
 progress:

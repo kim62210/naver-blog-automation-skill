@@ -1,14 +1,14 @@
 """
 Image Pipeline Module
 
-Integrated pipeline for generating blog images with text overlay support.
-Combines Gemini API image generation with SVG text composition.
+Integrated pipeline for generating blog images with watermark support.
+Combines Gemini API image generation with PIL watermark application.
 
 Workflow:
 1. Parse image guide content
-2. Extract prompts and text overlay configs
-3. Generate background images via Gemini API
-4. Apply text overlay using SVG composition
+2. Extract prompts and watermark configs
+3. Generate images via Gemini API (AI renders text directly)
+4. Apply watermark via PIL
 5. Export final PNG images
 """
 
@@ -17,13 +17,12 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional
 
 from .config import get_config, get_config_value
 from .gemini_image import GeminiImageGenerator, ImageResult, BatchResult
 from .image_guide_parser import extract_first_prompt, split_image_sections
 from .prompt_converter import (
-    TextOverlayConfig,
     WatermarkConfig,
     extract_watermark_config,
 )
@@ -35,7 +34,6 @@ class PipelineConfig:
     """Configuration for the image pipeline"""
 
     output_dir: str
-    use_text_overlay: bool = True
     concurrent_limit: int = 2
     default_size: str = "1024x1024"
     cleanup_temp: bool = True
@@ -50,9 +48,7 @@ class PipelineItem:
     prompt: str
     filename: str
     watermark_config: Optional[WatermarkConfig] = None
-    # Keep text_config for backward compatibility
-    text_config: Optional[TextOverlayConfig] = None
-    mode: str = "B"  # A: Reference, B: AI Generation (with text), B-3: AI + Watermark Only
+    mode: str = "B"  # B: AI Generation (with text), B-3: AI + Watermark Only
 
 
 @dataclass
@@ -62,15 +58,13 @@ class PipelineResult:
     total: int = 0
     success_count: int = 0
     failed_count: int = 0
-    text_overlay_count: int = 0
     results: List[ImageResult] = field(default_factory=list)
     total_time: float = 0.0
 
     def summary(self) -> str:
         """Generate summary string"""
         return (
-            f"📊 Pipeline result: {self.success_count}/{self.total} succeeded "
-            f"({self.text_overlay_count} with text overlay), "
+            f"Pipeline result: {self.success_count}/{self.total} succeeded, "
             f"time elapsed: {self.total_time:.1f}s"
         )
 
@@ -80,31 +74,27 @@ class ImagePipeline:
     Integrated image generation pipeline.
 
     Combines:
-    - Gemini API for background image generation
-    - SVG composition for text overlay
+    - Gemini API for image generation (AI renders text directly)
+    - PIL for watermark application
     - PNG export for final output
 
     Usage:
         pipeline = ImagePipeline()
 
-        # Option 1: Generate single image with text overlay
-        result = await pipeline.generate_with_text_overlay(
-            prompt="Blog thumbnail, finance concept...",
-            output_path="./images/01_썸네일.png",
-            text_config=TextOverlayConfig(
-                main_text="제목 텍스트",
-                sub_text="부제목"
-            )
+        # Option 1: Generate single image with watermark
+        result = await pipeline.generate_with_watermark(
+            prompt="Blog thumbnail, bold Korean text '...' in upper third...",
+            output_path="./images/01_thumbnail.png",
+            watermark_config=WatermarkConfig(watermark_text="@money-lab-brian")
         )
 
         # Option 2: Process entire image guide
-        with open("이미지 가이드.md", "r") as f:
+        with open("image_guide.md", "r") as f:
             content = f.read()
 
         result = await pipeline.process_image_guide(
             image_guide_content=content,
-            output_dir="./images/",
-            use_text_overlay=True
+            output_dir="./images/"
         )
     """
 
@@ -130,34 +120,6 @@ class ImagePipeline:
             watermark_enabled=bool(get_config_value(config, "watermark", "enabled", default=True)),
         )
 
-    async def generate_with_text_overlay(
-        self,
-        prompt: str,
-        output_path: str,
-        text_config: TextOverlayConfig,
-        size: str = "1024x1024",
-    ) -> ImageResult:
-        """
-        DEPRECATED: Use generate_with_watermark() instead.
-
-        Generate a single image with text overlay.
-
-        Args:
-            prompt: Image generation prompt (text will be stripped)
-            output_path: Final output path for PNG
-            text_config: Text overlay configuration
-            size: Image size
-
-        Returns:
-            ImageResult: Generation result
-        """
-        return await self.generator.generate_with_text_overlay(
-            prompt=prompt,
-            output_path=output_path,
-            text_config=text_config,
-            size=size,
-        )
-
     async def generate_with_watermark(
         self,
         prompt: str,
@@ -168,9 +130,8 @@ class ImagePipeline:
         """
         Generate a single image with AI-rendered text + watermark only.
 
-        This is the new recommended method where:
-        - AI renders all text directly in the image (main_text, sub_text in prompt)
-        - PIL only adds watermark at bottom-center
+        AI renders all text directly in the image (main_text, sub_text in prompt).
+        PIL only adds watermark at bottom-center.
 
         Args:
             prompt: Image generation prompt (including text instructions for AI)
@@ -183,8 +144,8 @@ class ImagePipeline:
 
         Example:
             result = await pipeline.generate_with_watermark(
-                prompt="Blog thumbnail, bold Korean text '제목' in upper third...",
-                output_path="./images/01_썸네일.png",
+                prompt="Blog thumbnail, bold Korean text '...' in upper third...",
+                output_path="./images/01_thumbnail.png",
                 watermark_config=WatermarkConfig(watermark_text="@money-lab-brian")
             )
         """
@@ -203,7 +164,6 @@ class ImagePipeline:
         self,
         image_guide_content: str,
         output_dir: str,
-        use_text_overlay: bool = True,
         concurrent_limit: int = 2,
     ) -> PipelineResult:
         """
@@ -212,7 +172,6 @@ class ImagePipeline:
         Args:
             image_guide_content: Content of the image guide markdown
             output_dir: Output directory for generated images
-            use_text_overlay: Whether to use text overlay for Mode B-2 items
             concurrent_limit: Concurrent generation limit
 
         Returns:
@@ -248,10 +207,8 @@ class ImagePipeline:
             batch_item = {
                 "prompt": item.prompt,
                 "filename": item.filename,
-                # Apply watermark to all modes (Mode B, B-3, etc.)
+                # Apply watermark to all modes (Mode B, B-3)
                 "watermark_config": effective_watermark,
-                # Legacy support: use text_config for Mode B-2
-                "text_config": item.text_config if (use_text_overlay and item.mode == "B-2") else None,
             }
             batch_items.append(batch_item)
 
@@ -262,16 +219,12 @@ class ImagePipeline:
             concurrent_limit=concurrent_limit,
         )
 
-        # Count text overlay items
-        text_overlay_count = sum(1 for item in items if item.text_config is not None)
-
         total_time = (datetime.now() - start_time).total_seconds()
 
         return PipelineResult(
             total=batch_result.total,
             success_count=batch_result.success_count,
             failed_count=batch_result.failed_count,
-            text_overlay_count=text_overlay_count,
             results=batch_result.results,
             total_time=total_time,
         )
@@ -281,9 +234,8 @@ class ImagePipeline:
         Parse image guide markdown to extract pipeline items.
 
         Supports formats:
-        - Mode A: 📷 Reference Image
-        - Mode B: 🎨 AI Generation
-        - Mode B-2: 🎨 AI Generation (Background Only) + Text Overlay
+        - Mode B: AI Generation (text rendered by AI)
+        - Mode B-3: AI Generation + explicit Watermark Config
 
         Args:
             content: Image guide markdown content
@@ -314,31 +266,25 @@ class ImagePipeline:
         Returns:
             PipelineItem or None if parsing fails
         """
-        # Check for Mode B-3 (AI renders text + Watermark Only) - NEW FORMAT
+        # Check for Mode B-3 (AI renders text + Watermark Only) - preferred format
         if "[Watermark Config]" in content or "watermark config" in content.lower():
             return self._parse_mode_b3(index, role, content)
 
-        # Check for Mode B-2 (DEPRECATED: Background Only + Text Overlay)
-        # Keep for backward compatibility but treat as Mode B
-        if "AI Generation (Background Only)" in content or "Background Only" in content:
-            return self._parse_mode_b2_legacy(index, role, content)
-
         # Check for Mode B (Regular AI Generation with text in prompt)
-        if "🎨 AI Generation" in content or "AI Generation Prompt" in content:
+        if "AI Generation" in content or "AI Generation Prompt" in content:
             return self._parse_mode_b(index, role, content)
 
-        # Check for Mode A (Reference Image)
-        if "📷" in content or "Reference Image" in content or "Downloaded image" in content:
-            return self._parse_mode_a(index, role, content)
+        # Fallback: try to extract a prompt from any section with a fenced code block
+        prompt = extract_first_prompt(content)
+        if prompt:
+            return PipelineItem(
+                index=index,
+                role=role,
+                prompt=prompt,
+                filename=self._generate_filename(index, role),
+                mode="B",
+            )
 
-        return None
-
-    def _parse_mode_a(
-        self, index: int, role: str, content: str
-    ) -> Optional[PipelineItem]:
-        """Parse Mode A (Reference Image) section"""
-        # Mode A uses downloaded reference images, not generated
-        # Return None as we don't generate these
         return None
 
     def _parse_mode_b(
@@ -358,7 +304,6 @@ class ImagePipeline:
             role=role,
             prompt=prompt,
             filename=filename,
-            text_config=None,
             mode="B",
         )
 
@@ -368,7 +313,7 @@ class ImagePipeline:
         """
         Parse Mode B-3 (AI renders text + Watermark Only) section.
 
-        This is the NEW format where:
+        This is the preferred format where:
         - AI prompt includes text rendering instructions
         - PIL only adds watermark to the final image
         """
@@ -392,117 +337,6 @@ class ImagePipeline:
             mode="B-3",
         )
 
-    def _parse_mode_b2_legacy(
-        self, index: int, role: str, content: str
-    ) -> Optional[PipelineItem]:
-        """
-        DEPRECATED: Parse Mode B-2 (Background Only + Text Overlay) section.
-
-        This is kept for backward compatibility only.
-        New code should use Mode B-3 (AI renders text + Watermark Only).
-        """
-        # Extract background-only prompt
-        prompt = extract_first_prompt(content)
-        if not prompt:
-            return None
-
-        # Extract text overlay config (old format)
-        text_config = self._extract_text_overlay_config(content)
-
-        # Generate filename
-        filename = self._generate_filename(index, role)
-
-        return PipelineItem(
-            index=index,
-            role=role,
-            prompt=prompt,
-            filename=filename,
-            text_config=text_config,
-            mode="B-2",
-        )
-
-    def _extract_text_overlay_config(self, content: str) -> Optional[TextOverlayConfig]:
-        """
-        Extract TextOverlayConfig from section content.
-
-        Looks for patterns like:
-        - main_text: "..."
-        - sub_text: "..."
-        - position: "center"
-        - font_size: 48
-        etc.
-        """
-        config_kwargs = {}
-
-        # Extract main_text
-        main_text_match = re.search(
-            r"main_text[:\s]*[\"'](.+?)[\"']",
-            content,
-            re.IGNORECASE
-        )
-        if main_text_match:
-            config_kwargs["main_text"] = main_text_match.group(1)
-
-        # Extract sub_text
-        sub_text_match = re.search(
-            r"sub_text[:\s]*[\"'](.+?)[\"']",
-            content,
-            re.IGNORECASE
-        )
-        if sub_text_match:
-            config_kwargs["sub_text"] = sub_text_match.group(1)
-
-        # Extract position
-        position_match = re.search(
-            r"position[:\s]*[\"'](.+?)[\"']",
-            content,
-            re.IGNORECASE
-        )
-        if position_match:
-            config_kwargs["position"] = position_match.group(1)
-
-        # Extract font_size
-        font_size_match = re.search(
-            r"font_size[:\s]*(\d+)",
-            content,
-            re.IGNORECASE
-        )
-        if font_size_match:
-            config_kwargs["font_size"] = int(font_size_match.group(1))
-
-        # Extract font_color
-        font_color_match = re.search(
-            r"font_color[:\s]*[\"'](.+?)[\"']",
-            content,
-            re.IGNORECASE
-        )
-        if font_color_match:
-            config_kwargs["font_color"] = font_color_match.group(1)
-
-        # Extract shadow
-        shadow_match = re.search(
-            r"shadow[:\s]*(true|false)",
-            content,
-            re.IGNORECASE
-        )
-        if shadow_match:
-            config_kwargs["shadow"] = shadow_match.group(1).lower() == "true"
-
-        # Extract background_box
-        bg_box_match = re.search(
-            r"background_box[:\s]*(true|false)",
-            content,
-            re.IGNORECASE
-        )
-        if bg_box_match:
-            config_kwargs["background_box"] = bg_box_match.group(1).lower() == "true"
-
-        # Only return config if we have at least main_text
-        if "main_text" in config_kwargs:
-            return TextOverlayConfig(**config_kwargs)
-
-        return None
-
     def _generate_filename(self, index: int, role: str) -> str:
         """
         Generate filename from index and role.
@@ -512,7 +346,7 @@ class ImagePipeline:
             role: Image role description
 
         Returns:
-            Filename string (e.g., "01_썸네일.png")
+            Filename string (e.g., "01_thumbnail.png")
         """
         # Clean role for filename
         clean_role = re.sub(r"[^\w가-힣\s]", "", role)
@@ -526,95 +360,9 @@ class ImagePipeline:
 
 # Convenience functions for direct usage
 
-async def generate_blog_image(
-    prompt: str,
-    output_path: str,
-    main_text: str,
-    sub_text: str = "",
-    position: str = "center",
-    font_size: int = 48,
-    font_color: str = "#FFFFFF",
-    shadow: bool = True,
-    api_key: Optional[str] = None,
-) -> ImageResult:
-    """
-    Convenience function to generate a single blog image with text overlay.
-
-    Args:
-        prompt: Background image generation prompt
-        output_path: Output file path
-        main_text: Main title text
-        sub_text: Subtitle text (optional)
-        position: Text position
-        font_size: Font size
-        font_color: Font color (hex)
-        shadow: Whether to add text shadow
-        api_key: Google API key (optional)
-
-    Returns:
-        ImageResult: Generation result
-
-    Example:
-        result = await generate_blog_image(
-            prompt="Finance blog thumbnail, money growing concept, green gradient",
-            output_path="./images/thumbnail.png",
-            main_text="2026년 적금 가이드",
-            sub_text="연 5% 고금리 상품 총정리"
-        )
-    """
-    pipeline = ImagePipeline(api_key=api_key)
-
-    text_config = TextOverlayConfig(
-        main_text=main_text,
-        sub_text=sub_text,
-        position=position,
-        font_size=font_size,
-        font_color=font_color,
-        shadow=shadow,
-    )
-
-    return await pipeline.generate_with_text_overlay(
-        prompt=prompt,
-        output_path=output_path,
-        text_config=text_config,
-    )
-
-
-def generate_blog_image_sync(
-    prompt: str,
-    output_path: str,
-    main_text: str,
-    sub_text: str = "",
-    position: str = "center",
-    font_size: int = 48,
-    font_color: str = "#FFFFFF",
-    shadow: bool = True,
-    api_key: Optional[str] = None,
-) -> ImageResult:
-    """
-    Synchronous wrapper for generate_blog_image.
-
-    See generate_blog_image for arguments.
-    """
-    return asyncio.run(
-        generate_blog_image(
-            prompt=prompt,
-            output_path=output_path,
-            main_text=main_text,
-            sub_text=sub_text,
-            position=position,
-            font_size=font_size,
-            font_color=font_color,
-            shadow=shadow,
-            api_key=api_key,
-        )
-    )
-
-
 async def process_image_guide_file(
     guide_path: str,
     output_dir: str,
-    use_text_overlay: bool = True,
     api_key: Optional[str] = None,
 ) -> PipelineResult:
     """
@@ -623,7 +371,6 @@ async def process_image_guide_file(
     Args:
         guide_path: Path to the image guide markdown file
         output_dir: Output directory for generated images
-        use_text_overlay: Whether to use text overlay
         api_key: Google API key (optional)
 
     Returns:
@@ -631,7 +378,7 @@ async def process_image_guide_file(
 
     Example:
         result = await process_image_guide_file(
-            guide_path="./이미지 가이드.md",
+            guide_path="./image_guide.md",
             output_dir="./images/"
         )
         print(result.summary())
@@ -643,14 +390,12 @@ async def process_image_guide_file(
     return await pipeline.process_image_guide(
         image_guide_content=content,
         output_dir=output_dir,
-        use_text_overlay=use_text_overlay,
     )
 
 
 def process_image_guide_file_sync(
     guide_path: str,
     output_dir: str,
-    use_text_overlay: bool = True,
     api_key: Optional[str] = None,
 ) -> PipelineResult:
     """
@@ -662,7 +407,6 @@ def process_image_guide_file_sync(
         process_image_guide_file(
             guide_path=guide_path,
             output_dir=output_dir,
-            use_text_overlay=use_text_overlay,
             api_key=api_key,
         )
     )

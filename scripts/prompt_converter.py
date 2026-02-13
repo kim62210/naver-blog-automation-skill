@@ -6,7 +6,7 @@ Converts image guide prompts to Gemini API optimized format.
 
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from .config import get_config, get_config_value
 from .image_guide_parser import extract_first_prompt, split_image_sections
@@ -30,55 +30,21 @@ class WatermarkConfig:
     watermark_enabled: bool = True
 
 
-# Keep TextOverlayConfig as alias for backward compatibility during transition
-@dataclass
-class TextOverlayConfig:
-    """
-    DEPRECATED: Use WatermarkConfig instead.
-
-    This class is kept for backward compatibility only.
-    New code should use WatermarkConfig directly.
-    """
-
-    main_text: str = ""
-    sub_text: str = ""
-    position: str = "center"
-    font_size: int = 48
-    font_color: str = "#FFFFFF"
-    font_family: str = "Pretendard, Nanum Gothic, sans-serif"
-    shadow: bool = True
-    shadow_color: str = "rgba(0,0,0,0.5)"
-    shadow_offset: int = 2
-    background_box: bool = False
-    background_box_color: str = "rgba(0,0,0,0.3)"
-    background_box_padding: int = 20
-    # Watermark fields (new)
-    watermark_text: str = "@money-lab-brian"
-    watermark_position: str = "bottom-center"
-    watermark_margin_bottom: int = 60
-    watermark_font_size: int = 18
-    watermark_font_color: str = "rgba(255,255,255,0.6)"
-    watermark_enabled: bool = True
-
-
 @dataclass
 class ImageGuideItem:
     """Data class for image guide items"""
 
     index: int
     role: str
-    mode: str  # "A" (reference), "B" (AI generation)
+    mode: str  # "B" (AI generation)
     korean_description: str = ""
     prompt: str = ""
     style_guide: Dict[str, str] = None
     filename: str = ""
-    text_overlay: TextOverlayConfig = None  # New field for text overlay config
 
     def __post_init__(self):
         if self.style_guide is None:
             self.style_guide = {}
-        if self.text_overlay is None:
-            self.text_overlay = TextOverlayConfig()
 
 
 @dataclass
@@ -89,117 +55,6 @@ class GeminiPrompt:
     filename: str
     aspect_ratio: str = "16:9"
     style_hints: str = ""
-
-
-def strip_text_instructions(prompt: str) -> str:
-    """
-    Remove text-related instructions from prompt for background-only generation.
-
-    Args:
-        prompt: Original prompt string
-
-    Returns:
-        Prompt with text instructions removed
-
-    Example:
-        >>> strip_text_instructions('Blog thumbnail with "Hello World" text overlay')
-        'Blog thumbnail'
-    """
-    # Patterns to remove
-    text_patterns = [
-        # Text overlay patterns
-        r'[,\s]*(?:include|with|add)?[,\s]*(?:bold|large|big|small)?[,\s]*(?:Korean|English|Chinese)?[,\s]*text\s*overlay[:\s]*["\'][^"\']*["\']',
-        r'[,\s]*(?:bold|large|big)?[,\s]*["\'][^"\']*["\'][,\s]*(?:Korean|English)?\s*text\s*overlay',
-        r'[,\s]*text\s*overlay[:\s]*["\'][^"\']*["\']',
-        r'[,\s]*["\'][^"\']*["\'][,\s]*text',
-        # Text-related keywords
-        r'[,\s]*include\s+(?:bold\s+)?(?:Korean\s+)?text[^,\.]*',
-        r'[,\s]*(?:bold|large)\s+(?:Korean\s+)?text[^,\.]*',
-        r'[,\s]*Korean\s+text[^,\.]*',
-        r'[,\s]*text\s+saying[^,\.]*',
-        r'[,\s]*with\s+text[^,\.]*',
-        r'[,\s]*text\s+reading[^,\.]*',
-        # Typography patterns
-        r'[,\s]*typography[^,\.]*',
-        r'[,\s]*lettering[^,\.]*',
-        r'[,\s]*title\s+text[^,\.]*',
-        r'[,\s]*headline[^,\.]*',
-    ]
-
-    result = prompt
-    for pattern in text_patterns:
-        result = re.sub(pattern, '', result, flags=re.IGNORECASE)
-
-    # Clean up multiple commas and spaces
-    result = re.sub(r',\s*,', ',', result)
-    result = re.sub(r'\s+', ' ', result)
-    result = re.sub(r',\s*$', '', result)
-    result = re.sub(r'^\s*,', '', result)
-    result = result.strip()
-
-    return result
-
-
-def extract_text_config(prompt: str, korean_desc: str = "") -> TextOverlayConfig:
-    """
-    Extract text overlay configuration from prompt and Korean description.
-
-    Args:
-        prompt: Original English prompt
-        korean_desc: Korean description
-
-    Returns:
-        TextOverlayConfig with extracted text information
-    """
-    config = TextOverlayConfig()
-
-    # Extract quoted text from prompt
-    quoted_texts = re.findall(r'["\']([^"\']+)["\']', prompt)
-
-    # Extract Korean text from Korean description
-    korean_quoted = re.findall(r'["\']([^"\']+)["\']', korean_desc)
-
-    # Prioritize Korean quoted text for main_text
-    if korean_quoted:
-        config.main_text = korean_quoted[0]
-        if len(korean_quoted) > 1:
-            config.sub_text = korean_quoted[1]
-    elif quoted_texts:
-        # Use English quoted text as fallback
-        config.main_text = quoted_texts[0]
-        if len(quoted_texts) > 1:
-            config.sub_text = quoted_texts[1]
-
-    # Detect position hints
-    position_hints = {
-        'center': ['center', '중앙', '가운데'],
-        'top': ['top', '상단', '위'],
-        'bottom': ['bottom', '하단', '아래'],
-        'top-left': ['top-left', '좌상단'],
-        'top-right': ['top-right', '우상단'],
-        'bottom-left': ['bottom-left', '좌하단'],
-        'bottom-right': ['bottom-right', '우하단'],
-    }
-
-    combined_text = f"{prompt} {korean_desc}".lower()
-    for position, keywords in position_hints.items():
-        if any(kw in combined_text for kw in keywords):
-            config.position = position
-            break
-
-    # Detect font size hints
-    if 'bold' in combined_text or '굵은' in korean_desc:
-        config.font_size = 48
-    if 'large' in combined_text or '큰' in korean_desc:
-        config.font_size = 56
-    if 'small' in combined_text or '작은' in korean_desc:
-        config.font_size = 32
-
-    # Detect shadow preference
-    if 'no shadow' in combined_text or '그림자 없' in korean_desc:
-        config.shadow = False
-
-    return config
 
 
 def convert_to_gemini_prompt(

@@ -24,6 +24,54 @@ class ValidationResult:
     message: str             # Status message
 
 
+def _strip_content(text: str, mode: str = "html") -> str:
+    """
+    Internal helper to strip HTML, tags, and placeholders from text.
+
+    Args:
+        text: Raw text content
+        mode: "html" for HTML content, "draft" for draft text with render tags
+
+    Returns:
+        Stripped text with normalized whitespace
+    """
+    # Step 1: Remove HTML (common to both modes)
+    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
+    text = re.sub(r'<[^>]+>', '', text)
+
+    # Step 2: Draft-specific stripping
+    if mode == "draft":
+        # Remove non-render memo blocks: [[...]]
+        text = re.sub(r'\[\[.*?\]\]', '', text)
+
+        # Remove IMG placeholders (draft alternative format)
+        text = re.sub(r'\[IMG\s*\d+[^\]]*\]', '', text, flags=re.IGNORECASE)
+
+        # Remove inline emphasis markers
+        text = re.sub(r'\[(?:/?B|/?U|/?I)\]', '', text, flags=re.IGNORECASE)
+
+        # Remove render tags at line start
+        render_tag_pattern = (
+            r'^\[(?:'
+            r'제목|중제목|소제목|인용|본문|문단|각주|출처|'
+            r'TITLE|H1|H2|H3|QUOTE|P|CTA|FOOTNOTE|SOURCE|'
+            r'(?:폰트|강조|FONT|EMPHASIS)\s*:[^\]]+'
+            r')\]\s*'
+        )
+        text = re.sub(render_tag_pattern, '', text, flags=re.MULTILINE | re.IGNORECASE)
+
+    # Step 3: Common stripping (both modes)
+    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
+    text = re.sub(r'(?:^|\s)#\S+', '', text)
+
+    # Step 4: Normalize whitespace
+    text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r'\n+', ' ', text)
+
+    return text.strip()
+
+
 def count_content_chars(html_content: str, include_spaces: bool = True) -> int:
     """
     Count characters in HTML content (pure text only).
@@ -42,27 +90,7 @@ def count_content_chars(html_content: str, include_spaces: bool = True) -> int:
     Returns:
         Character count
     """
-    text = html_content
-
-    # Step 1: Remove CSS style blocks FIRST (before tag stripping)
-    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
-
-    # Step 2: Remove HTML comments
-    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
-
-    # Step 3: Remove HTML tags
-    text = re.sub(r'<[^>]+>', '', text)
-
-    # Step 4: Remove image placeholders
-    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
-
-    # Step 5: Remove hashtag lines (e.g., "#태그1 #태그2 #태그3")
-    text = re.sub(r'(?:^|\s)#\S+', '', text)
-
-    # Step 6: Normalize whitespace
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'\n+', ' ', text)
-    text = text.strip()
+    text = _strip_content(html_content, mode="html")
 
     if not include_spaces:
         text = re.sub(r'\s+', '', text)
@@ -91,122 +119,12 @@ def count_draft_chars(draft_text: str, include_spaces: bool = True) -> int:
     Returns:
         Character count
     """
-    text = draft_text
-
-    # Remove any accidental HTML (keep behavior consistent with HTML validator)
-    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
-    text = re.sub(r'<[^>]+>', '', text)
-
-    # Remove non-render memo blocks: [[...]]
-    text = re.sub(r'\[\[.*?\]\]', '', text)
-
-    # Remove image placeholders
-    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
-    text = re.sub(r'\[IMG\s*\d+[^\]]*\]', '', text, flags=re.IGNORECASE)
-
-    # Remove inline emphasis markers (keep inner text)
-    text = re.sub(r'\[(?:/?B|/?U|/?I)\]', '', text, flags=re.IGNORECASE)
-
-    # Remove leading render tags, but keep the actual text after the tag.
-    # (Examples: [중제목] ..., [폰트:24px bold] ..., [강조:Bold] ...)
-    render_tag_pattern = (
-        r'^\[(?:'
-        r'제목|중제목|소제목|인용|본문|문단|각주|출처|'
-        r'TITLE|H1|H2|H3|QUOTE|P|CTA|FOOTNOTE|SOURCE|'
-        r'(?:폰트|강조|FONT|EMPHASIS)\s*:[^\]]+'
-        r')\]\s*'
-    )
-    text = re.sub(render_tag_pattern, '', text, flags=re.MULTILINE | re.IGNORECASE)
-
-    # Remove hashtag tokens (e.g., "#태그1 #태그2 ...")
-    text = re.sub(r'(?:^|\s)#\S+', '', text)
-
-    # Normalize whitespace
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'\n+', ' ', text)
-    text = text.strip()
+    text = _strip_content(draft_text, mode="draft")
 
     if not include_spaces:
         text = re.sub(r'\s+', '', text)
 
     return len(text)
-
-
-def extract_draft_pure_text(draft_text: str) -> str:
-    """
-    Extract pure text from 원본.txt for debugging.
-    Returns the text that would be counted by count_draft_chars().
-    """
-    text = draft_text
-
-    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
-    text = re.sub(r'<[^>]+>', '', text)
-    text = re.sub(r'\[\[.*?\]\]', '', text)
-    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
-    text = re.sub(r'\[IMG\s*\d+[^\]]*\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[(?:/?B|/?U|/?I)\]', '', text, flags=re.IGNORECASE)
-
-    render_tag_pattern = (
-        r'^\[(?:'
-        r'제목|중제목|소제목|인용|본문|문단|각주|출처|'
-        r'TITLE|H1|H2|H3|QUOTE|P|CTA|FOOTNOTE|SOURCE|'
-        r'(?:폰트|강조|FONT|EMPHASIS)\s*:[^\]]+'
-        r')\]\s*'
-    )
-    text = re.sub(render_tag_pattern, '', text, flags=re.MULTILINE | re.IGNORECASE)
-    text = re.sub(r'(?:^|\s)#\S+', '', text)
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'\n+', ' ', text)
-
-    return text.strip()
-
-
-def validate_draft_char_count(draft_text: str, config: Optional[dict] = None) -> ValidationResult:
-    """
-    Validate character count for draft text (원본.txt).
-
-    Args:
-        draft_text: Draft content (plain text)
-        config: Configuration dictionary (uses default if not provided)
-
-    Returns:
-        ValidationResult object
-    """
-    if config is None:
-        config = get_config()
-
-    target = get_config_value(config, "writing", "char_count", default=1900)
-    min_chars = get_config_value(config, "writing", "min_chars", default=1850)
-    max_chars = get_config_value(config, "writing", "max_chars", default=1950)
-
-    char_count = count_draft_chars(draft_text)
-    difference = char_count - target
-
-    if char_count < min_chars:
-        status = "under"
-        is_valid = False
-        message = f"⚠️ Draft character count under limit: {char_count} chars (minimum {min_chars} required, {min_chars - char_count} short)"
-    elif char_count > max_chars:
-        status = "over"
-        is_valid = False
-        message = f"⚠️ Draft character count over limit: {char_count} chars (maximum {max_chars}, {char_count - max_chars} over)"
-    else:
-        status = "ok"
-        is_valid = True
-        message = f"✅ Draft character count valid: {char_count} chars (target: {target})"
-
-    return ValidationResult(
-        char_count=char_count,
-        target=target,
-        min_chars=min_chars,
-        max_chars=max_chars,
-        is_valid=is_valid,
-        status=status,
-        difference=difference,
-        message=message
-    )
 
 
 def extract_pure_text(html_content: str) -> str:
@@ -220,18 +138,76 @@ def extract_pure_text(html_content: str) -> str:
     Returns:
         Pure text string (without HTML, CSS, placeholders, hashtags)
     """
-    text = html_content
+    return _strip_content(html_content, mode="html")
 
-    # Same pipeline as count_content_chars
-    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
-    text = re.sub(r'<[^>]+>', '', text)
-    text = re.sub(r'\[이미지\s*\d+\s*삽입[^\]]*\]', '', text)
-    text = re.sub(r'(?:^|\s)#\S+', '', text)
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'\n+', ' ', text)
 
-    return text.strip()
+def extract_draft_pure_text(draft_text: str) -> str:
+    """
+    Extract pure text from 원본.txt for debugging.
+    Returns the text that would be counted by count_draft_chars().
+    """
+    return _strip_content(draft_text, mode="draft")
+
+
+def _validate_char_count_internal(char_count: int, config: Optional[dict], prefix: str = "") -> ValidationResult:
+    """
+    Internal helper for character count validation logic.
+
+    Args:
+        char_count: The counted character count
+        config: Configuration dictionary
+        prefix: Prefix for message (e.g., "Draft " or "")
+
+    Returns:
+        ValidationResult object
+    """
+    if config is None:
+        config = get_config()
+
+    target = get_config_value(config, "writing", "char_count", default=1900)
+    min_chars = get_config_value(config, "writing", "min_chars", default=1850)
+    max_chars = get_config_value(config, "writing", "max_chars", default=1950)
+
+    difference = char_count - target
+
+    if char_count < min_chars:
+        status = "under"
+        is_valid = False
+        message = f"⚠️ {prefix}Character count under limit: {char_count} chars (minimum {min_chars} required, {min_chars - char_count} short)"
+    elif char_count > max_chars:
+        status = "over"
+        is_valid = False
+        message = f"⚠️ {prefix}Character count over limit: {char_count} chars (maximum {max_chars}, {char_count - max_chars} over)"
+    else:
+        status = "ok"
+        is_valid = True
+        message = f"✅ {prefix}Character count valid: {char_count} chars (target: {target})"
+
+    return ValidationResult(
+        char_count=char_count,
+        target=target,
+        min_chars=min_chars,
+        max_chars=max_chars,
+        is_valid=is_valid,
+        status=status,
+        difference=difference,
+        message=message
+    )
+
+
+def validate_draft_char_count(draft_text: str, config: Optional[dict] = None) -> ValidationResult:
+    """
+    Validate character count for draft text (원본.txt).
+
+    Args:
+        draft_text: Draft content (plain text)
+        config: Configuration dictionary (uses default if not provided)
+
+    Returns:
+        ValidationResult object
+    """
+    char_count = count_draft_chars(draft_text)
+    return _validate_char_count_internal(char_count, config, prefix="Draft ")
 
 
 def validate_char_count(html_content: str, config: Optional[dict] = None) -> ValidationResult:
@@ -245,39 +221,8 @@ def validate_char_count(html_content: str, config: Optional[dict] = None) -> Val
     Returns:
         ValidationResult object
     """
-    if config is None:
-        config = get_config()
-
-    target = get_config_value(config, "writing", "char_count", default=1900)
-    min_chars = get_config_value(config, "writing", "min_chars", default=1850)
-    max_chars = get_config_value(config, "writing", "max_chars", default=1950)
-
     char_count = count_content_chars(html_content)
-    difference = char_count - target
-
-    if char_count < min_chars:
-        status = "under"
-        is_valid = False
-        message = f"⚠️ Character count under limit: {char_count} chars (minimum {min_chars} required, {min_chars - char_count} short)"
-    elif char_count > max_chars:
-        status = "over"
-        is_valid = False
-        message = f"⚠️ Character count over limit: {char_count} chars (maximum {max_chars}, {char_count - max_chars} over)"
-    else:
-        status = "ok"
-        is_valid = True
-        message = f"✅ Character count valid: {char_count} chars (target: {target})"
-
-    return ValidationResult(
-        char_count=char_count,
-        target=target,
-        min_chars=min_chars,
-        max_chars=max_chars,
-        is_valid=is_valid,
-        status=status,
-        difference=difference,
-        message=message
-    )
+    return _validate_char_count_internal(char_count, config, prefix="")
 
 
 def get_section_breakdown(html_content: str) -> List[Tuple[str, int]]:

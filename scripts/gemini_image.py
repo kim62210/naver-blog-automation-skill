@@ -1,38 +1,29 @@
 """
 Gemini Image Generation API Integration Module
 
-Automatically generates blog images using Google Gemini API.
-Uses a 3-tier fallback model strategy driven by `config.yaml` (`gemini.models`).
-
-Updated to use the new google-genai SDK.
-Supports text overlay pipeline for better Korean text quality.
+Generates blog images using Google Gemini API (gemini-3-pro-image-preview).
+Uses the new google-genai SDK with text overlay and watermark support.
 """
 
 import asyncio
 import base64
 import os
-import re
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from .config import get_config, get_config_value
 
 if TYPE_CHECKING:
-    from .prompt_converter import TextOverlayConfig as PromptTextOverlayConfig
     from .prompt_converter import WatermarkConfig
 
-
-# API configuration constants - 3-tier fallback system
-# These defaults can be overridden via config.yaml (`gemini.models`)
-DEFAULT_MODEL = "gemini-3-pro-image-preview"  # Best quality (may require paid tier)
-FALLBACK_MODEL = "gemini-3-pro-image-preview"
-FALLBACK_MODEL_2 = "gemini-3-pro-image-preview"
+DEFAULT_MODEL = "gemini-3-pro-image-preview"
 DEFAULT_SIZE = "1024x1024"
 DEFAULT_TIMEOUT = 60
 DEFAULT_RETRY_COUNT = 3
-DEFAULT_RATE_LIMIT_DELAY = 6.0  # Safe interval: 60s/10 requests = 6s
+DEFAULT_RATE_LIMIT_DELAY = 6.0  # 60s / 10 requests
 
 
 def _get_rate_limit_delay() -> float:
@@ -46,8 +37,7 @@ def _get_rate_limit_delay() -> float:
 
 @dataclass
 class ImageResult:
-    """Data class for image generation result"""
-
+    """Image generation result."""
     success: bool
     file_path: Optional[str] = None
     prompt: str = ""
@@ -57,14 +47,13 @@ class ImageResult:
 
     def __str__(self) -> str:
         if self.success:
-            return f"✅ Generation complete: {self.file_path} ({self.model_used})"
-        return f"❌ Generation failed: {self.error_message}"
+            return f"Generation complete: {self.file_path} ({self.model_used})"
+        return f"Generation failed: {self.error_message}"
 
 
 @dataclass
 class BatchResult:
-    """Batch image generation result"""
-
+    """Batch image generation result."""
     total: int = 0
     success_count: int = 0
     failed_count: int = 0
@@ -73,970 +62,269 @@ class BatchResult:
 
     @property
     def success_rate(self) -> float:
-        if self.total == 0:
-            return 0.0
-        return (self.success_count / self.total) * 100
+        return (self.success_count / self.total * 100) if self.total else 0.0
 
     def summary(self) -> str:
         return (
-            f"📊 Batch generation result: {self.success_count}/{self.total} succeeded "
-            f"({self.success_rate:.1f}%), time elapsed: {self.total_time:.1f}s"
+            f"Batch result: {self.success_count}/{self.total} succeeded "
+            f"({self.success_rate:.1f}%), {self.total_time:.1f}s"
         )
 
 
 class GeminiImageGenerator:
-    """
-    Image generator using Gemini API (new google-genai SDK)
+    """Image generator using Gemini API (google-genai SDK)."""
 
-    Usage example:
-        generator = GeminiImageGenerator()
-        result = await generator.generate_image(
-            prompt="Blog thumbnail, modern design...",
-            save_path="./images/01_thumbnail.png"
-        )
-    """
-
-    def __init__(
-        self,
-        api_key: Optional[str] = None,
-        primary_model: Optional[str] = None,
-        fallback_model: Optional[str] = None,
-        fallback_model_2: Optional[str] = None,
-        force_primary_only: Optional[bool] = None,
-    ):
-        """
-        Initialize GeminiImageGenerator
-
-        Args:
-            api_key: Google API key (loads from environment variable if not provided)
-            primary_model: Primary model (default: `DEFAULT_MODEL` or config override)
-            fallback_model: First fallback model (default: `FALLBACK_MODEL` or config override)
-            fallback_model_2: Second fallback model (default: `FALLBACK_MODEL_2` or config override)
-            force_primary_only: If True, disables fallback and only uses primary model
-        """
+    def __init__(self, api_key: Optional[str] = None, primary_model: Optional[str] = None):
         self.api_key = api_key or self._load_api_key()
-        self.primary_model = primary_model or self._get_config_model("primary") or DEFAULT_MODEL
-        self.fallback_model = fallback_model or self._get_config_model("fallback") or FALLBACK_MODEL
-        self.fallback_model_2 = fallback_model_2 or self._get_config_model("fallback_2") or FALLBACK_MODEL_2
-        self.timeout = self._get_config_timeout() or DEFAULT_TIMEOUT
-        self.retry_count = self._get_config_retry_count() or DEFAULT_RETRY_COUNT
-
-        # Force primary model only (disable fallback)
-        self.force_primary_only = force_primary_only if force_primary_only is not None else self._get_force_primary_only()
-
-        # Client initialization (lazy loading)
+        self.primary_model = primary_model or self._get_config_value("gemini", "models", "primary") or DEFAULT_MODEL
+        self.timeout = self._get_config_value("gemini", "timeout") or DEFAULT_TIMEOUT
+        self.retry_count = self._get_config_value("gemini", "retry_count") or DEFAULT_RETRY_COUNT
         self._client = None
 
     def _load_api_key(self) -> str:
-        """Load API key from environment variable"""
         api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-
         if not api_key:
-            raise ValueError(
-                "Google API key not set. "
-                "Set environment variable GOOGLE_API_KEY or GEMINI_API_KEY."
-            )
-
+            raise ValueError("Set GOOGLE_API_KEY or GEMINI_API_KEY environment variable.")
         return api_key
 
-    def _get_config_model(self, model_type: str) -> Optional[str]:
-        """Get model settings from config.yaml"""
+    @staticmethod
+    def _get_config_value(*keys) -> Any:
         config = get_config()
-        return get_config_value(config, "gemini", "models", model_type)
-
-    def _get_config_timeout(self) -> Optional[int]:
-        """Get timeout settings from config.yaml"""
-        config = get_config()
-        return get_config_value(config, "gemini", "timeout")
-
-    def _get_config_retry_count(self) -> Optional[int]:
-        """Get retry count settings from config.yaml"""
-        config = get_config()
-        return get_config_value(config, "gemini", "retry_count")
-
-    def _get_force_primary_only(self) -> bool:
-        """Get force_primary_only setting from config.yaml (default: True)"""
-        config = get_config()
-        value = get_config_value(config, "gemini", "force_primary_only")
-        # Default to True to enforce gemini-3-pro-image-preview
-        return value if value is not None else True
+        return get_config_value(config, *keys)
 
     def _init_client(self):
-        """Initialize Google GenAI client (new SDK)"""
         if self._client is not None:
             return
-
         try:
             from google import genai
             self._client = genai.Client(api_key=self.api_key)
             self._genai_types = None
-            # Import types for configuration
             try:
                 from google.genai import types
                 self._genai_types = types
             except ImportError:
                 pass
         except ImportError:
-            raise ImportError(
-                "google-genai package not installed. "
-                "Install with: pip install google-genai"
-            )
+            raise ImportError("google-genai not installed. Run: pip install google-genai")
 
-    async def generate_image(
-        self,
-        prompt: str,
-        save_path: Optional[str] = None,
-        size: str = DEFAULT_SIZE,
-        use_fallback: bool = True,
-    ) -> ImageResult:
-        """
-        Generate a single image with optional fallback.
-
-        Args:
-            prompt: Image generation prompt (English recommended)
-            save_path: Save path (generates temp file if not provided)
-            size: Image size (default: 1024x1024)
-            use_fallback: Whether to use fallback models on failure
-                          (ignored if force_primary_only is True)
-
-        Returns:
-            ImageResult: Generation result
-        """
+    async def generate_image(self, prompt: str, save_path: Optional[str] = None,
+                             size: str = DEFAULT_SIZE, **kwargs) -> ImageResult:
+        """Generate a single image using the primary model."""
         start_time = datetime.now()
-
-        # Check if fallback is disabled (force primary model only)
-        # When force_primary_only is True, only gemini-3-pro-image-preview is used
-        effective_use_fallback = use_fallback and not self.force_primary_only
-
-        if self.force_primary_only:
-            print(f"🔒 Force primary model only: {self.primary_model}")
-
-        # Tier 1: Primary model (gemini-3-pro-image-preview)
-        result = await self._generate_with_model(
-            prompt=prompt,
-            save_path=save_path,
-            size=size,
-            model=self.primary_model,
-        )
-
-        # Tier 2: First fallback (only if force_primary_only is False)
-        if not result.success and effective_use_fallback and self._should_fallback(result.error_message):
-            print(f"⚠️ {self.primary_model} failed, retrying with {self.fallback_model}...")
-            await asyncio.sleep(_get_rate_limit_delay())
-
-            result = await self._generate_with_model(
-                prompt=prompt,
-                save_path=save_path,
-                size=size,
-                model=self.fallback_model,
-            )
-
-        # Tier 3: Second fallback (only if force_primary_only is False)
-        if not result.success and effective_use_fallback and self._should_fallback(result.error_message):
-            print(f"⚠️ {self.fallback_model} failed, retrying with {self.fallback_model_2}...")
-            await asyncio.sleep(_get_rate_limit_delay())
-
-            result = await self._generate_with_model(
-                prompt=prompt,
-                save_path=save_path,
-                size=size,
-                model=self.fallback_model_2,
-            )
-
+        result = await self._generate_with_retry(prompt, save_path, self.primary_model)
         result.generation_time = (datetime.now() - start_time).total_seconds()
         return result
 
-    def _should_fallback(self, error_message: Optional[str]) -> bool:
-        """Determine whether to attempt fallback"""
-        if not error_message:
-            return True
-
-        # Fallback trigger conditions
-        fallback_triggers = [
-            "429", "QUOTA_EXCEEDED", "RATE_LIMIT", "ResourceExhausted",
-            "SAFETY", "blocked", "filtered", "RECITATION",
-            "INVALID_ARGUMENT", "does not support", "not support"
-        ]
-        return any(trigger.lower() in error_message.lower() for trigger in fallback_triggers)
-
-    async def _generate_with_model(
-        self,
-        prompt: str,
-        save_path: Optional[str],
-        size: str,
-        model: str,
-    ) -> ImageResult:
-        """Generate image with specific model"""
+    async def _generate_with_retry(self, prompt: str, save_path: Optional[str],
+                                   model: str) -> ImageResult:
+        """Generate image with retry logic for rate limits and transient errors."""
         self._init_client()
-
-        # Collect all errors for better debugging
         errors: List[str] = []
 
         for attempt in range(self.retry_count):
             try:
-                # Generate image with Gemini model
-                if model.startswith("gemini"):
-                    return await self._generate_with_gemini(prompt, save_path, model)
-                else:
-                    return await self._generate_with_imagen(prompt, save_path, size, model)
-
+                return await self._call_gemini_api(prompt, save_path, model)
             except Exception as e:
-                error_msg = f"Attempt {attempt + 1}: {type(e).__name__}: {str(e)}"
+                error_msg = f"Attempt {attempt + 1}: {type(e).__name__}: {e}"
                 errors.append(error_msg)
-                print(f"⚠️ {model} generation failed - {error_msg}")
+                print(f"Warning: {model} failed - {error_msg}")
 
-                # Wait and retry on rate limit error
+                if attempt >= self.retry_count - 1:
+                    break
+
                 if "429" in str(e) or "ResourceExhausted" in str(e):
-                    if attempt < self.retry_count - 1:
-                        delay = _get_rate_limit_delay()
-                        wait_time = delay * (attempt + 1)
-                        print(f"⏳ Rate limit, waiting {wait_time:.1f}s before retry...")
-                        await asyncio.sleep(wait_time)
-                        continue
-
-                # Retry if not last attempt
-                if attempt < self.retry_count - 1:
+                    wait_time = _get_rate_limit_delay() * (attempt + 1)
+                    print(f"Rate limit, waiting {wait_time:.1f}s...")
+                    await asyncio.sleep(wait_time)
+                else:
                     await asyncio.sleep(1)
-                    continue
 
-                # Return with all collected errors
-                return ImageResult(
-                    success=False,
-                    prompt=prompt,
-                    model_used=model,
-                    error_message=" | ".join(errors),
-                )
+        return ImageResult(success=False, prompt=prompt, model_used=model,
+                           error_message=" | ".join(errors))
 
-        return ImageResult(
-            success=False,
-            prompt=prompt,
-            model_used=model,
-            error_message=f"Maximum retry count exceeded. Errors: {' | '.join(errors)}",
-        )
+    async def _call_gemini_api(self, prompt: str, save_path: Optional[str],
+                               model: str) -> ImageResult:
+        """Call Gemini generate_content API and extract image."""
+        config = None
+        if self._genai_types:
+            config = self._genai_types.GenerateContentConfig(response_modalities=["IMAGE"])
 
-    async def _generate_with_gemini(
-        self,
-        prompt: str,
-        save_path: Optional[str],
-        model: str,
-    ) -> ImageResult:
-        """Generate image with Gemini model using the `generate_content` API (google-genai SDK)."""
-        try:
-            # Build configuration for image generation
-            config = None
-            if self._genai_types:
-                config = self._genai_types.GenerateContentConfig(
-                    response_modalities=["IMAGE"],
-                )
+        kwargs = dict(model=model, contents=prompt)
+        if config:
+            kwargs["config"] = config
 
-            # Image generation request using new SDK
-            if config:
-                response = await asyncio.to_thread(
-                    self._client.models.generate_content,
-                    model=model,
-                    contents=prompt,
-                    config=config,
-                )
-            else:
-                # Fallback without types
-                response = await asyncio.to_thread(
-                    self._client.models.generate_content,
-                    model=model,
-                    contents=prompt,
-                )
+        response = await asyncio.to_thread(self._client.models.generate_content, **kwargs)
 
-            # Extract image from response (new SDK format)
-            image_data = None
+        image_data = self._extract_image(response)
+        if not image_data:
+            return ImageResult(success=False, prompt=prompt, model_used=model,
+                               error_message="No image found in response")
 
-            # Handle new SDK response format
-            if hasattr(response, 'parts'):
-                for part in response.parts:
-                    if hasattr(part, 'inline_data') and part.inline_data:
-                        mime_type = getattr(part.inline_data, 'mime_type', '')
-                        if mime_type.startswith("image/"):
-                            image_data = part.inline_data.data
-                            break
-                    # Try as_image() method
-                    if hasattr(part, 'as_image'):
-                        try:
-                            img = part.as_image()
-                            # Get bytes from PIL Image
-                            from io import BytesIO
-                            buffer = BytesIO()
-                            img.save(buffer, format='PNG')
-                            image_data = buffer.getvalue()
-                            break
-                        except Exception:
-                            pass
+        final_path = self._save_image(image_data, save_path)
+        return ImageResult(success=True, file_path=str(final_path), prompt=prompt,
+                           model_used=model)
 
-            # Fallback: check candidates structure
-            if not image_data and hasattr(response, 'candidates'):
-                for candidate in response.candidates:
-                    if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
-                        for part in candidate.content.parts:
-                            if hasattr(part, 'inline_data') and part.inline_data:
-                                mime_type = getattr(part.inline_data, 'mime_type', '')
-                                if mime_type.startswith("image/"):
-                                    image_data = part.inline_data.data
-                                    break
-                            if hasattr(part, 'as_image'):
-                                try:
-                                    img = part.as_image()
-                                    from io import BytesIO
-                                    buffer = BytesIO()
-                                    img.save(buffer, format='PNG')
-                                    image_data = buffer.getvalue()
-                                    break
-                                except Exception:
-                                    pass
+    def _extract_image(self, response) -> Optional[bytes]:
+        """Extract image bytes from Gemini API response."""
+        # Try response.parts directly
+        if hasattr(response, 'parts'):
+            data = self._extract_from_parts(response.parts)
+            if data:
+                return data
 
-            if not image_data:
-                return ImageResult(
-                    success=False,
-                    prompt=prompt,
-                    model_used=model,
-                    error_message="No image found in response",
-                )
+        # Try candidates structure
+        if hasattr(response, 'candidates'):
+            for candidate in response.candidates:
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    data = self._extract_from_parts(candidate.content.parts)
+                    if data:
+                        return data
+        return None
 
-            # Save file
-            final_path = self._save_image(image_data, save_path, "png")
+    @staticmethod
+    def _extract_from_parts(parts) -> Optional[bytes]:
+        """Extract image bytes from response parts."""
+        for part in parts:
+            if hasattr(part, 'inline_data') and part.inline_data:
+                if getattr(part.inline_data, 'mime_type', '').startswith("image/"):
+                    return part.inline_data.data
+            if hasattr(part, 'as_image'):
+                try:
+                    from io import BytesIO
+                    buf = BytesIO()
+                    part.as_image().save(buf, format='PNG')
+                    return buf.getvalue()
+                except Exception:
+                    pass
+        return None
 
-            return ImageResult(
-                success=True,
-                file_path=str(final_path),
-                prompt=prompt,
-                model_used=model,
-            )
-
-        except Exception as e:
-            raise e
-
-    async def _generate_with_imagen(
-        self,
-        prompt: str,
-        save_path: Optional[str],
-        size: str,
-        model: str,
-    ) -> ImageResult:
-        """Generate an image using the `generate_images` API (google-genai SDK)."""
-        try:
-            # Parse size and get aspect ratio
-            width, height = self._parse_size(size)
-            aspect_ratio = self._get_aspect_ratio(width, height)
-
-            # Build configuration
-            config = None
-            if self._genai_types:
-                config = self._genai_types.GenerateImagesConfig(
-                    number_of_images=1,
-                    aspect_ratio=aspect_ratio,
-                    output_mime_type='image/png',
-                    include_rai_reason=True,
-                )
-
-            # Generate image using new SDK
-            if config:
-                response = await asyncio.to_thread(
-                    self._client.models.generate_images,
-                    model=model,
-                    prompt=prompt,
-                    config=config,
-                )
-            else:
-                response = await asyncio.to_thread(
-                    self._client.models.generate_images,
-                    model=model,
-                    prompt=prompt,
-                )
-
-            if not response.generated_images:
-                # Check for RAI reason (content blocked)
-                rai_reason = None
-                if hasattr(response, 'generated_images') and response.generated_images:
-                    first_img = response.generated_images[0]
-                    if hasattr(first_img, 'rai_reason'):
-                        rai_reason = first_img.rai_reason
-
-                error_msg = "No image generation result"
-                if rai_reason:
-                    error_msg = f"Content blocked: {rai_reason}"
-
-                return ImageResult(
-                    success=False,
-                    prompt=prompt,
-                    model_used=model,
-                    error_message=error_msg,
-                )
-
-            # Extract and save image data using new SDK
-            generated_image = response.generated_images[0]
-
-            # Try to save directly using the image object
-            if hasattr(generated_image, 'image'):
-                img = generated_image.image
-                if hasattr(img, 'save'):
-                    # Direct save method
-                    final_path = self._get_save_path(save_path, "png")
-                    final_path.parent.mkdir(parents=True, exist_ok=True)
-                    await asyncio.to_thread(img.save, str(final_path))
-
-                    return ImageResult(
-                        success=True,
-                        file_path=str(final_path),
-                        prompt=prompt,
-                        model_used=model,
-                    )
-                elif hasattr(img, '_image_bytes'):
-                    # Legacy bytes access
-                    image_data = img._image_bytes
-                    final_path = self._save_image(image_data, save_path, "png")
-
-                    return ImageResult(
-                        success=True,
-                        file_path=str(final_path),
-                        prompt=prompt,
-                        model_used=model,
-                    )
-
-            # Fallback: Try to get bytes from data attribute
-            if hasattr(generated_image, 'data'):
-                image_data = generated_image.data
-                if isinstance(image_data, str):
-                    image_data = base64.b64decode(image_data)
-                final_path = self._save_image(image_data, save_path, "png")
-
-                return ImageResult(
-                    success=True,
-                    file_path=str(final_path),
-                    prompt=prompt,
-                    model_used=model,
-                )
-
-            return ImageResult(
-                success=False,
-                prompt=prompt,
-                model_used=model,
-                error_message="Could not extract image data from response",
-            )
-
-        except Exception as e:
-            raise e
-
-    def _parse_size(self, size: str) -> Tuple[int, int]:
-        """Parse size string"""
-        match = re.match(r"(\d+)x(\d+)", size)
-        if match:
-            return int(match.group(1)), int(match.group(2))
-        return 1024, 1024
-
-    def _get_aspect_ratio(self, width: int, height: int) -> str:
-        """Return aspect ratio"""
-        ratio = width / height
-
-        if abs(ratio - 1.0) < 0.1:
-            return "1:1"
-        elif abs(ratio - 16/9) < 0.1:
-            return "16:9"
-        elif abs(ratio - 9/16) < 0.1:
-            return "9:16"
-        elif abs(ratio - 4/3) < 0.1:
-            return "4:3"
-        elif abs(ratio - 3/4) < 0.1:
-            return "3:4"
-        else:
-            return "1:1"
-
-    def _get_save_path(self, save_path: Optional[str], ext: str = "png") -> Path:
-        """Get the save path"""
+    def _get_save_path(self, save_path: Optional[str]) -> Path:
         if save_path:
             return Path(save_path)
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            return Path(f"generated_image_{timestamp}.{ext}")
+        return Path(f"generated_image_{datetime.now():%Y%m%d_%H%M%S}.png")
 
-    def _save_image(
-        self,
-        image_data: bytes,
-        save_path: Optional[str],
-        ext: str = "png",
-    ) -> Path:
-        """Save image to file"""
-        path = self._get_save_path(save_path, ext)
-
-        # Create directory
+    def _save_image(self, image_data: bytes, save_path: Optional[str]) -> Path:
+        """Save image bytes to file."""
+        path = self._get_save_path(save_path)
         path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Save file
         with open(path, "wb") as f:
-            if isinstance(image_data, str):
-                f.write(base64.b64decode(image_data))
-            else:
-                f.write(image_data)
-
+            f.write(base64.b64decode(image_data) if isinstance(image_data, str) else image_data)
         return path
 
-    async def generate_batch(
-        self,
-        prompts: List[Dict[str, str]],
-        output_dir: str,
-        concurrent_limit: int = 2,
-    ) -> BatchResult:
-        """
-        Generate multiple images in batch.
+    def _cleanup_temp(self, temp_path: Path, temp_dir: str):
+        """Remove temp file and directory."""
+        try:
+            if temp_path.exists():
+                temp_path.unlink()
+            Path(temp_dir).rmdir()
+        except Exception:
+            pass
 
-        Args:
-            prompts: Prompt list [{"prompt": "...", "filename": "..."}, ...]
-            output_dir: Output directory
-            concurrent_limit: Concurrent execution limit (considering 15 requests/min limit)
-
-        Returns:
-            BatchResult: Batch generation result
-        """
+    async def generate_batch(self, prompts: List[Dict[str, str]], output_dir: str,
+                             concurrent_limit: int = 2) -> BatchResult:
+        """Generate multiple images in batch with rate limiting."""
         start_time = datetime.now()
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
-
-        results: List[ImageResult] = []
         semaphore = asyncio.Semaphore(concurrent_limit)
 
-        async def generate_with_limit(item: Dict[str, str]) -> ImageResult:
+        async def _gen(item: Dict[str, str]) -> ImageResult:
             async with semaphore:
-                prompt = item.get("prompt", "")
-                filename = item.get("filename", f"image_{len(results):02d}.png")
-                save_path = str(output_path / filename)
-
-                result = await self.generate_image(prompt=prompt, save_path=save_path)
-
-                # Delay to prevent rate limiting
+                result = await self.generate_image(
+                    prompt=item.get("prompt", ""),
+                    save_path=str(output_path / item.get("filename", "image.png")),
+                )
                 await asyncio.sleep(_get_rate_limit_delay())
-
                 return result
 
-        # Parallel execution (with limited concurrency)
-        tasks = [generate_with_limit(item) for item in prompts]
-        results = await asyncio.gather(*tasks)
-
-        # Aggregate results
+        results = await asyncio.gather(*[_gen(item) for item in prompts])
         success_count = sum(1 for r in results if r.success)
-        total_time = (datetime.now() - start_time).total_seconds()
-
         return BatchResult(
-            total=len(prompts),
-            success_count=success_count,
+            total=len(prompts), success_count=success_count,
             failed_count=len(prompts) - success_count,
             results=list(results),
-            total_time=total_time,
+            total_time=(datetime.now() - start_time).total_seconds(),
         )
 
-    async def generate_with_text_overlay(
-        self,
-        prompt: str,
-        output_path: str,
-        text_config: "PromptTextOverlayConfig",
-        size: str = DEFAULT_SIZE,
-        use_fallback: bool = True,
-        background_only: bool = True,
-    ) -> ImageResult:
-        """
-        Generate image with text overlay pipeline.
-
-        Workflow:
-        1. Strip text instructions from prompt (if background_only=True)
-        2. Generate background image via Gemini
-        3. Apply text overlay using SVG composition
-        4. Export final PNG
-
-        Args:
-            prompt: Image generation prompt
-            output_path: Final output path for PNG
-            text_config: TextOverlayConfig from prompt_converter module
-            size: Image size (default: 1024x1024)
-            use_fallback: Whether to use fallback models on failure
-            background_only: Whether to strip text instructions from prompt
-
-        Returns:
-            ImageResult: Generation result with final PNG path
-
-        Example:
-            from scripts.prompt_converter import TextOverlayConfig
-
-            text_config = TextOverlayConfig(
-                main_text="0세 적금 필수!",
-                sub_text="연 12% 고금리",
-                position="center",
-                font_size=48,
-                font_color="#FFFFFF",
-                shadow=True
-            )
-
-            result = await generator.generate_with_text_overlay(
-                prompt="Blog thumbnail, finance concept, warm gradient...",
-                output_path="./images/01_썸네일.png",
-                text_config=text_config
-            )
-        """
-        import tempfile
-        from pathlib import Path as PathLib
-
+    async def generate_with_watermark(self, prompt: str, output_path: str,
+                                      watermark_config: "WatermarkConfig",
+                                      size: str = DEFAULT_SIZE, **kwargs) -> ImageResult:
+        """Generate image with AI-rendered text, then add PIL watermark."""
         start_time = datetime.now()
+        tmp_dir = tempfile.mkdtemp()
+        tmp_img = Path(tmp_dir) / "generated.png"
 
-        # Step 1: Strip text instructions if background_only
-        processed_prompt = prompt
-        if background_only:
-            from .prompt_converter import strip_text_instructions
-            processed_prompt = strip_text_instructions(prompt)
-
-        # Step 2: Generate background image to temp file
-        temp_dir = tempfile.mkdtemp()
-        temp_bg_path = PathLib(temp_dir) / "background.png"
-
-        bg_result = await self.generate_image(
-            prompt=processed_prompt,
-            save_path=str(temp_bg_path),
-            size=size,
-            use_fallback=use_fallback,
-        )
-
-        if not bg_result.success:
-            return ImageResult(
-                success=False,
-                prompt=prompt,
-                model_used=bg_result.model_used,
-                error_message=f"Background generation failed: {bg_result.error_message}",
-                generation_time=(datetime.now() - start_time).total_seconds(),
-            )
-
-        # Step 3: Apply text overlay
         try:
-            from .text_overlay import add_text_to_existing_image
+            gen = await self.generate_image(prompt=prompt, save_path=str(tmp_img), size=size)
+            elapsed = lambda: (datetime.now() - start_time).total_seconds()
 
-            overlay_result = add_text_to_existing_image(
-                image_path=str(temp_bg_path),
-                text_config=text_config,
-                output_path=output_path,
-            )
-
-            if not overlay_result.get("success"):
-                return ImageResult(
-                    success=False,
-                    prompt=prompt,
-                    model_used=bg_result.model_used,
-                    error_message=f"Text overlay failed: {overlay_result.get('error')}",
-                    generation_time=(datetime.now() - start_time).total_seconds(),
-                )
-
-            return ImageResult(
-                success=True,
-                file_path=output_path,
-                prompt=prompt,
-                model_used=bg_result.model_used,
-                generation_time=(datetime.now() - start_time).total_seconds(),
-            )
-
-        except ImportError as e:
-            return ImageResult(
-                success=False,
-                prompt=prompt,
-                model_used=bg_result.model_used,
-                error_message=f"Text overlay module not available: {e}",
-                generation_time=(datetime.now() - start_time).total_seconds(),
-            )
-        finally:
-            # Cleanup temp files
+            if not gen.success:
+                return ImageResult(success=False, prompt=prompt, model_used=gen.model_used,
+                                   error_message=f"Image generation failed: {gen.error_message}",
+                                   generation_time=elapsed())
             try:
-                if temp_bg_path.exists():
-                    temp_bg_path.unlink()
-                PathLib(temp_dir).rmdir()
-            except Exception:
-                pass
+                from .text_overlay import add_watermark_to_image
 
-    async def generate_with_watermark(
-        self,
-        prompt: str,
-        output_path: str,
-        watermark_config: "WatermarkConfig",
-        size: str = DEFAULT_SIZE,
-        use_fallback: bool = True,
-    ) -> ImageResult:
-        """
-        Generate image with AI-rendered text and add watermark only.
+                if not watermark_config.watermark_enabled:
+                    import shutil
+                    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.move(str(tmp_img), output_path)
+                    return ImageResult(success=True, file_path=output_path, prompt=prompt,
+                                       model_used=gen.model_used, generation_time=elapsed())
 
-        This is the NEW workflow where:
-        1. AI renders text directly in the image (prompt includes text instructions)
-        2. PIL only adds watermark at bottom-center
+                result = add_watermark_to_image(
+                    image_path=str(tmp_img), watermark_config=watermark_config,
+                    output_path=output_path)
 
-        Args:
-            prompt: Image generation prompt (includes text rendering instructions)
-            output_path: Final output path for PNG
-            watermark_config: WatermarkConfig from prompt_converter module
-            size: Image size (default: 1024x1024)
-            use_fallback: Whether to use fallback models on failure
+                if not result.get("success"):
+                    return ImageResult(success=False, prompt=prompt, model_used=gen.model_used,
+                                       error_message=f"Watermark failed: {result.get('error')}",
+                                       generation_time=elapsed())
 
-        Returns:
-            ImageResult: Generation result with final PNG path
-
-        Example:
-            from scripts.prompt_converter import WatermarkConfig
-
-            watermark_config = WatermarkConfig(
-                watermark_text="@money-lab-brian",
-                watermark_position="bottom-center",
-                watermark_font_size=18,
-                watermark_font_color="rgba(255,255,255,0.6)"
-            )
-
-            result = await generator.generate_with_watermark(
-                prompt="Blog thumbnail, bold Korean text '0세 적금 필수!' in center...",
-                output_path="./images/01_썸네일.png",
-                watermark_config=watermark_config
-            )
-        """
-        import tempfile
-        from pathlib import Path as PathLib
-
-        start_time = datetime.now()
-
-        # Step 1: Generate image with AI-rendered text (no text stripping)
-        # Prompt already contains text instructions for AI to render
-        temp_dir = tempfile.mkdtemp()
-        temp_img_path = PathLib(temp_dir) / "generated.png"
-
-        gen_result = await self.generate_image(
-            prompt=prompt,
-            save_path=str(temp_img_path),
-            size=size,
-            use_fallback=use_fallback,
-        )
-
-        if not gen_result.success:
-            return ImageResult(
-                success=False,
-                prompt=prompt,
-                model_used=gen_result.model_used,
-                error_message=f"Image generation failed: {gen_result.error_message}",
-                generation_time=(datetime.now() - start_time).total_seconds(),
-            )
-
-        # Step 2: Add watermark only (if enabled)
-        try:
-            from .text_overlay import add_watermark_to_image
-
-            # Check if watermark is enabled
-            if not watermark_config.watermark_enabled:
-                # Just move the file to output path
-                import shutil
-                PathLib(output_path).parent.mkdir(parents=True, exist_ok=True)
-                shutil.move(str(temp_img_path), output_path)
-
-                return ImageResult(
-                    success=True,
-                    file_path=output_path,
-                    prompt=prompt,
-                    model_used=gen_result.model_used,
-                    generation_time=(datetime.now() - start_time).total_seconds(),
-                )
-
-            # Add watermark
-            overlay_result = add_watermark_to_image(
-                image_path=str(temp_img_path),
-                watermark_config=watermark_config,
-                output_path=output_path,
-            )
-
-            if not overlay_result.get("success"):
-                return ImageResult(
-                    success=False,
-                    prompt=prompt,
-                    model_used=gen_result.model_used,
-                    error_message=f"Watermark failed: {overlay_result.get('error')}",
-                    generation_time=(datetime.now() - start_time).total_seconds(),
-                )
-
-            return ImageResult(
-                success=True,
-                file_path=output_path,
-                prompt=prompt,
-                model_used=gen_result.model_used,
-                generation_time=(datetime.now() - start_time).total_seconds(),
-            )
-
-        except ImportError as e:
-            return ImageResult(
-                success=False,
-                prompt=prompt,
-                model_used=gen_result.model_used,
-                error_message=f"Watermark module not available: {e}",
-                generation_time=(datetime.now() - start_time).total_seconds(),
-            )
+                return ImageResult(success=True, file_path=output_path, prompt=prompt,
+                                   model_used=gen.model_used, generation_time=elapsed())
+            except ImportError as e:
+                return ImageResult(success=False, prompt=prompt, model_used=gen.model_used,
+                                   error_message=f"Watermark module not available: {e}",
+                                   generation_time=elapsed())
         finally:
-            # Cleanup temp files
-            try:
-                if temp_img_path.exists():
-                    temp_img_path.unlink()
-                PathLib(temp_dir).rmdir()
-            except Exception:
-                pass
+            self._cleanup_temp(tmp_img, tmp_dir)
 
-    async def generate_batch_with_text_overlay(
-        self,
-        items: List[Dict[str, Any]],
-        output_dir: str,
-        concurrent_limit: int = 2,
-    ) -> BatchResult:
-        """
-        Generate multiple images with text overlay in batch.
-
-        Args:
-            items: List of generation configs, each containing:
-                - prompt: Image generation prompt
-                - filename: Output filename
-                - text_config: TextOverlayConfig (optional, if None uses regular generation)
-                - watermark_config: WatermarkConfig (optional, default watermark applied if None)
-            output_dir: Output directory
-            concurrent_limit: Concurrent execution limit
-
-        Returns:
-            BatchResult: Batch generation result
-
-        Example:
-            from scripts.prompt_converter import TextOverlayConfig
-
-            items = [
-                {
-                    "prompt": "Blog thumbnail background...",
-                    "filename": "01_썸네일.png",
-                    "text_config": TextOverlayConfig(
-                        main_text="제목",
-                        sub_text="부제목"
-                    )
-                },
-                {
-                    "prompt": "Info graphic...",
-                    "filename": "02_인포그래픽.png",
-                    "text_config": None  # No text overlay
-                }
-            ]
-
-            result = await generator.generate_batch_with_text_overlay(
-                items=items,
-                output_dir="./images/"
-            )
-        """
+    async def generate_batch_with_text_overlay(self, items: List[Dict[str, Any]],
+                                               output_dir: str,
+                                               concurrent_limit: int = 2) -> BatchResult:
+        """Generate multiple images with watermark in batch."""
         from .prompt_converter import WatermarkConfig as WMConfig
 
         start_time = datetime.now()
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
-
-        results: List[ImageResult] = []
         semaphore = asyncio.Semaphore(concurrent_limit)
 
-        # Default watermark config - always applied unless explicitly disabled
-        default_watermark = WMConfig(
-            watermark_text="@money-lab-brian",
-            watermark_position="bottom-center",
-            watermark_enabled=True,
-        )
+        default_wm = WMConfig(watermark_text="@money-lab-brian",
+                              watermark_position="bottom-center", watermark_enabled=True)
 
-        async def generate_with_limit(item: Dict[str, Any]) -> ImageResult:
+        async def _gen(item: Dict[str, Any]) -> ImageResult:
             async with semaphore:
-                prompt = item.get("prompt", "")
-                filename = item.get("filename", f"image_{len(results):02d}.png")
-                text_config = item.get("text_config")
-                watermark_config = item.get("watermark_config")
-                save_path = str(output_path / filename)
-
-                # Determine effective watermark config
-                # Priority: explicit config > default (always apply watermark)
-                effective_watermark = watermark_config if watermark_config else default_watermark
-
-                if text_config:
-                    # LEGACY: Use text overlay pipeline (deprecated)
-                    result = await self.generate_with_text_overlay(
-                        prompt=prompt,
-                        output_path=save_path,
-                        text_config=text_config,
-                    )
-                else:
-                    # NEW WORKFLOW: AI renders text, PIL adds watermark only
-                    # All images now get watermark by default
-                    result = await self.generate_with_watermark(
-                        prompt=prompt,
-                        output_path=save_path,
-                        watermark_config=effective_watermark,
-                    )
-
-                # Delay to prevent rate limiting
+                wm = item.get("watermark_config") or default_wm
+                result = await self.generate_with_watermark(
+                    prompt=item.get("prompt", ""),
+                    output_path=str(output_path / item.get("filename", "image.png")),
+                    watermark_config=wm,
+                )
                 await asyncio.sleep(_get_rate_limit_delay())
-
                 return result
 
-        # Parallel execution (with limited concurrency)
-        tasks = [generate_with_limit(item) for item in items]
-        results = await asyncio.gather(*tasks)
-
-        # Aggregate results
+        results = await asyncio.gather(*[_gen(item) for item in items])
         success_count = sum(1 for r in results if r.success)
-        total_time = (datetime.now() - start_time).total_seconds()
-
         return BatchResult(
-            total=len(items),
-            success_count=success_count,
+            total=len(items), success_count=success_count,
             failed_count=len(items) - success_count,
             results=list(results),
-            total_time=total_time,
+            total_time=(datetime.now() - start_time).total_seconds(),
         )
 
 
 def create_generator(api_key: Optional[str] = None) -> GeminiImageGenerator:
-    """
-    Factory function to create GeminiImageGenerator instance.
-
-    Args:
-        api_key: Google API key (optional)
-
-    Returns:
-        GeminiImageGenerator instance
-    """
+    """Factory function to create GeminiImageGenerator instance."""
     return GeminiImageGenerator(api_key=api_key)
-
-
-# Synchronous wrapper functions for convenience
-def generate_image_sync(
-    prompt: str,
-    save_path: Optional[str] = None,
-    api_key: Optional[str] = None,
-) -> ImageResult:
-    """
-    Generate image synchronously.
-
-    Args:
-        prompt: Image generation prompt
-        save_path: Save path
-        api_key: API key (optional)
-
-    Returns:
-        ImageResult: Generation result
-    """
-    generator = create_generator(api_key)
-    return asyncio.run(generator.generate_image(prompt=prompt, save_path=save_path))
-
-
-def generate_batch_sync(
-    prompts: List[Dict[str, str]],
-    output_dir: str,
-    api_key: Optional[str] = None,
-) -> BatchResult:
-    """
-    Generate multiple images synchronously.
-
-    Args:
-        prompts: Prompt list
-        output_dir: Output directory
-        api_key: API key (optional)
-
-    Returns:
-        BatchResult: Batch generation result
-    """
-    generator = create_generator(api_key)
-    return asyncio.run(generator.generate_batch(prompts=prompts, output_dir=output_dir))

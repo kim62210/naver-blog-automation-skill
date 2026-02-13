@@ -1,17 +1,17 @@
-# 환경 설정 가이드
+# Environment Setup Guide
 
-## 자동 설정 (권장)
+## Auto Setup (Recommended)
 
-첫 실행 시 자동으로:
-1. `.venv` 가상환경 생성
-2. 필수 패키지 설치 (PyYAML, google-genai, pillow)
-3. GOOGLE_API_KEY 입력 요청 → `.env`에 저장
+First run automatically:
+1. Creates `.venv` virtual environment
+2. Installs required packages (PyYAML, google-genai, pillow)
+3. Prompts for GOOGLE_API_KEY and saves to `.env`
 
 ```bash
 python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 ```
 
-## 수동 설정
+## Manual Setup
 
 ```bash
 cd ~/.claude/skills/search-blogging
@@ -21,7 +21,7 @@ pip install -r requirements.txt
 echo 'GOOGLE_API_KEY="your-key"' > .env
 ```
 
-## API 키 재설정
+## API Key Reset
 
 ```bash
 rm ~/.claude/skills/search-blogging/.env
@@ -35,31 +35,20 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 pip install google-genai pillow
 ```
 
-### Optional (Legacy): SVG to PNG Conversion (Text Overlay)
-```bash
-# Option 1: Recommended
-pip install cairosvg
-
-# Option 2: System package
-sudo apt install librsvg2-bin
-
-# Option 3: Fallback
-pip install svglib reportlab
-```
-
 ## Limits & Model Order (Config-driven)
 
 - Rate limiting/delay is configured in `config.yaml` (`gemini.rate_limit.*`) and enforced by the generator.
-- Model order is configured in `config.yaml` (`gemini.models.primary` → `fallback` → `fallback_2`).
+- Model: `gemini-3-pro-image-preview` only (`gemini.models.primary`).
 - Exact quotas/availability/cost vary by account and can change.
 
 ## Quick Start
 
 ```python
-from scripts.image_pipeline import process_image_guide_file_sync
+from scripts.image_pipeline import ImagePipeline
 
-result = process_image_guide_file_sync(
-    guide_path="./이미지 가이드.md",
+pipeline = ImagePipeline()
+result = await pipeline.process_image_guide(
+    image_guide_content=open("./이미지 가이드.md").read(),
     output_dir="./images/"
 )
 print(result.summary())

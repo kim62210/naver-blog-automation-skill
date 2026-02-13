@@ -1,228 +1,101 @@
-"""
-HTML/MD generation module
+"""HTML/MD generation -- renders templates to produce blog HTML, image guide, and references."""
 
-Renders Jinja2-style templates to generate 본문.html, image guide.md, and references.md.
-"""
-
-import re
-from datetime import datetime
 from pathlib import Path
 from string import Template
 from typing import Dict, List, Optional, Any
 
 from .config import get_config, get_config_value
-from .utils import get_today_date, clean_text
+from .utils import get_today_date
 from .validator import validate_char_count, validate_draft_char_count, ValidationResult
 from .setup import update_metadata
 
+_TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
+
 
 def load_template(template_name: str, templates_dir: Optional[Path] = None) -> str:
-    """
-    Load template file.
-
-    Args:
-        template_name: Template filename
-        templates_dir: Template directory (uses default path if not provided)
-
-    Returns:
-        Template content
-    """
-    if templates_dir is None:
-        # Find templates directory relative to current script location
-        script_dir = Path(__file__).parent
-        templates_dir = script_dir.parent / "templates"
-
+    """Load a template file by name. Returns the raw template string."""
+    templates_dir = templates_dir or _TEMPLATES_DIR
     template_path = templates_dir / template_name
-
     if not template_path.exists():
         raise FileNotFoundError(f"Template not found: {template_path}")
-
     with open(template_path, "r", encoding="utf-8") as f:
         return f.read()
 
 
 def render_template(template_content: str, context: Dict[str, Any]) -> str:
-    """
-    Simple template rendering (using Python string.Template).
+    """Render a string.Template with *context*. Missing keys are left as-is."""
+    return Template(template_content).safe_substitute(context)
 
-    Supported syntax:
-    - ${variable} or $variable: Variable substitution
-    - Loops not supported (requires separate handling)
 
-    Args:
-        template_content: Template content
-        context: Context variables
-
-    Returns:
-        Rendered content
-    """
-    # Basic substitution
-    template = Template(template_content)
-
-    # Use safe_substitute to keep missing variables as-is
-    result = template.safe_substitute(context)
-
-    return result
+def _build_sections_html(sections: List[Dict[str, Any]]) -> str:
+    """Build the inner HTML fragment for all sections (h2, paragraphs, images, hr)."""
+    parts: List[str] = []
+    image_index = 2
+    for section in sections:
+        title = section.get("title", "")
+        content = section.get("content", "")
+        if title:
+            parts.append(f'\n<h2>{title}</h2>\n')
+        if content:
+            for para in content.split('\n\n'):
+                para = para.strip()
+                if not para:
+                    continue
+                if para.startswith('"') and para.endswith('"'):
+                    parts.append(f'<blockquote>\n{para}\n</blockquote>\n')
+                else:
+                    parts.append(f'<p>{para}</p>\n')
+        if section.get("has_image", False):
+            parts.append(f'\n<div class="image-placeholder">[이미지 {image_index} 삽입]</div>\n')
+            image_index += 1
+        parts.append('\n<hr>\n')
+    return '\n'.join(parts)
 
 
 def generate_html_content(
     title: str,
     sections: List[Dict[str, Any]],
     tags: List[str],
-    config: Optional[Dict] = None
+    config: Optional[Dict] = None,
 ) -> str:
-    """
-    Generate HTML content.
-
-    Args:
-        title: Title
-        sections: Section list [{"title": str, "content": str, "has_image": bool}]
-        tags: Tag list
-        config: Configuration dictionary
-
-    Returns:
-        HTML content
-    """
+    """Generate full blog HTML by rendering the blog-post template with *sections*."""
     if config is None:
         config = get_config()
 
-    # Typography settings (from config.yaml)
     font_family = get_config_value(
         config, "typography", "font_family",
-        default="Nanum Gothic, Pretendard, sans-serif"
+        default="Nanum Gothic, Pretendard, sans-serif",
     )
     line_height = get_config_value(config, "typography", "line_height", default=1.8)
-    blog_sizes = get_config_value(config, "typography", "blog_sizes", default={}) or {}
+    sizes = get_config_value(config, "typography", "blog_sizes", default={}) or {}
 
-    title_size = int(blog_sizes.get("title", 28))
-    title_medium_size = int(blog_sizes.get("title_medium", 24))
-    title_small_size = int(blog_sizes.get("title_small", 19))
-    body_size = int(blog_sizes.get("body", 16))
-    footnote_size = int(blog_sizes.get("footnote", 11))
-
-    # HTML template start
-    html_parts = [
-        '<!DOCTYPE html>',
-        '<html>',
-        '<head>',
-        '  <meta charset="UTF-8">',
-        '  <style>',
-        f'    body {{ font-family: {font_family}; line-height: {line_height}; max-width: 700px; margin: 0 auto; padding: 20px; }}',
-        f'    h1 {{ font-size: {title_size}px; font-weight: bold; margin-bottom: 20px; }}',
-        f'    h2 {{ font-size: {title_medium_size}px; font-weight: bold; margin: 32px 0 16px; }}',
-        f'    h3 {{ font-size: {title_small_size}px; font-weight: bold; margin: 24px 0 12px; }}',
-        f'    p {{ font-size: {body_size}px; margin: 12px 0; }}',
-        '    blockquote { border-left: 4px solid #4A90D9; padding-left: 16px; color: #555; margin: 16px 0; }',
-        '    .highlight-quote { background: #f0f7ff; padding: 16px; border-radius: 8px; border-left: none; }',
-        '    hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }',
-        '    .thick-hr { border-top: 3px solid #333; }',
-        '    table { border-collapse: collapse; width: 100%; margin: 16px 0; }',
-        '    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }',
-        '    th { background: #f5f5f5; font-weight: bold; }',
-        '    .cta { font-size: 24px; font-weight: bold; text-align: center; margin: 32px 0; color: #4A90D9; }',
-        f'    .small {{ font-size: {footnote_size}px; color: #888; }}',
-        '    .image-placeholder { color: #999; text-align: center; padding: 40px; background: #f9f9f9; margin: 16px 0; }',
-        '    .tags { color: #4A90D9; margin-top: 32px; }',
-        '  </style>',
-        '</head>',
-        '<body>',
-        '',
-        f'<h1>{title}</h1>',
-        '',
-        '<div class="image-placeholder">[이미지 1 삽입 - 썸네일]</div>',
-        '',
-        '<hr>',
-    ]
-
-    # Add section content
-    image_index = 2
-    for section in sections:
-        section_title = section.get("title", "")
-        section_content = section.get("content", "")
-        has_image = section.get("has_image", False)
-        section_type = section.get("type", "normal")
-
-        # Section title
-        if section_title:
-            html_parts.append(f'\n<h2>{section_title}</h2>\n')
-
-        # Section content
-        if section_content:
-            # Split content into paragraphs
-            paragraphs = section_content.split('\n\n')
-            for para in paragraphs:
-                para = para.strip()
-                if para:
-                    # Handle quotes
-                    if para.startswith('"') and para.endswith('"'):
-                        html_parts.append(f'<blockquote>\n{para}\n</blockquote>\n')
-                    else:
-                        html_parts.append(f'<p>{para}</p>\n')
-
-        # Image placeholder
-        if has_image:
-            html_parts.append(f'\n<div class="image-placeholder">[이미지 {image_index} 삽입]</div>\n')
-            image_index += 1
-
-        html_parts.append('\n<hr>\n')
-
-    # Add tags
-    tags_str = ' '.join(f'#{tag}' for tag in tags)
-    html_parts.extend([
-        f'\n<p class="tags">{tags_str}</p>',
-        '',
-        '</body>',
-        '</html>',
-    ])
-
-    return '\n'.join(html_parts)
+    return render_template(load_template("blog-post.html"), {
+        "font_family": font_family,
+        "line_height": line_height,
+        "title_size": int(sizes.get("title", 28)),
+        "title_medium_size": int(sizes.get("title_medium", 24)),
+        "title_small_size": int(sizes.get("title_small", 19)),
+        "body_size": int(sizes.get("body", 16)),
+        "footnote_size": int(sizes.get("footnote", 11)),
+        "title": title,
+        "sections_html": _build_sections_html(sections),
+        "tags": ' '.join(f'#{tag}' for tag in tags),
+    })
 
 
-def generate_text_rendering_prompt(
-    title: str,
-    subtitle: str = "",
-    color_palette: Optional[Dict[str, str]] = None
-) -> List[str]:
-    """
-    Generate detailed text rendering instructions for Gemini AI prompts.
-
-    This ensures AI renders Korean text directly on the image,
-    instead of leaving it blank or using placeholder text.
-
-    Args:
-        title: Main title text (Korean)
-        subtitle: Subtitle text (Korean, optional)
-        color_palette: Color palette for contrast calculation
-
-    Returns:
-        List of markdown lines with text rendering instructions
-    """
+def _build_text_rendering_lines(title: str, subtitle: str = "") -> List[str]:
+    """Return markdown lines with AI text-rendering instructions for *title*/*subtitle*."""
     if not title:
         return []
-
-    # Default colors
-    if color_palette is None:
-        color_palette = {}
-
-    # Determine contrasting text color based on background
-    bg_color = color_palette.get("background", "#ffffff")
-    main_color = color_palette.get("main", "#1a365d")
-
-    # Use white text on dark backgrounds, dark text on light backgrounds
-    # Simple heuristic: if main color is dark, use it; otherwise use white
-    text_color = "#FFFFFF"
-    shadow_desc = "subtle drop shadow for depth"
-
     lines = [
         '',
         '**TEXT RENDERING (CRITICAL)**:',
         f'- Main title: "{title}"',
         '  - Position: upper-center (y: 25-30% from top)',
         '  - Font: Extra bold Korean sans-serif (Pretendard or similar), 48-52px',
-        f'  - Color: {text_color} with {shadow_desc}',
+        '  - Color: #FFFFFF with subtle drop shadow for depth',
         '  - Style: Clear, readable, high contrast against background',
     ]
-
     if subtitle:
         lines.extend([
             f'- Subtitle: "{subtitle}"',
@@ -230,13 +103,7 @@ def generate_text_rendering_prompt(
             '  - Font: Bold sans-serif, 28-32px',
             '  - Color: White (#FFFFFF) with 90% opacity',
         ])
-
-    lines.extend([
-        '',
-        'IMPORTANT: Render the exact Korean text characters as specified above.',
-        '',
-    ])
-
+    lines.extend(['', 'IMPORTANT: Render the exact Korean text characters as specified above.', ''])
     return lines
 
 
@@ -248,138 +115,85 @@ def generate_image_guide(
     blog_title: Optional[str] = None,
     blog_subtitle: Optional[str] = None,
     key_points: Optional[List[str]] = None,
-    config: Optional[Dict] = None
+    config: Optional[Dict] = None,
 ) -> str:
-    """
-    Generate image guide markdown.
+    """Generate image guide markdown with per-image prompts, style guides, and watermark config."""
+    config = config or get_config()
+    date = date or get_today_date()
 
-    Args:
-        topic: Topic
-        images: Image guide list
-        color_palette: Color palette
-        date: Date
-        blog_title: Blog title for thumbnail text rendering
-        blog_subtitle: Blog subtitle for thumbnail text rendering
-        key_points: Key points for each section image (optional)
-        config: Configuration dictionary (auto-loaded if not provided)
-
-    Returns:
-        Markdown content
-    """
-    if config is None:
-        config = get_config()
-
-    # Load watermark defaults from config
     wm = get_config_value(config, "watermark", default={}) or {}
-    wm_text = wm.get("text", "@money-lab-brian")
-    wm_position = wm.get("position", "bottom-center")
-    wm_margin = wm.get("margin_bottom", 60)
-    wm_font_size = wm.get("font_size", 18)
-    wm_font_color = wm.get("font_color", "rgba(255,255,255,0.6)")
-    wm_font_family = wm.get("font_family", "Pretendard, Nanum Gothic, sans-serif")
-
-    if date is None:
-        date = get_today_date()
+    wm_vars = {
+        "text": wm.get("text", "@money-lab-brian"),
+        "position": wm.get("position", "bottom-center"),
+        "margin_bottom": wm.get("margin_bottom", 60),
+        "font_size": wm.get("font_size", 18),
+        "font_color": wm.get("font_color", "rgba(255,255,255,0.6)"),
+        "font_family": wm.get("font_family", "Pretendard, Nanum Gothic, sans-serif"),
+    }
 
     md_parts = [
-        '# Image Guide',
-        '',
+        '# Image Guide', '',
         '## Basic Information',
         f'- Topic: {topic}',
         f'- Created: {date}',
-        f'- Total images: {len(images)}',
-        '',
+        f'- Total images: {len(images)}', '',
         '## Color Palette',
         f'- Main: {color_palette.get("main", "#1a365d")}',
         f'- Accent: {color_palette.get("accent", "#d69e2e")}',
         f'- Background: {color_palette.get("background", "#ffffff")}',
-        f'- Text: {color_palette.get("text", "#333333")}',
-        '',
-        '---',
-        '',
+        f'- Text: {color_palette.get("text", "#333333")}', '',
+        '---', '',
     ]
 
     for idx, img in enumerate(images, 1):
         role = img.get("role", f"Image {idx}")
         mode = img.get("mode", "ai_generate")
-
-        md_parts.append(f'## [Image {idx}] {role}')
-        md_parts.append('')
+        md_parts.extend([f'## [Image {idx}] {role}', ''])
 
         if mode == "reference":
-            # Reference image mode
             md_parts.extend([
                 '### 📷 Reference Image',
                 f'**File:** {img.get("filename", "N/A")}',
                 f'**Source:** {img.get("source_url", "N/A")}',
-                f'**Usage:** {img.get("usage", "Direct use / Layout reference")}',
-                '',
+                f'**Usage:** {img.get("usage", "Direct use / Layout reference")}', '',
             ])
 
         if mode in ("ai_generate", "both"):
-            # AI image generation prompt
             md_parts.extend([
-                '### AI Generation (With Text)',
-                '',
+                '### AI Generation (With Text)', '',
                 '## [Korean Description]',
-                img.get("description_kr", "Enter image description."),
-                '',
+                img.get("description_kr", "Enter image description."), '',
             ])
 
-            # For thumbnail (Image 1), inject text rendering instructions
             is_thumbnail = (
-                idx == 1 or
-                role.lower() in ("thumbnail", "썸네일", "대표 이미지", "메인 이미지")
+                idx == 1 or role.lower() in ("thumbnail", "썸네일", "대표 이미지", "메인 이미지")
             )
-
             if is_thumbnail and blog_title:
-                # Generate enhanced prompt with text rendering instructions
-                base_prompt = img.get("prompt_en", "")
-                text_rendering_lines = generate_text_rendering_prompt(
-                    title=blog_title,
-                    subtitle=blog_subtitle or "",
-                    color_palette=color_palette
-                )
-
-                md_parts.extend([
-                    '## [AI Generation Prompt]',
-                    '```',
-                    base_prompt,
-                ])
-                # Add text rendering instructions inside the code block
-                md_parts.extend(text_rendering_lines)
+                md_parts.extend(['## [AI Generation Prompt]', '```', img.get("prompt_en", "")])
+                md_parts.extend(_build_text_rendering_lines(blog_title, blog_subtitle or ""))
                 md_parts.append('```')
             else:
-                # Standard prompt without text rendering
                 md_parts.extend([
-                    '## [AI Generation Prompt]',
-                    '```',
-                    img.get("prompt_en", "Image generation prompt here"),
-                    '```',
+                    '## [AI Generation Prompt]', '```',
+                    img.get("prompt_en", "Image generation prompt here"), '```',
                 ])
 
             md_parts.extend([
-                '',
-                '## [Style Guide]',
+                '', '## [Style Guide]',
                 f'- Color: {img.get("colors", color_palette.get("main"))}',
                 f'- Mood: {img.get("mood", "Professional")}',
                 f'- Format: {img.get("format", "Infographic")}',
-                '- Ratio: 1:1 (1024x1024)',
-                '',
+                '- Ratio: 1:1 (1024x1024)', '',
                 '[Watermark Config]',
-                f'- watermark_text: "{wm_text}"',
-                f'- watermark_position: "{wm_position}"',
-                f'- watermark_margin_bottom: {wm_margin}',
-                f'- watermark_font_size: {wm_font_size}',
-                f'- watermark_font_color: "{wm_font_color}"',
-                f'- watermark_font_family: "{wm_font_family}"',
-                '',
+                f'- watermark_text: "{wm_vars["text"]}"',
+                f'- watermark_position: "{wm_vars["position"]}"',
+                f'- watermark_margin_bottom: {wm_vars["margin_bottom"]}',
+                f'- watermark_font_size: {wm_vars["font_size"]}',
+                f'- watermark_font_color: "{wm_vars["font_color"]}"',
+                f'- watermark_font_family: "{wm_vars["font_family"]}"', '',
             ])
 
-        md_parts.extend([
-            '---',
-            '',
-        ])
+        md_parts.extend(['---', ''])
 
     return '\n'.join(md_parts)
 
@@ -388,112 +202,68 @@ def generate_references(
     topic: str,
     text_sources: Dict[str, List[Dict[str, str]]],
     images: List[Dict[str, Any]],
-    date: Optional[str] = None
+    date: Optional[str] = None,
 ) -> str:
-    """
-    Generate references markdown document.
-
-    Args:
-        topic: Topic
-        text_sources: Text sources {"네이버 뉴스": [...], "네이버 블로그": [...]}
-        images: Image information list
-        date: Date
-
-    Returns:
-        Markdown content
-    """
-    if date is None:
-        date = get_today_date()
-
+    """Generate references markdown listing text sources and downloaded images."""
+    date = date or get_today_date()
     md_parts = [
-        '# References',
-        '',
-        '## Date',
-        date,
-        '',
-        '## Topic',
-        topic,
-        '',
-        '---',
-        '',
-        '## Text Sources',
-        '',
+        '# References', '',
+        '## Date', date, '',
+        '## Topic', topic, '',
+        '---', '', '## Text Sources', '',
     ]
 
     total_sources = 0
-
     for source_name, sources in text_sources.items():
-        if sources:
-            md_parts.append(f'### {source_name}')
-
-            for idx, source in enumerate(sources, 1):
-                title = source.get("title", "No title")
-                url = source.get("url", "#")
-                summary = source.get("summary", "")
-
-                md_parts.append(f'{idx}. [{title}]({url})')
-                if summary:
-                    md_parts.append(f'   - Summary: {summary}')
-
-                total_sources += 1
-
-            md_parts.append('')
+        if not sources:
+            continue
+        md_parts.append(f'### {source_name}')
+        for idx, source in enumerate(sources, 1):
+            md_parts.append(f'{idx}. [{source.get("title", "No title")}]({source.get("url", "#")})')
+            if source.get("summary"):
+                md_parts.append(f'   - Summary: {source["summary"]}')
+            total_sources += 1
+        md_parts.append('')
 
     md_parts.extend([
-        '---',
-        '',
-        '## Downloaded Images',
-        '',
-        'Location: `./images/`',
-        '',
+        '---', '', '## Downloaded Images', '', 'Location: `./images/`', '',
         '| # | Filename | Description | Source |',
         '|---|--------|------|------|',
     ])
 
     downloaded_count = 0
-    failed_images = []
-
+    failed_images: List[Dict[str, Any]] = []
     for idx, img in enumerate(images, 1):
         if img.get("downloaded", False):
-            filename = img.get("filename", "N/A")
-            description = img.get("description", "")
-            source_name = img.get("source_name", "")
-            source_url = img.get("source_url", "#")
-
-            md_parts.append(f'| {idx} | {filename} | {description} | [{source_name}]({source_url}) |')
+            md_parts.append(
+                f'| {idx} | {img.get("filename", "N/A")} | {img.get("description", "")} '
+                f'| [{img.get("source_name", "")}]({img.get("source_url", "#")}) |'
+            )
             downloaded_count += 1
         else:
             failed_images.append(img)
-
     md_parts.append('')
 
     if failed_images:
         md_parts.extend([
-            '### Download Failed (URL only)',
-            '',
+            '### Download Failed (URL only)', '',
             '| # | Description | Image URL | Failure Reason |',
             '|---|------|-----------|----------|',
         ])
-
         for idx, img in enumerate(failed_images, 1):
-            description = img.get("description", "")
-            url = img.get("url", "")[:50] + "..."
-            error = img.get("error", "Unknown")
-
-            md_parts.append(f'| {idx} | {description} | {url} | {error} |')
-
+            md_parts.append(
+                f'| {idx} | {img.get("description", "")} '
+                f'| {img.get("url", "")[:50]}... | {img.get("error", "Unknown")} |'
+            )
         md_parts.append('')
 
     md_parts.extend([
-        '---',
-        '',
-        '## Notes',
+        '---', '', '## Notes',
         f'- Collection date: {date}',
         f'- Text sources: {total_sources}',
         f'- Downloaded images: {downloaded_count}',
         f'- Failed downloads: {len(failed_images)}',
     ])
-
     return '\n'.join(md_parts)
 
 
@@ -502,120 +272,60 @@ def save_blog_files(
     html_content: str,
     image_guide: str,
     references: str,
-    validate: bool = True
+    validate: bool = True,
 ) -> Dict[str, Path]:
-    """
-    Save blog-related files.
+    """Save 본문.html, 이미지 가이드.md, and 참조.md to *project_path*."""
+    file_map = {
+        "html": ("본문.html", html_content),
+        "image_guide": ("이미지 가이드.md", image_guide),
+        "references": ("참조.md", references),
+    }
+    files: Dict[str, Path] = {}
+    for key, (name, content) in file_map.items():
+        path = project_path / name
+        path.write_text(content, encoding="utf-8")
+        files[key] = path
 
-    Args:
-        project_path: Project directory path
-        html_content: HTML content
-        image_guide: Image guide markdown
-        references: References markdown
-        validate: Whether to validate character count
-
-    Returns:
-        Saved file paths
-    """
-    files = {}
-
-    # Save 본문.html
-    html_path = project_path / "본문.html"
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
-    files["html"] = html_path
-
-    # Validate character count
-    validation_result = None
     if validate:
-        validation_result = validate_char_count(html_content)
-        if not validation_result.is_valid:
-            print(f"⚠️ Character count validation warning:")
-            print(f"   {validation_result.message}")
-            print(f"   Current: {validation_result.char_count} chars, "
-                  f"Target: {validation_result.target} chars ({validation_result.min_chars}-{validation_result.max_chars})")
-            # Note: We still save the file but log the warning prominently
+        result = validate_char_count(html_content)
+        if not result.is_valid:
+            print(f"⚠️ Character count validation warning:\n   {result.message}")
+            print(f"   Current: {result.char_count} chars, "
+                  f"Target: {result.target} chars ({result.min_chars}-{result.max_chars})")
 
-    # Save 이미지 가이드.md
-    guide_path = project_path / "이미지 가이드.md"
-    with open(guide_path, "w", encoding="utf-8") as f:
-        f.write(image_guide)
-    files["image_guide"] = guide_path
-
-    # Save 참조.md
-    ref_path = project_path / "참조.md"
-    with open(ref_path, "w", encoding="utf-8") as f:
-        f.write(references)
-    files["references"] = ref_path
-
-    # Update metadata
     update_metadata(project_path, {
-        "files": {
-            "html": str(html_path),
-            "image_guide": str(guide_path),
-            "references": str(ref_path),
-        },
+        "files": {k: str(v) for k, v in files.items()},
         "status": "completed",
     })
-
     return files
 
 
 def save_draft_file(
     project_path: Path,
     draft_text: str,
-    validate: bool = True
+    validate: bool = True,
 ) -> Path:
-    """
-    Save draft text as 원본.txt.
-
-    Args:
-        project_path: Project directory path
-        draft_text: Draft content (plain text)
-        validate: Whether to validate character count for the draft
-
-    Returns:
-        Draft file path
-    """
+    """Save *draft_text* as 원본.txt in *project_path* and optionally validate char count."""
     draft_path = project_path / "원본.txt"
-    with open(draft_path, "w", encoding="utf-8") as f:
-        f.write(draft_text)
+    draft_path.write_text(draft_text, encoding="utf-8")
 
-    # Validate draft character count
     if validate:
-        validation_result = validate_draft_char_count(draft_text)
-        if not validation_result.is_valid:
-            print("⚠️ Draft character count validation warning:")
-            print(f"   {validation_result.message}")
-            print(
-                f"   Current: {validation_result.char_count} chars, "
-                f"Target: {validation_result.target} chars ({validation_result.min_chars}-{validation_result.max_chars})"
-            )
+        result = validate_draft_char_count(draft_text)
+        if not result.is_valid:
+            print(f"⚠️ Draft character count validation warning:\n   {result.message}")
+            print(f"   Current: {result.char_count} chars, "
+                  f"Target: {result.target} chars ({result.min_chars}-{result.max_chars})")
 
-    # Update metadata (keep existing fields)
-    update_metadata(project_path, {
-        "files": {
-            "draft": str(draft_path),
-        },
-        "status": "draft_ready",
-    })
-
+    update_metadata(project_path, {"files": {"draft": str(draft_path)}, "status": "draft_ready"})
     return draft_path
 
 
 def print_completion_summary(
     project_path: Path,
     files: Dict[str, Path],
-    validation_result: Optional[ValidationResult] = None
+    validation_result: Optional[ValidationResult] = None,
 ) -> None:
-    """
-    Print completion summary.
-
-    Args:
-        project_path: Project directory path
-        files: Saved files
-        validation_result: Character count validation result
-    """
+    """Print a completion summary with file listing and paste instructions."""
     print("=" * 50)
     print("✅ Blog post creation complete!")
     print("=" * 50)
