@@ -37,6 +37,9 @@ env/
 # Serena (MCP tool)
 .serena/
 
+# OMC local state
+.omc/
+
 # Environment variables
 .env
 .env.local
