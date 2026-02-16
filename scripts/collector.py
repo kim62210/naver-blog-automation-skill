@@ -19,6 +19,60 @@ from .utils import format_image_filename, extract_extension_from_url
 from .setup import update_metadata
 
 
+_DEFAULT_BROWSER_HEADERS = {
+    "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Sec-Fetch-Dest": "image",
+    "Sec-Fetch-Mode": "no-cors",
+    "Sec-Fetch-Site": "cross-site",
+    "Upgrade-Insecure-Requests": "1",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "Connection": "keep-alive",
+}
+
+
+def build_crawl_headers(
+    url: str,
+    source_url: str = "",
+    user_agent: Optional[str] = None,
+) -> Dict[str, str]:
+    """Create browser-like headers for URL fetching."""
+    config = get_config()
+
+    headers = dict(_DEFAULT_BROWSER_HEADERS)
+    if user_agent is None:
+        user_agent = get_config_value(
+            config, "images", "user_agent",
+            default=(
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.0.0 Safari/537.36"
+            ),
+        )
+
+    headers["User-Agent"] = user_agent
+
+    if source_url:
+        headers["Referer"] = source_url
+        try:
+            parsed_source = urlparse(source_url)
+            if parsed_source.scheme and parsed_source.netloc:
+                headers["Origin"] = f"{parsed_source.scheme}://{parsed_source.netloc}"
+        except Exception:
+            headers["Origin"] = "https://www.google.com"
+    else:
+        headers["Referer"] = "https://www.google.com/"
+        headers["Origin"] = "https://www.google.com"
+
+    parsed = urlparse(url)
+    if parsed.hostname:
+        headers["Host"] = parsed.hostname
+
+    return headers
+
+
 @dataclass
 class ImageInfo:
     """Image information"""
@@ -46,6 +100,7 @@ def download_image(
     url: str,
     save_path: Path,
     timeout: int = 30,
+    source_url: str = "",
     user_agent: Optional[str] = None
 ) -> bool:
     """
@@ -69,9 +124,7 @@ def download_image(
         )
 
     try:
-        request = urllib.request.Request(url)
-        request.add_header("User-Agent", user_agent)
-        request.add_header("Accept", "image/*")
+        request = urllib.request.Request(url, headers=build_crawl_headers(url, source_url, user_agent))
 
         with urllib.request.urlopen(request, timeout=timeout) as response:
             content = response.read()
@@ -151,7 +204,13 @@ def collect_images(
 
         # Attempt download with detailed error capture
         try:
-            success = download_image(url, save_path, timeout=timeout)
+            success = download_image(
+                url,
+                save_path,
+                timeout=timeout,
+                source_url=source_url,
+                user_agent=None,
+            )
 
             if success:
                 image_info.downloaded = True
