@@ -16,6 +16,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 If one tool fails or is unavailable, immediately fallback to the next option.
 
+해당 우선순위는 `step1` 수집 로직과 `step2` 연구 수집 전반에 공통 적용된다.
+
 ## Commands
 
 ### Environment Setup
