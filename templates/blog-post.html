@@ -18,6 +18,8 @@
     .cta { font-size: 24px; font-weight: bold; text-align: center; margin: 32px 0; color: #4A90D9; }
     .small { font-size: ${footnote_size}px; color: #888; }
     .image-placeholder { color: #999; text-align: center; padding: 40px; background: #f9f9f9; margin: 16px 0; }
+    .image-wrap { text-align: center; margin: 16px 0; }
+    .blog-image { max-width: 100%; height: auto; display: block; margin: 0 auto; }
     .tags { color: #4A90D9; margin-top: 32px; }
   </style>
 </head>
@@ -25,7 +27,7 @@
 
 <h1>${title}</h1>
 
-<div class="image-placeholder">[이미지 1 삽입 - 썸네일]</div>
+${thumbnail_html}
 
 <hr>
 ${sections_html}

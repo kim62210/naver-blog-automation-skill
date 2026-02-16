@@ -31,7 +31,7 @@ Option B (Manual):
   1. Open 본문.html file in browser (double-click)
   2. Cmd+A (select all) -> Cmd+C (copy)
   3. Cmd+V (paste) in Naver Blog editor
-  4. Upload actual images at [이미지 N 삽입] positions
+  4. [이미지 N 삽입] 영역이 STEP 5에서 실제 이미지로 교체되었는지 확인
 
 Writing Info
 - Body character count: XXXX chars (pure body text)
@@ -115,7 +115,7 @@ Final save location: ./경제 블로그/YYYY-MM-DD/topic-name/
 Usage summary:
 1. /naver-auto-post -> Auto-publish to Naver Blog (recommended)
 2. Or manually: 본문.html -> Open in browser, copy -> paste into blog
-3. Upload images at [이미지 N 삽입] positions
+3. [이미지 N 삽입] 영역이 STEP 5에서 실제 이미지로 교체되었는지 확인
 
 Run /search-blogging again to write your next post.
 ```

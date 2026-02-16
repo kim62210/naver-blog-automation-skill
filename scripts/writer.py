@@ -12,6 +12,95 @@ from .setup import update_metadata
 _TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
 
+def _normalize_image_sources(image_sources: Optional[Any]) -> Dict[int, str]:
+    """Normalize different image source formats into a slot-based dict."""
+    if not image_sources:
+        return {}
+
+    if isinstance(image_sources, dict):
+        raw_items = image_sources.items()
+    else:
+        raw_items = enumerate(image_sources, start=1)
+
+    normalized: Dict[int, str] = {}
+    for raw_index, raw_value in raw_items:  # type: ignore[assignment]
+        try:
+            index = int(raw_index)
+        except (TypeError, ValueError):
+            continue
+
+        if raw_value is None:
+            continue
+
+        value: Any = raw_value
+        if isinstance(raw_value, dict):
+            value = raw_value.get("file_path") or raw_value.get("src") or raw_value.get("path")
+        elif not isinstance(raw_value, str) and hasattr(raw_value, "file_path"):
+            value = getattr(raw_value, "file_path")
+
+        if not isinstance(value, str):
+            continue
+
+        normalized[index] = value.strip()
+
+    return normalized
+
+
+def _to_image_data_uri(image_path: str) -> Optional[str]:
+    """Convert local image file path to data URI for safe paste."""
+    candidate = image_path.strip()
+    if not candidate:
+        return None
+
+    path = Path(candidate)
+    if not path.is_absolute():
+        # Keep working path behavior for relative references if it exists
+        try:
+            if not path.exists():
+                return None
+        except OSError:
+            return None
+
+    try:
+        with open(path, "rb") as image_file:
+            image_data = image_file.read()
+
+        mime_type, _ = mimetypes.guess_type(str(path))
+        if not mime_type:
+            mime_type = "image/png"
+
+        encoded = base64.b64encode(image_data).decode("utf-8")
+        return f"data:{mime_type};base64,{encoded}"
+    except Exception:
+        return None
+
+
+def _build_image_html(index: int, image_source: Optional[str], embed_images: bool = True) -> str:
+    """Build a single image block HTML string for a given slot."""
+    placeholder = (
+        f'\n<div class="image-placeholder">[이미지 {index} 삽입]'
+        f"</div>\n"
+    )
+
+    if not image_source:
+        return placeholder
+
+    src = image_source.strip()
+    if not src:
+        return placeholder
+
+    if embed_images and not (src.startswith("http://") or src.startswith("https://") or src.startswith("data:")):
+        data_uri = _to_image_data_uri(src)
+        if data_uri:
+            src = data_uri
+
+    return (
+        f"\n<div class='image-wrap'>\n"
+        f"  <img class='blog-image' src=\"{src}\" alt=\"이미지 {index}\" loading=\"lazy\">\n"
+        f"</div>\n"
+    )
+
+
 def load_template(template_name: str, templates_dir: Optional[Path] = None) -> str:
     """Load a template file by name. Returns the raw template string."""
     templates_dir = templates_dir or _TEMPLATES_DIR
@@ -27,8 +116,14 @@ def render_template(template_content: str, context: Dict[str, Any]) -> str:
     return Template(template_content).safe_substitute(context)
 
 
-def _build_sections_html(sections: List[Dict[str, Any]]) -> str:
+def _build_sections_html(
+    sections: List[Dict[str, Any]],
+    image_sources: Optional[Dict[int, str]] = None,
+    embed_images: bool = True,
+) -> str:
     """Build the inner HTML fragment for all sections (h2, paragraphs, images, hr)."""
+    resolved_images = _normalize_image_sources(image_sources)
+
     parts: List[str] = []
     image_index = 2
     for section in sections:
@@ -46,7 +141,7 @@ def _build_sections_html(sections: List[Dict[str, Any]]) -> str:
                 else:
                     parts.append(f'<p>{para}</p>\n')
         if section.get("has_image", False):
-            parts.append(f'\n<div class="image-placeholder">[이미지 {image_index} 삽입]</div>\n')
+            parts.append(_build_image_html(image_index, resolved_images.get(image_index), embed_images=embed_images))
             image_index += 1
         parts.append('\n<hr>\n')
     return '\n'.join(parts)
@@ -57,10 +152,14 @@ def generate_html_content(
     sections: List[Dict[str, Any]],
     tags: List[str],
     config: Optional[Dict] = None,
+    image_sources: Optional[Any] = None,
+    embed_images: bool = True,
 ) -> str:
     """Generate full blog HTML by rendering the blog-post template with *sections*."""
     if config is None:
         config = get_config()
+
+    resolved_images = _normalize_image_sources(image_sources)
 
     font_family = get_config_value(
         config, "typography", "font_family",
@@ -78,9 +177,29 @@ def generate_html_content(
         "body_size": int(sizes.get("body", 16)),
         "footnote_size": int(sizes.get("footnote", 11)),
         "title": title,
-        "sections_html": _build_sections_html(sections),
+        "thumbnail_html": _build_image_html(1, resolved_images.get(1), embed_images=embed_images),
+        "sections_html": _build_sections_html(sections, image_sources=resolved_images, embed_images=embed_images),
         "tags": ' '.join(f'#{tag}' for tag in tags),
     })
+
+
+def replace_image_placeholders_in_html(
+    html_content: str,
+    image_sources: Optional[Any] = None,
+    embed_images: bool = True,
+) -> str:
+    """Replace placeholder blocks in existing HTML with generated image tags."""
+    resolved_images = _normalize_image_sources(image_sources)
+
+    def _repl(match: re.Match[str]) -> str:
+        index = int(match.group(1))
+        return _build_image_html(index, resolved_images.get(index), embed_images=embed_images)
+
+    return re.sub(
+        r'<div class="image-placeholder">\s*\[이미지\s*(\d+)\s*삽입[^<]*\]\s*</div>',
+        _repl,
+        html_content,
+    )
 
 
 def _build_text_rendering_lines(title: str, subtitle: str = "") -> List[str]:
@@ -353,3 +472,8 @@ def print_completion_summary(
         print(f"   {validation_result.message}")
 
     print("=" * 50)
+"""HTML/MD generation -- renders templates to produce blog HTML, image guide, and references."""
+
+import base64
+import mimetypes
+import re

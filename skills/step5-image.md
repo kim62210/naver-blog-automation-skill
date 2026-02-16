@@ -85,6 +85,33 @@ result = await pipeline.process_image_guide(
 print(result.summary())
 ```
 
+### 5-3-1. 본문.html에 실제 이미지 반영 (권장)
+
+이미지 생성 후, 기존 `본문.html`의 `[이미지 N 삽입]` 플레이스홀더를 새로 생성된 이미지 데이터로 바로 치환할 수 있습니다.
+
+```python
+from pathlib import Path
+from scripts.writer import replace_image_placeholders_in_html
+
+html_path = Path(f"{project_path}/본문.html")
+html_content = html_path.read_text(encoding="utf-8")
+
+generated_image_paths = [
+    item.file_path for item in result.results if getattr(item, "success", False) and getattr(item, "file_path", None)
+]
+
+if generated_image_paths:
+    updated_html = replace_image_placeholders_in_html(
+        html_content=html_content,
+        image_sources=generated_image_paths,
+        embed_images=True,
+    )
+    html_path.write_text(updated_html, encoding="utf-8")
+    print(f"Updated HTML with {len(generated_image_paths)} images: {html_path}")
+else:
+    print("No successful image files to inject. Keep placeholders in 본문.html.")
+```
+
 ### Option B: Generate Single Image
 
 ```python
