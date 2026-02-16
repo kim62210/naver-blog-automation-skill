@@ -200,7 +200,7 @@ print(result.message)  # Valid / Over / Under
 ## 3-9. Save Location
 
 ```
-./경제 블로그/YYYY-MM-DD/topic-name/원본.txt
+~/workspace/경제 블로그/YYYY-MM-DD/topic-name/원본.txt
 ```
 
 ```python

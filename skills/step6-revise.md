@@ -16,7 +16,7 @@ Present the completed work and receive user feedback.
 Blog post writing complete!
 
 Save Location
-./경제 블로그/YYYY-MM-DD/topic-name/
+~/workspace/경제 블로그/YYYY-MM-DD/topic-name/
 ├── 원본.txt (Plain text draft)
 ├── 본문.html (HTML file)
 ├── 이미지 가이드.md (Image generation guide)
@@ -110,7 +110,7 @@ Workflow ends when:
 ```
 Blog post writing is complete!
 
-Final save location: ./경제 블로그/YYYY-MM-DD/topic-name/
+Final save location: ~/workspace/경제 블로그/YYYY-MM-DD/topic-name/
 
 Usage summary:
 1. /naver-auto-post -> Auto-publish to Naver Blog (recommended)

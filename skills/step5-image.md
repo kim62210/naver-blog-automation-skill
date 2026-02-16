@@ -19,7 +19,7 @@
 ```python
 import os
 
-project_path = "./경제 블로그/YYYY-MM-DD/topic-name"
+project_path = "~/workspace/경제 블로그/YYYY-MM-DD/topic-name"
 image_guide_path = f"{project_path}/이미지 가이드.md"
 assert os.path.exists(image_guide_path), f"Image guide not found: {image_guide_path}"
 

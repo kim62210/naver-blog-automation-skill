@@ -134,7 +134,7 @@ from scripts.setup import create_project_structure
 
 project_path = create_project_structure(
     topic="{topic}",
-    base_dir="./economy blog"
+    base_dir="~/workspace/경제 블로그"
 )
 ```
 

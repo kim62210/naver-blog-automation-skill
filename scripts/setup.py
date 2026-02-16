@@ -5,12 +5,21 @@ Handles automatic output directory creation, metadata initialization, etc.
 """
 
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, Any
 
 from .config import get_config, get_config_value
 from .utils import normalize_filename, get_today_date
+
+
+DEFAULT_BASE_DIR = "~/workspace/경제 블로그"
+
+
+def resolve_base_dir(base_dir: Optional[str]) -> Path:
+    value = base_dir or DEFAULT_BASE_DIR
+    return Path(os.path.expandvars(value)).expanduser()
 
 
 def create_project_structure(
@@ -23,7 +32,7 @@ def create_project_structure(
     Create project directory structure for blog post writing.
 
     Structure:
-    ./경제 블로그/YYYY-MM-DD/topic-name/
+    ~/workspace/경제 블로그/YYYY-MM-DD/topic-name/
     ├── images/
     └── .metadata.json
 
@@ -40,7 +49,7 @@ def create_project_structure(
         config = get_config()
 
     if base_dir is None:
-        base_dir = get_config_value(config, "output", "base_dir", default="./경제 블로그")
+        base_dir = get_config_value(config, "output", "base_dir", default=DEFAULT_BASE_DIR)
 
     if date is None:
         date_format = get_config_value(config, "output", "date_format", default="%Y-%m-%d")
@@ -50,7 +59,7 @@ def create_project_structure(
     normalized_topic = normalize_filename(topic)
 
     # Create project path
-    project_path = Path(base_dir) / date / normalized_topic
+    project_path = resolve_base_dir(base_dir) / date / normalized_topic
 
     # Create directory
     project_path.mkdir(parents=True, exist_ok=True)
@@ -192,13 +201,13 @@ def find_existing_project(
         config = get_config()
 
     if base_dir is None:
-        base_dir = get_config_value(config, "output", "base_dir", default="./경제 블로그")
+        base_dir = get_config_value(config, "output", "base_dir", default=DEFAULT_BASE_DIR)
 
     if date is None:
         date = get_today_date()
 
     normalized_topic = normalize_filename(topic)
-    project_path = Path(base_dir) / date / normalized_topic
+    project_path = resolve_base_dir(base_dir) / date / normalized_topic
 
     if project_path.exists():
         return project_path
@@ -226,9 +235,9 @@ def list_projects(
         config = get_config()
 
     if base_dir is None:
-        base_dir = get_config_value(config, "output", "base_dir", default="./경제 블로그")
+        base_dir = get_config_value(config, "output", "base_dir", default=DEFAULT_BASE_DIR)
 
-    base_path = Path(base_dir)
+    base_path = resolve_base_dir(base_dir)
 
     if not base_path.exists():
         return []

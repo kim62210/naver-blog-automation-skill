@@ -5,6 +5,7 @@ Provides common functionality for filename normalization, date handling, text cl
 """
 
 import re
+import os
 import unicodedata
 from datetime import datetime
 from pathlib import Path
@@ -71,7 +72,7 @@ def create_output_path(
     Create output path.
 
     Args:
-        base_dir: Base directory (e.g., "./경제 블로그")
+        base_dir: Base directory (e.g., "~/workspace/경제 블로그")
         topic: Topic name
         date: Date (uses today's date if not provided)
 
@@ -79,14 +80,14 @@ def create_output_path(
         Output path (Path object)
 
     Example:
-        >>> create_output_path("./경제 블로그", "육아휴직 가이드")
-        Path('./경제 블로그/2026-01-27/육아휴직-가이드')
+        >>> create_output_path("~/workspace/경제 블로그", "육아휴직 가이드")
+        Path('/Users/you/workspace/경제 블로그/2026-01-27/육아휴직-가이드')
     """
     if date is None:
         date = get_today_date()
 
     normalized_topic = normalize_filename(topic)
-    return Path(base_dir) / date / normalized_topic
+    return Path(os.path.expandvars(base_dir)).expanduser() / date / normalized_topic
 
 
 def clean_text(text: str) -> str:

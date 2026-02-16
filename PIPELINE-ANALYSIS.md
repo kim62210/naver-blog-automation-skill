@@ -190,7 +190,7 @@ flowchart TB
 
 	   **출력 구조**:
 	   ```
-	   ./경제 블로그/YYYY-MM-DD/topic-name/
+	   ~/workspace/경제 블로그/YYYY-MM-DD/topic-name/
 	   ├── images/
 	   └── .metadata.json
 	   ```
@@ -811,7 +811,7 @@ flowchart LR
 ### 출력 디렉토리 구조
 
 ```
-./경제 블로그/
+~/workspace/경제 블로그/
 └── 2026-02-01/
     └── 육아휴직-급여/
         ├── 본문.html              # 블로그 HTML (네이버 블로그 붙여넣기용)
@@ -934,7 +934,7 @@ watermark:
 
 # 출력 설정
 output:
-  base_dir: "./경제 블로그"
+  base_dir: "~/workspace/경제 블로그"
   date_format: "%Y-%m-%d"
 ```
 

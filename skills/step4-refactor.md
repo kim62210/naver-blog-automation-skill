@@ -19,7 +19,7 @@ STEP 3에서 저장한 `원본.txt`(일반 텍스트 + [괄호] 가이드)를 �
 
 ### Output (Generate in this step)
 ```
-./경제 블로그/YYYY-MM-DD/{topic-slug}/
+~/workspace/경제 블로그/YYYY-MM-DD/{topic-slug}/
 ├── 원본.txt               # [STEP 3] 순수 텍스트 원고 (STEP 4 이후 수정 금지)
 ├── 본문.html              # [STEP 4] 블로그 HTML (네이버 블로그 붙여넣기용)
 ├── 이미지 가이드.md       # [STEP 4] 이미지 생성 프롬프트 명세

@@ -1,9 +1,9 @@
 # Naver Blog Automation Configuration
-# search-blogging skill v3.0.2
+# search-blogging skill v3.0.3
 
 app:
   name: search-blogging
-  version: "3.0.2"
+  version: "3.0.3"
   description: "네이버 경제 숏텐츠 트렌딩 주제 수집부터 블로그 글 작성까지 자동화"
 
 # Writing defaults
@@ -28,7 +28,7 @@ tags:
 
 # Output settings
 output:
-  base_dir: "./경제 블로그"
+  base_dir: "~/workspace/경제 블로그"
   date_format: "%Y-%m-%d"
   encoding: "utf-8"
   subdirs:

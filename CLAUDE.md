@@ -93,7 +93,7 @@ Each step is a separate markdown file in `skills/`:
 
 ### Output Structure
 ```
-./경제 블로그/YYYY-MM-DD/{topic-slug}/
+~/workspace/경제 블로그/YYYY-MM-DD/{topic-slug}/
 ├── 원본.txt          # Plain text draft (STEP 3, immutable after STEP 4)
 ├── 본문.html          # Blog HTML (copy-paste to Naver Blog)
 ├── 이미지 가이드.md   # Image generation prompts (## [Image N] format)

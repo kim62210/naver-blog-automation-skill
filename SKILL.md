@@ -67,7 +67,7 @@ python3 ~/.claude/skills/search-blogging/scripts/ensure_venv.py
 ### Save Path
 
 ```
-./경제 블로그/YYYY-MM-DD/{topic-slug}/
+~/workspace/경제 블로그/YYYY-MM-DD/{topic-slug}/
 ├── 원본.txt          # Plain text draft (STEP 3, immutable after STEP 4)
 ├── 본문.html          # Blog HTML (copy-paste to Naver Blog)
 ├── 이미지 가이드.md   # Image generation prompts (## [Image N] format)
@@ -183,7 +183,7 @@ tags:
   count: 8
 
 output:
-  base_dir: "./경제 블로그"
+  base_dir: "~/workspace/경제 블로그"
 
 gemini:
   models:
@@ -268,6 +268,11 @@ search-blogging/
 ---
 
 ## Version Information
+
+- **v3.0.3** (2026-02-16)
+  - Default output path changed to `~/workspace/경제 블로그`
+  - Path resolver now expands `~` and environment variables during project path construction
+  - Step/documentation examples updated to the new default save location
 
 - **v3.0.2** (2026-02-16)
   - Image generation output is now forced to 500x500 by default (`gemini.default_size`)

@@ -14,7 +14,7 @@ import yaml
 DEFAULT_CONFIG = {
     "app": {
         "name": "search-blogging",
-        "version": "2.2.0",
+        "version": "3.0.3",
     },
     "writing": {
         "char_count": 1900,
@@ -34,7 +34,7 @@ DEFAULT_CONFIG = {
         "max_count": 10,
     },
     "output": {
-        "base_dir": "./경제 블로그",
+        "base_dir": "~/workspace/경제 블로그",
         "date_format": "%Y-%m-%d",
         "encoding": "utf-8",
     },
