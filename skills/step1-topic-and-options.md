@@ -1,6 +1,6 @@
 # STEP 1: Topic Selection + Options
 
-Use Chrome DevTools MCP to collect today's popular topics from Naver Economy Shortents, let the user select one, and configure writing options in a single interaction.
+Use web-first tools to collect today's popular topics from Naver Economy Shortents, let the user select one, and configure writing options in a single interaction.
 
 ## Progress Status
 
@@ -10,19 +10,23 @@ Use Chrome DevTools MCP to collect today's popular topics from Naver Economy Sho
 
 ---
 
-## 1-1. Access Naver Economy Shortents Page
+## 1-1. Access Naver Economy Shortents Page (Web Tool Priority)
 
-Use Chrome DevTools MCP tools to access the page:
+Priority must be: **Playwriter → Playwright → Chrome DevTools → web search fallback**.
 
-```
-1. Call mcp__chrome-devtools__navigate_page:
-   - type: "url"
-   - url: "https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all"
-   - timeout: 30000
+1. **Playwriter**: navigate and extract from live DOM
+   - URL: https://search.naver.com/search.naver?category=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9&query=%EA%B2%BD%EC%A0%9C+%EC%A2%85%ED%95%A9+%EC%88%8F%ED%85%90%EC%B8%A0&sm=mtb_pcv&ssc=tab.shortents.all
+   - `state.myPage = await context.newPage()`
+   - `await state.myPage.goto(..., { waitUntil: 'domcontentloaded' })`
+   - collect `link` and title/time from DOM
 
-2. Call mcp__chrome-devtools__take_snapshot:
-   - Capture page content snapshot
-```
+2. **Playwright**: equivalent automation path if Playwriter unavailable or blocked
+
+3. **Chrome DevTools**: fallback automation for page access and snapshot
+   - Call `mcp__chrome-devtools__navigate_page`
+   - Call `mcp__chrome-devtools__take_snapshot`
+
+4. **web fallback**: search query fallback when page collection fails
 
 ---
 

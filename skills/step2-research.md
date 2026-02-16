@@ -12,6 +12,13 @@ Run 3 agents simultaneously to collect materials. Auto-assess sufficiency and pr
 
 ## 2-1. Execution Method
 
+Launch 3 librarian agents **in parallel** using the Task tool. Continue collection using the same web-first priority used in Step 1:
+
+1. Playwriter (if a live DOM can be fetched)
+2. Playwright
+3. Chrome DevTools
+4. web fallback search
+
 Launch 3 librarian agents **in parallel** using the Task tool:
 
 ```

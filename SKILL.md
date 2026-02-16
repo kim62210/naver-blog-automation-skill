@@ -2,7 +2,7 @@
 name: search-blogging
 description: |
   A skill for collecting trending topics from Naver Economy Shortents and automating blog post writing.
-  In step 1, collect today's top 10 economy news using Chrome DevTools for user selection.
+  In step 1, collect today's top 10 economy news using web-first tools in this priority: Playwriter, Playwright, Google Chrome DevTools, then web search fallback.
   Then collect materials via parallel web search and write a blog post of around 1900 characters (configurable).
 
   When to use:

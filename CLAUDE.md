@@ -6,6 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **search-blogging** is a Claude Code skill that automates the workflow from collecting trending economy topics on Naver Shortents to writing Korean blog posts (~1900 characters) with AI-generated images.
 
+### Tool Priority Rule (Step 1)
+
+`search-blogging` MUST use web-first sources in this order for topic collection:
+1. Playwriter DOM automation
+2. Playwright automation
+3. Google Chrome DevTools
+4. web search fallback
+
+If one tool fails or is unavailable, immediately fallback to the next option.
+
 ## Commands
 
 ### Environment Setup
