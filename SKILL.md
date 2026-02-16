@@ -269,6 +269,12 @@ search-blogging/
 
 ## Version Information
 
+- **v3.0.1** (2026-02-16)
+  - Section subtitles in generated `본문.html` now use Naver editor-compatible markup (`se-text-paragraph` + `se-ff-system se-fs30 __se-node`)
+  - Subtitle IDs now use unique `SE-<uuid>` values per block to avoid duplicate node identifiers
+  - Section subtitle rendering now inherits configured `line_height`, matching paragraph spacing in the template
+  - Subtitle text is HTML-escaped before rendering to prevent malformed markup in pasted content
+
 - **v3.0.0** (2026-02-14)
   - Workflow optimization: 10 steps -> 6 steps (~40% time reduction)
   - User interactions reduced: 5+ -> 2 (topic+options, title selection)

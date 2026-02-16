@@ -116,12 +116,24 @@ def render_template(template_content: str, context: Dict[str, Any]) -> str:
     return Template(template_content).safe_substitute(context)
 
 
+def _build_naver_subtitle_html(subtitle: str, line_height: float = 1.8) -> str:
+    paragraph_id = f"SE-{uuid.uuid4()}"
+    span_id = f"SE-{uuid.uuid4()}"
+    escaped_subtitle = html.escape(subtitle, quote=False)
+    return (
+        f'\n<p id="{paragraph_id}" class="se-text-paragraph se-text-paragraph-align-left" '
+        f'style="line-height: {line_height};">'
+        f'<span id="{span_id}" class="se-ff-system se-fs30 __se-node" '
+        f'style="color: rgb(0, 0, 0);"><b>{escaped_subtitle}</b></span></p>\n'
+    )
+
+
 def _build_sections_html(
     sections: List[Dict[str, Any]],
     image_sources: Optional[Dict[int, str]] = None,
     embed_images: bool = True,
+    line_height: float = 1.8,
 ) -> str:
-    """Build the inner HTML fragment for all sections (h2, paragraphs, images, hr)."""
     resolved_images = _normalize_image_sources(image_sources)
 
     parts: List[str] = []
@@ -130,7 +142,7 @@ def _build_sections_html(
         title = section.get("title", "")
         content = section.get("content", "")
         if title:
-            parts.append(f'\n<h2>{title}</h2>\n')
+            parts.append(_build_naver_subtitle_html(title, line_height=line_height))
         if content:
             for para in content.split('\n\n'):
                 para = para.strip()
@@ -178,7 +190,12 @@ def generate_html_content(
         "footnote_size": int(sizes.get("footnote", 11)),
         "title": title,
         "thumbnail_html": _build_image_html(1, resolved_images.get(1), embed_images=embed_images),
-        "sections_html": _build_sections_html(sections, image_sources=resolved_images, embed_images=embed_images),
+        "sections_html": _build_sections_html(
+            sections,
+            image_sources=resolved_images,
+            embed_images=embed_images,
+            line_height=float(line_height),
+        ),
         "tags": ' '.join(f'#{tag}' for tag in tags),
     })
 
@@ -475,5 +492,7 @@ def print_completion_summary(
 """HTML/MD generation -- renders templates to produce blog HTML, image guide, and references."""
 
 import base64
+import html
 import mimetypes
 import re
+import uuid
