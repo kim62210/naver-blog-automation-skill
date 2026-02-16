@@ -111,7 +111,7 @@ print(result.message)
 ### 공통 규칙
 
 - `본문.html`의 **섹션 흐름/핵심 메시지**에 맞춰 이미지 역할을 정의
-- 모든 이미지 비율: **1:1 (1024x1024)** 고정
+- 모든 이미지 비율: **1:1 (500x500)** 고정
 - 모든 이미지에 `[Watermark Config]` 6필드 필수
 - 이미지별 섹션 **최소 1000자** 권장
 - 헤더 형식: `## [Image N] {역할}` (h2 마크다운)
@@ -150,7 +150,7 @@ print(result.message)
 - **서브 텍스트**: 부제목 또는 핵심 키워드 (선택)
 - **배경**: 주제에 맞는 그라데이션 또는 테마 비주얼
 - 프롬프트에 반드시 포함: `"render exact Korean text characters as specified"`
-- 비율: **1:1 (1024x1024)**
+- 비율: **1:1 (500x500)**
 
 > 상세 썸네일 레이아웃: `thumbnail_layout.svg`, `references/thumbnail-templates.md` 참조
 
@@ -183,7 +183,7 @@ print(result.message)
 - Color: {HEX 색상 코드}
 - Mood: {분위기 키워드}
 - Format: {형식}
-- Ratio: 1:1 (1024x1024)
+- Ratio: 1:1 (500x500)
 
 [Watermark Config]
 - watermark_text: "@money-lab-brian"
@@ -239,7 +239,7 @@ files = save_blog_files(
 - [ ] `이미지 가이드.md` 파일 존재, `## [Image N]` 형식 헤더 사용
 - [ ] 모든 AI 프롬프트가 코드블록으로 감싸져 있음
 - [ ] 각 섹션에 `[Watermark Config]` 6필드 포함
-- [ ] 모든 이미지 비율 1:1 (1024x1024)
+- [ ] 모든 이미지 비율 1:1 (500x500)
 - [ ] `참조.md` 파일 존재
 - [ ] `원본.txt` 대비 본문 의미/분량 유지
 - [ ] 문체 가이드 적용 확인

@@ -2,7 +2,7 @@
 
 Generate 3 title candidates and write the draft simultaneously. Present both title options and a preview draft for user selection.
 
-**Refer to [Naver Blog Writing Style Guide](../naver_blog_style_guide.md) for tone/sentence structure/intro-closing patterns.**
+**Refer to [Naver Blog Writing Style Guide](../네이버_블로그_문체_가이드.md) for tone/sentence structure/intro-closing patterns.**
 
 ## Progress Status
 
@@ -15,9 +15,9 @@ Generate 3 title candidates and write the draft simultaneously. Present both tit
 ## 3-1. Outputs
 
 ### Output (Required)
-`{project_path}/draft.txt`
+`{project_path}/원본.txt`
 
-> This step does NOT create `body.html`, `image guide.md`, or `references.md`. (Created in STEP 4)
+> This step does NOT create `본문.html`, `이미지 가이드.md`, or `참조.md`. (Created in STEP 4)
 
 ---
 
@@ -80,7 +80,7 @@ Please select. Or say "regenerate" for new candidates.
 
 ## 3-5. Writing Style Guide (MANDATORY)
 
-> Full guide: [Naver Blog Writing Style Guide](../naver_blog_style_guide.md)
+> Full guide: [Naver Blog Writing Style Guide](../네이버_블로그_문체_가이드.md)
 
 ### (1) Tone & Endings
 
@@ -136,7 +136,7 @@ Please select. Or say "regenerate" for new candidates.
 
 ---
 
-## 3-6. draft.txt Writing Rules
+## 3-6. 원본.txt Writing Rules
 
 ### (1) Pure text only
 - No HTML tags (`<h2>`, `<p>`, `<br>` etc.)
@@ -167,11 +167,11 @@ Please select. Or say "regenerate" for new candidates.
 - Target: 1900 chars
 - Allowed range: **1850~1950 chars**
 
-### Include/Exclude Criteria (draft.txt)
+### Include/Exclude Criteria (원본.txt)
 - **Include**: Actual text of titles/headings/quotes/body
 - **Exclude**: `[이미지 N 삽입...]` placeholders, `[[...]]` memos, `[tag]` strings themselves
 
-### Python Validation (draft.txt)
+### Python Validation (원본.txt)
 ```python
 from pathlib import Path
 from scripts.validator import validate_draft_char_count

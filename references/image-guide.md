@@ -215,14 +215,14 @@ central 56% area as main content zone,
 {color} gradient background,
 eye-catching modern design, high contrast text,
 watermark "@money-lab-brian" at bottom center of frame,
-1:1 ratio, 1024x1024 pixels,
+1:1 ratio, 500x500 pixels,
 render exact Korean text characters as specified
 
 [Style Guide]
 - Color: {main color} + {accent color} gradient
 - Mood: Eye-catching and click-inducing
 - Format: Modern thumbnail design (thumbnail_layout.svg 비례 기준)
-- Ratio: 1:1 (1024x1024)
+- Ratio: 1:1 (500x500)
 - Font: Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif
 
 [Watermark Config]
@@ -256,14 +256,14 @@ central 56% area as main content zone,
 warm yellow to soft orange gradient background,
 eye-catching modern design, high contrast readable text,
 watermark "@money-lab-brian" at bottom center of frame,
-1:1 ratio, 1024x1024 pixels,
+1:1 ratio, 500x500 pixels,
 render exact Korean text characters as specified
 
 [Style Guide]
 - Color: Warm yellow + Soft orange gradient
 - Mood: Warm, friendly, trustworthy
 - Format: Modern thumbnail design (thumbnail_layout.svg 비례 기준)
-- Ratio: 1:1 (1024x1024)
+- Ratio: 1:1 (500x500)
 - Font: Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif
 
 [Watermark Config]

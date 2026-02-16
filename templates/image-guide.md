@@ -41,7 +41,7 @@ eye-catching modern design with subtle depth and shadows,
 high contrast readable text with slight glow or outline effect,
 professional Korean financial/economy blog style,
 watermark "@money-lab-brian" at bottom center of frame,
-1:1 ratio, 1024x1024 pixels,
+1:1 ratio, 500x500 pixels,
 render exact Korean text characters as specified
 ```
 
@@ -49,7 +49,7 @@ render exact Korean text characters as specified
 - Color: ${color_main} (${color_main_name}) + ${color_accent} gradient
 - Mood: Professional, trustworthy, modern, eye-catching
 - Format: Modern thumbnail design (thumbnail_layout.svg 비례 기준)
-- Ratio: 1:1 (1024x1024)
+- Ratio: 1:1 (500x500)
 - Font: Gmarket Sans Bold, Pretendard Bold, SB Aggro Bold, sans-serif
 
 [Watermark Config]
@@ -236,7 +236,7 @@ The pipeline parses this file and generates images with the specified prompts.
 - [ ] All Korean text in quotes with exact characters
 - [ ] Color codes in HEX format (e.g., #1a365d)
 - [ ] Position specified for text elements
-- [ ] 1:1 (1024x1024) ratio for thumbnail, appropriate ratios for others
+- [ ] 1:1 (500x500) ratio for thumbnail, appropriate ratios for others
 - [ ] Thumbnail prompt includes layout specs (thumbnail_layout.svg 비례)
 - [ ] Thumbnail prompt includes font style (Gmarket Sans Bold / SB Aggro Bold)
 - [ ] All 6 watermark config fields included per image

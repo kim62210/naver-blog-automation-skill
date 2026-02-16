@@ -13,7 +13,7 @@ description: |
   Trigger keywords: blog post writing, write a blog post, research and write, economy blog
 ---
 
-# search-blogging Skill v3.0
+# search-blogging Skill v3.0.4
 
 Automates the entire workflow from trending topic collection on Naver Economy Shortents to blog post writing.
 
@@ -268,6 +268,12 @@ search-blogging/
 ---
 
 ## Version Information
+
+- **v3.0.4** (2026-02-16)
+  - Fixed broken style-guide links in STEP 3 and legacy analysis docs
+  - Aligned STEP 3 output naming with runtime files (`원본.txt`, `본문.html`, `이미지 가이드.md`, `참조.md`)
+  - Normalized image-size docs/templates to `500x500` to match `gemini.default_size`
+  - Marked `PIPELINE-ANALYSIS.md` as legacy v2 archive to prevent workflow confusion
 
 - **v3.0.3** (2026-02-16)
   - Default output path changed to `~/workspace/경제 블로그`

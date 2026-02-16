@@ -79,7 +79,7 @@ Each step is a separate markdown file in `skills/`:
 
 ### Image Generation
 - **Model**: `gemini-3-pro-image-preview` only
-- **Size**: 1024x1024 (1:1)
+- **Size**: 500x500 (1:1)
 - **Rate limit**: 10 req/min, 6s interval
 - **Mode B-3**: AI renders text + PIL adds watermark (recommended)
 
@@ -119,7 +119,7 @@ Each step is a separate markdown file in `skills/`:
 - `writing.char_count/char_tolerance` - Character count validation
 - `images.default_count` - Default image count per post (5), min 3, max 10
 - `gemini.models.primary` - Gemini model (`gemini-3-pro-image-preview`)
-- `gemini.default_size` - Image size (`1024x1024`)
+- `gemini.default_size` - Image size (`500x500`)
 - `watermark.*` - Watermark text, position, styling
 - `output.base_dir` - Output directory path
 - `tags.count/max_count` - Tag count (8 default, 10 max)

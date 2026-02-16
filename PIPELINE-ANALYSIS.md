@@ -1,6 +1,10 @@
 # search-blogging 파이프라인 분석 리포트
 
-> **Version**: 2.2.0
+> ⚠️ **Legacy Archive (v2.x)**
+> 이 문서는 10-step 기준의 과거 분석 리포트입니다.
+> 현재 정식 워크플로우는 6-step이며 `SKILL.md`와 `skills/step1~step6`를 기준으로 사용하세요.
+
+> **Version**: 2.2.0 (Legacy)
 > **Generated**: 2026-02-01
 > **Author**: Claude Code Analysis
 
@@ -370,7 +374,7 @@ result: CollectionResult = collect_images(images, output_dir)
 
 > STEP 7은 "순수 텍스트 작성 단계"이므로, HTML/CSS는 원본.txt에 존재하면 안 됩니다.
 
-> 📖 **문체 가이드 적용**: [네이버 블로그 문체 가이드](../네이버_블로그_문체_가이드.md)의 핵심 규칙을 적용합니다.
+> 📖 **문체 가이드 적용**: [네이버 블로그 문체 가이드](./네이버_블로그_문체_가이드.md)의 핵심 규칙을 적용합니다.
 > - 종결어미: ~합니다 70% / ~다 20% / ~요 10%
 > - 문장 길이: 20~40자, short-long-short 리듬
 > - 도입부: 공감형(40%), 결론 선제시형(25%), 질문형(20%), 팩트형(15%)
