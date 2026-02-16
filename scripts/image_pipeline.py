@@ -35,7 +35,7 @@ class PipelineConfig:
 
     output_dir: str
     concurrent_limit: int = 2
-    default_size: str = "1024x1024"
+    default_size: str = "500x500"
     cleanup_temp: bool = True
 
 
@@ -107,6 +107,8 @@ class ImagePipeline:
         """
         self.generator = GeminiImageGenerator(api_key=api_key)
         self.overlay_processor = TextOverlayProcessor()
+        config = get_config()
+        self.default_size = str(get_config_value(config, "gemini", "default_size", default="500x500"))
 
     def _get_default_watermark_config(self) -> WatermarkConfig:
         config = get_config()
@@ -125,7 +127,7 @@ class ImagePipeline:
         prompt: str,
         output_path: str,
         watermark_config: Optional[WatermarkConfig] = None,
-        size: str = "1024x1024",
+        size: Optional[str] = None,
     ) -> ImageResult:
         """
         Generate a single image with AI-rendered text + watermark only.
@@ -157,7 +159,7 @@ class ImagePipeline:
             prompt=prompt,
             output_path=output_path,
             watermark_config=watermark_config,
-            size=size,
+            size=size or self.default_size,
         )
 
     async def process_image_guide(
@@ -217,6 +219,7 @@ class ImagePipeline:
             items=batch_items,
             output_dir=output_dir,
             concurrent_limit=concurrent_limit,
+            size=self.default_size,
         )
 
         total_time = (datetime.now() - start_time).total_seconds()

@@ -7,6 +7,7 @@ Uses the new google-genai SDK with text overlay and watermark support.
 
 import asyncio
 import base64
+import importlib
 import os
 import tempfile
 from dataclasses import dataclass, field
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
     from .prompt_converter import WatermarkConfig
 
 DEFAULT_MODEL = "gemini-3-pro-image-preview"
-DEFAULT_SIZE = "1024x1024"
+DEFAULT_SIZE = "500x500"
 DEFAULT_TIMEOUT = 60
 DEFAULT_RETRY_COUNT = 3
 DEFAULT_RATE_LIMIT_DELAY = 6.0  # 60s / 10 requests
@@ -77,9 +78,22 @@ class GeminiImageGenerator:
     def __init__(self, api_key: Optional[str] = None, primary_model: Optional[str] = None):
         self.api_key = api_key or self._load_api_key()
         self.primary_model = primary_model or self._get_config_value("gemini", "models", "primary") or DEFAULT_MODEL
+        self.default_size = str(self._get_config_value("gemini", "default_size") or DEFAULT_SIZE)
         self.timeout = self._get_config_value("gemini", "timeout") or DEFAULT_TIMEOUT
         self.retry_count = self._get_config_value("gemini", "retry_count") or DEFAULT_RETRY_COUNT
         self._client = None
+
+    @staticmethod
+    def _parse_size(size: str) -> tuple[int, int]:
+        try:
+            width_str, height_str = (size or "").lower().split("x", 1)
+            width = int(width_str)
+            height = int(height_str)
+            if width > 0 and height > 0:
+                return width, height
+        except Exception:
+            pass
+        return 500, 500
 
     def _load_api_key(self) -> str:
         api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
@@ -108,22 +122,23 @@ class GeminiImageGenerator:
             raise ImportError("google-genai not installed. Run: pip install google-genai")
 
     async def generate_image(self, prompt: str, save_path: Optional[str] = None,
-                             size: str = DEFAULT_SIZE, **kwargs) -> ImageResult:
+                             size: Optional[str] = None, **kwargs) -> ImageResult:
         """Generate a single image using the primary model."""
         start_time = datetime.now()
-        result = await self._generate_with_retry(prompt, save_path, self.primary_model)
+        resolved_size = size or self.default_size
+        result = await self._generate_with_retry(prompt, save_path, self.primary_model, resolved_size)
         result.generation_time = (datetime.now() - start_time).total_seconds()
         return result
 
     async def _generate_with_retry(self, prompt: str, save_path: Optional[str],
-                                   model: str) -> ImageResult:
+                                   model: str, size: str) -> ImageResult:
         """Generate image with retry logic for rate limits and transient errors."""
         self._init_client()
         errors: List[str] = []
 
         for attempt in range(self.retry_count):
             try:
-                return await self._call_gemini_api(prompt, save_path, model)
+                return await self._call_gemini_api(prompt, save_path, model, size)
             except Exception as e:
                 error_msg = f"Attempt {attempt + 1}: {type(e).__name__}: {e}"
                 errors.append(error_msg)
@@ -143,7 +158,7 @@ class GeminiImageGenerator:
                            error_message=" | ".join(errors))
 
     async def _call_gemini_api(self, prompt: str, save_path: Optional[str],
-                               model: str) -> ImageResult:
+                               model: str, size: str) -> ImageResult:
         """Call Gemini generate_content API and extract image."""
         config = None
         if self._genai_types:
@@ -160,7 +175,7 @@ class GeminiImageGenerator:
             return ImageResult(success=False, prompt=prompt, model_used=model,
                                error_message="No image found in response")
 
-        final_path = self._save_image(image_data, save_path)
+        final_path = self._save_image(image_data, save_path, size)
         return ImageResult(success=True, file_path=str(final_path), prompt=prompt,
                            model_used=model)
 
@@ -203,12 +218,19 @@ class GeminiImageGenerator:
             return Path(save_path)
         return Path(f"generated_image_{datetime.now():%Y%m%d_%H%M%S}.png")
 
-    def _save_image(self, image_data: bytes, save_path: Optional[str]) -> Path:
+    def _save_image(self, image_data: bytes, save_path: Optional[str], size: str) -> Path:
         """Save image bytes to file."""
         path = self._get_save_path(save_path)
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "wb") as f:
             f.write(base64.b64decode(image_data) if isinstance(image_data, str) else image_data)
+
+        target_width, target_height = self._parse_size(size)
+        pil_image = importlib.import_module("PIL.Image")
+        with pil_image.open(path) as img:
+            if img.size != (target_width, target_height):
+                resized = img.resize((target_width, target_height), pil_image.Resampling.LANCZOS)
+                resized.save(path, format="PNG")
         return path
 
     def _cleanup_temp(self, temp_path: Path, temp_dir: str):
@@ -248,7 +270,7 @@ class GeminiImageGenerator:
 
     async def generate_with_watermark(self, prompt: str, output_path: str,
                                       watermark_config: "WatermarkConfig",
-                                      size: str = DEFAULT_SIZE, **kwargs) -> ImageResult:
+                                      size: Optional[str] = None, **kwargs) -> ImageResult:
         """Generate image with AI-rendered text, then add PIL watermark."""
         start_time = datetime.now()
         tmp_dir = tempfile.mkdtemp()
@@ -292,7 +314,8 @@ class GeminiImageGenerator:
 
     async def generate_batch_with_text_overlay(self, items: List[Dict[str, Any]],
                                                output_dir: str,
-                                               concurrent_limit: int = 2) -> BatchResult:
+                                               concurrent_limit: int = 2,
+                                               size: Optional[str] = None) -> BatchResult:
         """Generate multiple images with watermark in batch."""
         from .prompt_converter import WatermarkConfig as WMConfig
 
@@ -311,6 +334,7 @@ class GeminiImageGenerator:
                     prompt=item.get("prompt", ""),
                     output_path=str(output_path / item.get("filename", "image.png")),
                     watermark_config=wm,
+                    size=size,
                 )
                 await asyncio.sleep(_get_rate_limit_delay())
                 return result

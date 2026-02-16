@@ -249,7 +249,7 @@ class PipelineConfig:
     output_dir: str
     use_text_overlay: bool = True
     concurrent_limit: int = 2
-    default_size: str = "1024x1024"
+    default_size: str = "500x500"
     cleanup_temp: bool = True
 
 

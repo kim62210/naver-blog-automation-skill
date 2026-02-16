@@ -319,7 +319,7 @@ def generate_image_guide(
                 f'- Color: {img.get("colors", color_palette.get("main"))}',
                 f'- Mood: {img.get("mood", "Professional")}',
                 f'- Format: {img.get("format", "Infographic")}',
-                '- Ratio: 1:1 (1024x1024)', '',
+                '- Ratio: 1:1 (500x500)', '',
                 '[Watermark Config]',
                 f'- watermark_text: "{wm_vars["text"]}"',
                 f'- watermark_position: "{wm_vars["position"]}"',

@@ -49,7 +49,7 @@ Standard entry point: `ImagePipeline.process_image_guide()`
 | Property | Value | Config Path |
 |----------|-------|-------------|
 | Model | `gemini-3-pro-image-preview` | `gemini.models.primary` |
-| Size | `1024x1024` (1:1) | `gemini.default_size` |
+| Size | `500x500` (1:1) | `gemini.default_size` |
 | Format | PNG | Fixed |
 | Watermark | `@money-lab-brian` | `watermark.*` |
 

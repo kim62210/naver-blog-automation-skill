@@ -269,6 +269,11 @@ search-blogging/
 
 ## Version Information
 
+- **v3.0.2** (2026-02-16)
+  - Image generation output is now forced to 500x500 by default (`gemini.default_size`)
+  - Added deterministic post-save resize so generated PNG files are always normalized to 500x500
+  - Updated image guide ratio notation from 1024x1024 to 500x500 for consistency
+
 - **v3.0.1** (2026-02-16)
   - Section subtitles in generated `본문.html` now use Naver editor-compatible markup (`se-text-paragraph` + `se-ff-system se-fs30 __se-node`)
   - Subtitle IDs now use unique `SE-<uuid>` values per block to avoid duplicate node identifiers

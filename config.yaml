@@ -1,9 +1,9 @@
 # Naver Blog Automation Configuration
-# search-blogging skill v3.0.0
+# search-blogging skill v3.0.2
 
 app:
   name: search-blogging
-  version: "3.0.0"
+  version: "3.0.2"
   description: "네이버 경제 숏텐츠 트렌딩 주제 수집부터 블로그 글 작성까지 자동화"
 
 # Writing defaults
@@ -103,7 +103,7 @@ gemini:
   enabled: true
   models:
     primary: "gemini-3-pro-image-preview"
-  default_size: "1024x1024"
+  default_size: "500x500"
   timeout: 60
   retry_count: 3
   rate_limit:
